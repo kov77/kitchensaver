@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+
+# secrets (names only in .env.example)
+.env
+.env.*
+!.env.example
+*.pem
+*.p8
+*.p12
+*.jks
+
+# builds
+dist/
+build/
+.expo/
+
+# misc
+.DS_Store
+
+# IDE
+.idea/
+
+# project documentation (local only)
+docs/
