@@ -1,29 +1,15 @@
-import type { INestApplication } from '@nestjs/common'
-import { Test } from '@nestjs/testing'
 import request from 'supertest'
-import { afterAll, beforeAll, describe, it } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
-import { AppModule } from '../src/app.module.js'
+import { createTestApp } from './support/test-app.js'
 
 describe('GET /health', () => {
-  let app: INestApplication
+  test('responds 200 with status ok and needs no authentication', async () => {
+    const app = await createTestApp()
 
-  beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile()
-    app = moduleRef.createNestApplication()
-    await app.init()
-  })
+    const response = await request(app.getHttpServer()).get('/health')
 
-  afterAll(async () => {
-    await app.close()
-  })
-
-  it('responds 200 with status ok and needs no authentication', async () => {
-    await request(app.getHttpServer())
-      .get('/health')
-      .expect(200)
-      .expect({ status: 'ok' })
+    expect(response.status).toBe(200)
+    expect(response.body).toEqual({ status: 'ok' })
   })
 })
