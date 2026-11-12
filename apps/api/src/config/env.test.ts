@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest'
 
 import { validateEnv } from './env.js'
 
-const validEnv = { DATABASE_URL: 'postgresql://user:pass@localhost:5432/db' }
+const validEnv = {
+  DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
+  AUTH_JWKS_URL: 'https://auth.example.test/.well-known/jwks.json',
+  AUTH_ISSUER: 'https://auth.example.test',
+  AUTH_AUDIENCE: 'authenticated',
+}
 
 describe('validateEnv', () => {
   it('applies defaults', () => {
@@ -31,6 +36,24 @@ describe('validateEnv', () => {
 
   it('rejects a missing DATABASE_URL', () => {
     expect(() => validateEnv({})).toThrow(/DATABASE_URL/)
+  })
+
+  it.each(['AUTH_JWKS_URL', 'AUTH_ISSUER', 'AUTH_AUDIENCE'])(
+    'rejects a missing %s',
+    (name) => {
+      const { [name]: _removed, ...rest } = validEnv as Record<string, string>
+
+      expect(() => validateEnv(rest)).toThrow(new RegExp(name))
+    },
+  )
+
+  it('rejects a JWKS url that is not https', () => {
+    expect(() =>
+      validateEnv({
+        ...validEnv,
+        AUTH_JWKS_URL: 'http://auth.example.test/jwks',
+      }),
+    ).toThrow(/AUTH_JWKS_URL/)
   })
 
   it('rejects a DATABASE_URL that is not a postgres URL', () => {
