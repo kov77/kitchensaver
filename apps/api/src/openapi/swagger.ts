@@ -12,6 +12,7 @@ export function setupSwagger(app: INestApplication, nodeEnv: Env['NODE_ENV']) {
     .setTitle('KitchenSaver API')
     .setDescription('REST API of the KitchenSaver mobile app')
     .setVersion('0.1.0')
+    .addBearerAuth()
     .build()
 
   SwaggerModule.setup(SWAGGER_PATH, app, () =>

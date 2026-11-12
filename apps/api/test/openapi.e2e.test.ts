@@ -22,6 +22,18 @@ describe('OpenAPI documentation', () => {
     ).toBe('#/components/schemas/HealthResponseDto')
   })
 
+  test('documents the protected /api/v1/me route with bearer auth', async () => {
+    const app = await createTestApp('development')
+
+    const { body } = await request(app.getHttpServer()).get(
+      `/${SWAGGER_PATH}-json`,
+    )
+
+    expect(body.paths['/api/v1/me'].get.security).toEqual([{ bearer: [] }])
+    expect(body.paths['/api/v1/me'].get.responses['401']).toBeDefined()
+    expect(body.paths['/health'].get.security).toBeUndefined()
+  })
+
   test('serves the Swagger UI outside production', async () => {
     const app = await createTestApp('development')
 
