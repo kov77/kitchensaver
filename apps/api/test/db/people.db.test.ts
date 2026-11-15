@@ -4,6 +4,10 @@ import * as zod from 'zod'
 
 import { PrismaService } from '../../src/prisma/prisma.service.js'
 import { createConsentedActor } from '../support/factories.js'
+import {
+  createPeopleClient,
+  type PeopleClient,
+} from '../support/people-client.js'
 import { createTestApp } from '../support/test-app.js'
 import { createActor } from '../support/test-auth.js'
 
@@ -36,53 +40,18 @@ async function setup() {
   const user = await createConsentedActor(prisma)
   const otherUser = await createConsentedActor(prisma)
   const server = app.getHttpServer()
-  const as = (actor: { authorization: string }) => ({
-    list: (query = '') =>
-      request(server)
-        .get(`/api/v1/people${query}`)
-        .set('Authorization', actor.authorization),
-    create: (body: object) =>
-      request(server)
-        .post('/api/v1/people')
-        .set('Authorization', actor.authorization)
-        .send(body),
-    get: (id: string) =>
-      request(server)
-        .get(`/api/v1/people/${id}`)
-        .set('Authorization', actor.authorization),
-    patch: (id: string, body: object) =>
-      request(server)
-        .patch(`/api/v1/people/${id}`)
-        .set('Authorization', actor.authorization)
-        .send(body),
-    archive: (id: string) =>
-      request(server)
-        .post(`/api/v1/people/${id}/archive`)
-        .set('Authorization', actor.authorization),
-    restore: (id: string) =>
-      request(server)
-        .post(`/api/v1/people/${id}/restore`)
-        .set('Authorization', actor.authorization),
-    remove: (id: string) =>
-      request(server)
-        .delete(`/api/v1/people/${id}`)
-        .set('Authorization', actor.authorization),
-  })
   return {
     app,
     prisma,
     server,
     user,
     otherUser,
-    asUser: as(user),
-    asOtherUser: as(otherUser),
+    asUser: createPeopleClient(server, user),
+    asOtherUser: createPeopleClient(server, otherUser),
   }
 }
 
-async function createPerson(
-  api: { create: (body: object) => request.Test },
-  name = 'Anna',
-) {
+async function createPerson(api: PeopleClient, name = 'Anna') {
   const response = await api.create({ name, dateOfBirth: adultBirthDate })
   expect(response.status).toBe(201)
   return createdPersonSchema.parse(response.body)

@@ -3,7 +3,7 @@ import * as zod from 'zod'
 
 import { ApiException } from '../common/api-exception.js'
 import { EntitlementsService } from '../entitlements/entitlements.service.js'
-import { type PersonProfile, Prisma } from '../generated/prisma/client.js'
+import { Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import {
   calculateAge,
@@ -19,6 +19,7 @@ import type {
   UpdatePersonRequest,
 } from './people.dto.js'
 import { personNotFound } from './people.errors.js'
+import { planReadiness } from './plan-readiness.js'
 
 // Requests of one account queue on the Account row lock, so the Prisma defaults (2s/5s) are too tight.
 const TRANSACTION_TIMEOUT_MS = 10_000
@@ -33,21 +34,33 @@ function toIsoDate(date: Date) {
   return date.toISOString().slice(0, 10)
 }
 
+type PersonWithGoal = Prisma.PersonProfileGetPayload<{
+  include: { goal: true }
+}>
+
 function toListItem({
   id,
   name,
   dateOfBirth,
   archivedAt,
-}: PersonProfile): PersonListItemDto {
+  goal,
+}: PersonWithGoal): PersonListItemDto {
+  const age = calculateAge(dateOfBirth, new Date())
   return {
     id,
     name,
-    age: calculateAge(dateOfBirth, new Date()),
+    age,
+    goal: goal && {
+      mode: goal.mode,
+      dailyKcal: goal.dailyKcal,
+      goalType: goal.goalType,
+    },
+    planReadiness: planReadiness(age, goal),
     archivedAt: archivedAt?.toISOString() ?? null,
   }
 }
 
-function toDetail(person: PersonProfile): PersonDetailDto {
+function toDetail(person: PersonWithGoal): PersonDetailDto {
   const { dateOfBirth, createdAt } = person
   return {
     ...toListItem(person),
@@ -116,6 +129,7 @@ export class PeopleService {
   async list(accountId: string, status: ListPeopleQuery['status']) {
     const people = await this.prisma.personProfile.findMany({
       where: { accountId, ...ARCHIVED_FILTERS[status] },
+      include: { goal: true },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     })
     return people.map(toListItem)
@@ -124,9 +138,23 @@ export class PeopleService {
   async get(accountId: string, id: string) {
     const person = await this.prisma.personProfile.findFirst({
       where: { id, accountId },
+      include: { goal: true },
     })
     if (!person) throw personNotFound()
     return toDetail(person)
+  }
+
+  async assertExists(accountId: string, id: string) {
+    await this.getDateOfBirth(accountId, id)
+  }
+
+  async getDateOfBirth(accountId: string, id: string) {
+    const person = await this.prisma.personProfile.findFirst({
+      where: { id, accountId },
+      select: { dateOfBirth: true },
+    })
+    if (!person) throw personNotFound()
+    return person.dateOfBirth
   }
 
   async create(
@@ -139,6 +167,7 @@ export class PeopleService {
       await assertActiveSlotAvailable(tx, accountId, activeProfiles)
       return tx.personProfile.create({
         data: { accountId, name, dateOfBirth },
+        include: { goal: true },
       })
     })
     return toDetail(person)
@@ -153,12 +182,27 @@ export class PeopleService {
       isoDateOfBirth === undefined
         ? undefined
         : parseSupportedDateOfBirth(isoDateOfBirth)
-    const [person] = await this.prisma.personProfile.updateManyAndReturn({
-      where: { id, accountId },
-      data: { name, dateOfBirth },
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.personProfile.findFirst({
+        where: { id, accountId },
+        select: { dateOfBirth: true },
+      })
+      if (!existing) throw personNotFound()
+      await tx.personProfile.updateMany({
+        where: { id, accountId },
+        data: { name, dateOfBirth },
+      })
+      const isDateOfBirthChanged =
+        dateOfBirth !== undefined &&
+        dateOfBirth.getTime() !== existing.dateOfBirth.getTime()
+      if (!isDateOfBirthChanged) return
+      // estimate was computed from the old age, so the user must confirm the goal again (D031).
+      await tx.nutritionGoal.updateMany({
+        where: { personProfileId: id, mode: 'ESTIMATED' },
+        data: { reviewRequiredAt: new Date() },
+      })
     })
-    if (!person) throw personNotFound()
-    return toDetail(person)
+    return this.get(accountId, id)
   }
 
   async archive(accountId: string, id: string) {
@@ -171,21 +215,20 @@ export class PeopleService {
 
   async restore(accountId: string, id: string) {
     const { activeProfiles } = await this.entitlements.getLimits(accountId)
-    const person = await this.withAccountLock(accountId, async (tx) => {
+    await this.withAccountLock(accountId, async (tx) => {
       const existing = await tx.personProfile.findFirst({
         where: { id, accountId },
+        select: { archivedAt: true },
       })
       if (!existing) throw personNotFound()
-      if (!existing.archivedAt) return existing
+      if (!existing.archivedAt) return
       await assertActiveSlotAvailable(tx, accountId, activeProfiles)
-      const [restored] = await tx.personProfile.updateManyAndReturn({
+      await tx.personProfile.updateMany({
         where: { id, accountId },
         data: { archivedAt: null },
       })
-      if (!restored) throw personNotFound()
-      return restored
     })
-    return toDetail(person)
+    return this.get(accountId, id)
   }
 
   async remove(accountId: string, id: string) {
