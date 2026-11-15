@@ -44,6 +44,7 @@ export class ConsentService {
   }
 
   async recordConsents(accountId: string, input: ConsentInput) {
+    const { termsVersion, privacyVersion } = input
     this.assertConfirmed(input)
     this.assertCurrentVersions(input)
 
@@ -57,12 +58,12 @@ export class ConsentService {
         {
           accountId,
           category: 'TERMS_OF_SERVICE',
-          documentVersion: input.termsVersion,
+          documentVersion: termsVersion,
         },
         {
           accountId,
           category: 'PRIVACY_POLICY',
-          documentVersion: input.privacyVersion,
+          documentVersion: privacyVersion,
         },
       ],
       skipDuplicates: true,
@@ -70,22 +71,26 @@ export class ConsentService {
     return this.getOnboardingStatus(accountId)
   }
 
-  private assertConfirmed(input: ConsentInput) {
-    if (!input.adultConfirmed) {
+  private assertConfirmed({
+    adultConfirmed,
+    acceptTerms,
+    acknowledgePrivacy,
+  }: ConsentInput) {
+    if (!adultConfirmed) {
       throw new ApiException(
         422,
         'ADULT_CONFIRMATION_REQUIRED',
         'Confirm that you are at least 18 years old',
       )
     }
-    if (!input.acceptTerms) {
+    if (!acceptTerms) {
       throw new ApiException(
         422,
         'TERMS_NOT_ACCEPTED',
         'Accept the terms of service',
       )
     }
-    if (!input.acknowledgePrivacy) {
+    if (!acknowledgePrivacy) {
       throw new ApiException(
         422,
         'PRIVACY_NOT_ACKNOWLEDGED',
@@ -94,10 +99,13 @@ export class ConsentService {
     }
   }
 
-  private assertCurrentVersions(input: ConsentInput) {
+  private assertCurrentVersions({
+    termsVersion,
+    privacyVersion,
+  }: ConsentInput) {
     const isCurrent =
-      input.termsVersion === CURRENT_LEGAL_VERSIONS.TERMS_OF_SERVICE &&
-      input.privacyVersion === CURRENT_LEGAL_VERSIONS.PRIVACY_POLICY
+      termsVersion === CURRENT_LEGAL_VERSIONS.TERMS_OF_SERVICE &&
+      privacyVersion === CURRENT_LEGAL_VERSIONS.PRIVACY_POLICY
     if (isCurrent) return
     throw new ApiException(
       422,
