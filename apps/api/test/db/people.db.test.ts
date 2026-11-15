@@ -141,6 +141,7 @@ describe('age rules', () => {
   test.each([
     ['an empty name', { name: '   ' }],
     ['a name over 80 characters', { name: 'a'.repeat(81) }],
+    ['a name with a NUL character', { name: 'An\u0000na' }],
     ['a missing name', {}],
   ])('rejects %s', async (_name, override) => {
     const { asUser } = await setup()
