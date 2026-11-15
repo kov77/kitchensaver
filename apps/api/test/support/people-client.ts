@@ -31,7 +31,18 @@ export function createPeopleClient(
       send('put', `/${id}/body-parameters`).send(body),
     removeBodyParameters: (id: string) =>
       send('delete', `/${id}/body-parameters`),
+    restrictions: (kind: RestrictionKind) => ({
+      list: (id: string) => send('get', `/${id}/${kind}`),
+      add: (id: string, body: object) =>
+        send('post', `/${id}/${kind}`).send(body),
+      patch: (id: string, itemId: string, body: object) =>
+        send('patch', `/${id}/${kind}/${itemId}`).send(body),
+      remove: (id: string, itemId: string) =>
+        send('delete', `/${id}/${kind}/${itemId}`),
+    }),
   }
 }
+
+export type RestrictionKind = 'allergies' | 'exclusions' | 'preferences'
 
 export type PeopleClient = ReturnType<typeof createPeopleClient>

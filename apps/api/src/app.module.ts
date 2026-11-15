@@ -11,6 +11,7 @@ import { MeModule } from './me/me.module.js'
 import { NutritionGoalsModule } from './nutrition-goals/nutrition-goals.module.js'
 import { PeopleModule } from './people/people.module.js'
 import { PrismaModule } from './prisma/prisma.module.js'
+import { RestrictionsModule } from './restrictions/restrictions.module.js'
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PrismaModule } from './prisma/prisma.module.js'
     MeModule,
     PeopleModule,
     NutritionGoalsModule,
+    RestrictionsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_FILTER, useClass: ApiExceptionFilter }],
