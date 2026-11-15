@@ -25,13 +25,13 @@ import {
 
 import { CurrentAccount } from '../auth/current-account.decorator.js'
 import {
-  CreatePersonRequestDto,
+  type CreatePersonRequest,
   createPersonSchema,
-  ListPeopleQueryDto,
+  type ListPeopleQuery,
   listPeopleQuerySchema,
   PersonDetailDto,
   PersonListItemDto,
-  UpdatePersonRequestDto,
+  type UpdatePersonRequest,
   updatePersonSchema,
 } from './people.dto.js'
 import { personNotFound } from './people.errors.js'
@@ -58,7 +58,7 @@ export class PeopleController {
   list(
     @CurrentAccount() accountId: string,
     @Query({ schema: listPeopleQuerySchema })
-    { status = 'active' }: ListPeopleQueryDto,
+    { status = 'active' }: ListPeopleQuery,
   ) {
     return this.people.list(accountId, status)
   }
@@ -71,7 +71,7 @@ export class PeopleController {
   @ApiConflictResponse({ description: 'PROFILE_LIMIT_REACHED' })
   create(
     @CurrentAccount() accountId: string,
-    @Body({ schema: createPersonSchema }) body: CreatePersonRequestDto,
+    @Body({ schema: createPersonSchema }) body: CreatePersonRequest,
   ) {
     return this.people.create(accountId, body)
   }
@@ -92,7 +92,7 @@ export class PeopleController {
   update(
     @CurrentAccount() accountId: string,
     @PersonId() id: string,
-    @Body({ schema: updatePersonSchema }) body: UpdatePersonRequestDto,
+    @Body({ schema: updatePersonSchema }) body: UpdatePersonRequest,
   ) {
     return this.people.update(accountId, id, body)
   }

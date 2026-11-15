@@ -1,5 +1,6 @@
 import request from 'supertest'
 import { describe, expect, test } from 'vitest'
+import * as zod from 'zod'
 
 import { PrismaService } from '../../src/prisma/prisma.service.js'
 import { createConsentedActor } from '../support/factories.js'
@@ -8,6 +9,8 @@ import { createActor } from '../support/test-auth.js'
 
 const adultBirthDate = '1990-05-17'
 
+const createdPersonSchema = zod.object({ id: zod.string() })
+
 function isoDate(date: Date) {
   return date.toISOString().slice(0, 10)
 }
@@ -15,14 +18,16 @@ function isoDate(date: Date) {
 // The date of birth of a person who turns `years` on `daysFromBirthday` days from today (UTC).
 function birthDateFor(years: number, daysFromBirthday: number) {
   const now = new Date()
-  const date = new Date(
-    Date.UTC(
-      now.getUTCFullYear() - years,
-      now.getUTCMonth(),
-      now.getUTCDate() + daysFromBirthday,
-    ),
-  )
-  return isoDate(date)
+  const year = now.getUTCFullYear() - years
+  const month = now.getUTCMonth()
+  const sameDay = new Date(Date.UTC(year, month, now.getUTCDate()))
+  // Feb 29 has no counterpart in a non-leap year: use the last day of the month instead of rolling into March.
+  const anniversary =
+    sameDay.getUTCMonth() === month
+      ? sameDay
+      : new Date(Date.UTC(year, month + 1, 0))
+  anniversary.setUTCDate(anniversary.getUTCDate() + daysFromBirthday)
+  return isoDate(anniversary)
 }
 
 async function setup() {
@@ -80,7 +85,7 @@ async function createPerson(
 ) {
   const response = await api.create({ name, dateOfBirth: adultBirthDate })
   expect(response.status).toBe(201)
-  return response.body as { id: string }
+  return createdPersonSchema.parse(response.body)
 }
 
 describe('create and read', () => {
@@ -467,20 +472,33 @@ describe('access control', () => {
   })
 })
 
-describe('account deletion cascade', () => {
-  test('removes profiles and consents together with the account', async () => {
+describe('lock wait', () => {
+  test('answers 503 when the account lock is held too long', async () => {
     const { asUser, prisma, user } = await setup()
-    await createPerson(asUser)
+    let release: () => void = () => undefined
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const holder = prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT id FROM account WHERE id = ${user.accountId}::uuid FOR NO KEY UPDATE`
+        await held
+      },
+      { timeout: 30_000 },
+    )
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
-    await prisma.account.delete({ where: { id: user.accountId } })
+    const response = await asUser.create({
+      name: 'Anna',
+      dateOfBirth: adultBirthDate,
+    })
+    release()
+    await holder
 
+    expect(response.status).toBe(503)
+    expect(response.body.code).toBe('SERVICE_BUSY')
     expect(
       await prisma.personProfile.count({
-        where: { accountId: user.accountId },
-      }),
-    ).toBe(0)
-    expect(
-      await prisma.accountConsent.count({
         where: { accountId: user.accountId },
       }),
     ).toBe(0)

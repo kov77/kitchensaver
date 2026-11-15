@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { Prisma } from '../../src/generated/prisma/client.js'
 import { PrismaService } from '../../src/prisma/prisma.service.js'
-import { createAccount } from '../support/factories.js'
+import { createAccount, grantCurrentConsents } from '../support/factories.js'
 import { createTestApp } from '../support/test-app.js'
 
 async function setup() {
@@ -36,5 +36,24 @@ describe('Account', () => {
       Prisma.PrismaClientKnownRequestError,
     )
     await expect(duplicate).rejects.toMatchObject({ code: 'P2002' })
+  })
+
+  it('removes its profiles and consents together with it', async () => {
+    const prisma = await setup()
+    const account = await createAccount(prisma)
+    await grantCurrentConsents(prisma, account.id)
+    await prisma.personProfile.create({
+      data: {
+        accountId: account.id,
+        name: 'Anna',
+        dateOfBirth: new Date('1990-05-17T00:00:00Z'),
+      },
+    })
+
+    await prisma.account.delete({ where: { id: account.id } })
+
+    const where = { accountId: account.id }
+    expect(await prisma.personProfile.count({ where })).toBe(0)
+    expect(await prisma.accountConsent.count({ where })).toBe(0)
   })
 })

@@ -53,4 +53,33 @@ describe('OpenAPI documentation', () => {
     expect(ui.status).toBe(404)
     expect(json.status).toBe(404)
   })
+
+  test('documents the people routes in sync with their validation', async () => {
+    const app = await createTestApp('development')
+
+    const { body } = await request(app.getHttpServer()).get(
+      `/${SWAGGER_PATH}-json`,
+    )
+
+    const people = body.paths['/api/v1/people']
+    expect(people.get.security).toEqual([{ bearer: [] }])
+    expect(people.post.responses['201']).toBeDefined()
+    expect(people.post.responses['409']).toBeDefined()
+    expect(
+      body.paths['/api/v1/people/{id}'].delete.responses['204'],
+    ).toBeDefined()
+    expect(body.paths['/api/v1/people/{id}/restore'].post).toBeDefined()
+    const { schema } = people.post.requestBody.content['application/json']
+    expect(schema.properties.name).toMatchObject({
+      minLength: 1,
+      maxLength: 80,
+    })
+    expect(schema.required).toEqual(['name', 'dateOfBirth'])
+    expect(schema.additionalProperties).toBe(false)
+    expect(
+      people.get.parameters.find(
+        ({ name }: { name: string }) => name === 'status',
+      ).schema.enum,
+    ).toEqual(['active', 'archived', 'all'])
+  })
 })

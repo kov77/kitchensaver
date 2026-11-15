@@ -1,18 +1,19 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { z } from 'zod'
+import { ApiProperty } from '@nestjs/swagger'
+import * as zod from 'zod'
 
+const NAME_MIN_LENGTH = 1
 const NAME_MAX_LENGTH = 80
 
-const nameSchema = z.string().trim().min(1).max(NAME_MAX_LENGTH)
-const dateOfBirthSchema = z.iso.date()
+const nameSchema = zod.string().trim().min(NAME_MIN_LENGTH).max(NAME_MAX_LENGTH)
+const dateOfBirthSchema = zod.iso.date()
 
-export const createPersonSchema = z.object({
+export const createPersonSchema = zod.strictObject({
   name: nameSchema,
   dateOfBirth: dateOfBirthSchema,
 })
 
-export const updatePersonSchema = z
-  .object({
+export const updatePersonSchema = zod
+  .strictObject({
     name: nameSchema.optional(),
     dateOfBirth: dateOfBirthSchema.optional(),
   })
@@ -21,29 +22,13 @@ export const updatePersonSchema = z
     { message: 'Provide name or dateOfBirth' },
   )
 
-export const listPeopleQuerySchema = z.object({
-  status: z.enum(['active', 'archived', 'all']).default('active'),
+export const listPeopleQuerySchema = zod.object({
+  status: zod.enum(['active', 'archived', 'all']).default('active'),
 })
 
-export type PeopleStatusFilter = z.infer<typeof listPeopleQuerySchema>['status']
-
-export class CreatePersonRequestDto {
-  @ApiProperty({ maxLength: NAME_MAX_LENGTH }) name: string
-  @ApiProperty({ format: 'date', example: '1990-05-17' }) dateOfBirth: string
-}
-
-export class UpdatePersonRequestDto {
-  @ApiPropertyOptional({ maxLength: NAME_MAX_LENGTH }) name?: string
-  @ApiPropertyOptional({ format: 'date' }) dateOfBirth?: string
-}
-
-export class ListPeopleQueryDto {
-  @ApiPropertyOptional({
-    enum: ['active', 'archived', 'all'],
-    default: 'active',
-  })
-  status?: PeopleStatusFilter
-}
+export type CreatePersonRequest = zod.infer<typeof createPersonSchema>
+export type UpdatePersonRequest = zod.infer<typeof updatePersonSchema>
+export type ListPeopleQuery = zod.infer<typeof listPeopleQuerySchema>
 
 export class PersonListItemDto {
   @ApiProperty({ format: 'uuid' }) id: string
