@@ -1,23 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { z } from 'zod'
+import * as zod from 'zod'
 
 import { ConsentCategory } from '../generated/prisma/client.js'
 
-export const recordConsentsSchema = z.object({
-  adultConfirmed: z.boolean(),
-  acceptTerms: z.boolean(),
-  acknowledgePrivacy: z.boolean(),
-  termsVersion: z.string().min(1).max(64),
-  privacyVersion: z.string().min(1).max(64),
+const versionSchema = zod.string().min(1).max(64)
+
+export const recordConsentsSchema = zod.strictObject({
+  adultConfirmed: zod.boolean(),
+  acceptTerms: zod.boolean(),
+  acknowledgePrivacy: zod.boolean(),
+  termsVersion: versionSchema,
+  privacyVersion: versionSchema,
 })
 
-export class RecordConsentsRequestDto {
-  @ApiProperty() adultConfirmed: boolean
-  @ApiProperty() acceptTerms: boolean
-  @ApiProperty() acknowledgePrivacy: boolean
-  @ApiProperty() termsVersion: string
-  @ApiProperty() privacyVersion: string
-}
+export type RecordConsentsRequest = zod.infer<typeof recordConsentsSchema>
 
 export class LegalVersionsDto {
   @ApiProperty() adultAttestationVersion: string

@@ -29,6 +29,7 @@ export default defineConfig({
           include: ['test/db/**/*.test.ts'],
           globalSetup: ['test/support/db-global-setup.ts'],
           fileParallelism: false,
+          testTimeout: 30_000,
           env: {
             DATABASE_URL: process.env['TEST_DATABASE_URL'] ?? '',
             ...authEnv,

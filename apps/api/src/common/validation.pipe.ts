@@ -21,13 +21,11 @@ export function createValidationPipe() {
   return new FailClosedValidationPipe({
     exceptionFactory: (issues) =>
       new ApiException(422, 'VALIDATION_FAILED', 'Request validation failed', {
-        fields: issues.map((issue) =>
-          (issue.path ?? [])
-            .map((segment) =>
-              String(typeof segment === 'object' ? segment.key : segment),
-            )
-            .join('.'),
-        ),
+        fields: [
+          ...new Set(
+            issues.map(({ path = [] }) => path.join('.')).filter(Boolean),
+          ),
+        ],
       }),
   })
 }

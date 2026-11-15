@@ -2,16 +2,11 @@ import { Injectable } from '@nestjs/common'
 
 import { ApiException } from '../common/api-exception.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import type { OnboardingStatusDto } from './consent.dto.js'
+import type {
+  OnboardingStatusDto,
+  RecordConsentsRequest,
+} from './consent.dto.js'
 import { CONSENT_CATEGORIES, CURRENT_LEGAL_VERSIONS } from './legal-versions.js'
-
-export interface ConsentInput {
-  adultConfirmed: boolean
-  acceptTerms: boolean
-  acknowledgePrivacy: boolean
-  termsVersion: string
-  privacyVersion: string
-}
 
 @Injectable()
 export class ConsentService {
@@ -43,49 +38,41 @@ export class ConsentService {
     }
   }
 
-  async recordConsents(accountId: string, input: ConsentInput) {
+  async recordConsents(accountId: string, input: RecordConsentsRequest) {
     this.assertConfirmed(input)
     this.assertCurrentVersions(input)
 
     await this.prisma.accountConsent.createMany({
-      data: [
-        {
-          accountId,
-          category: 'ADULT_ATTESTATION',
-          documentVersion: CURRENT_LEGAL_VERSIONS.ADULT_ATTESTATION,
-        },
-        {
-          accountId,
-          category: 'TERMS_OF_SERVICE',
-          documentVersion: input.termsVersion,
-        },
-        {
-          accountId,
-          category: 'PRIVACY_POLICY',
-          documentVersion: input.privacyVersion,
-        },
-      ],
+      data: CONSENT_CATEGORIES.map((category) => ({
+        accountId,
+        category,
+        documentVersion: CURRENT_LEGAL_VERSIONS[category],
+      })),
       skipDuplicates: true,
     })
     return this.getOnboardingStatus(accountId)
   }
 
-  private assertConfirmed(input: ConsentInput) {
-    if (!input.adultConfirmed) {
+  private assertConfirmed({
+    adultConfirmed,
+    acceptTerms,
+    acknowledgePrivacy,
+  }: RecordConsentsRequest) {
+    if (!adultConfirmed) {
       throw new ApiException(
         422,
         'ADULT_CONFIRMATION_REQUIRED',
         'Confirm that you are at least 18 years old',
       )
     }
-    if (!input.acceptTerms) {
+    if (!acceptTerms) {
       throw new ApiException(
         422,
         'TERMS_NOT_ACCEPTED',
         'Accept the terms of service',
       )
     }
-    if (!input.acknowledgePrivacy) {
+    if (!acknowledgePrivacy) {
       throw new ApiException(
         422,
         'PRIVACY_NOT_ACKNOWLEDGED',
@@ -94,10 +81,13 @@ export class ConsentService {
     }
   }
 
-  private assertCurrentVersions(input: ConsentInput) {
+  private assertCurrentVersions({
+    termsVersion,
+    privacyVersion,
+  }: RecordConsentsRequest) {
     const isCurrent =
-      input.termsVersion === CURRENT_LEGAL_VERSIONS.TERMS_OF_SERVICE &&
-      input.privacyVersion === CURRENT_LEGAL_VERSIONS.PRIVACY_POLICY
+      termsVersion === CURRENT_LEGAL_VERSIONS.TERMS_OF_SERVICE &&
+      privacyVersion === CURRENT_LEGAL_VERSIONS.PRIVACY_POLICY
     if (isCurrent) return
     throw new ApiException(
       422,

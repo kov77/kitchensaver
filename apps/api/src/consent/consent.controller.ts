@@ -11,7 +11,7 @@ import { CurrentAccount } from '../auth/current-account.decorator.js'
 import { AllowWithoutConsent } from './allow-without-consent.decorator.js'
 import {
   OnboardingStatusDto,
-  RecordConsentsRequestDto,
+  type RecordConsentsRequest,
   recordConsentsSchema,
 } from './consent.dto.js'
 import { ConsentService } from './consent.service.js'
@@ -33,7 +33,7 @@ export class ConsentController {
   })
   record(
     @CurrentAccount() accountId: string,
-    @Body({ schema: recordConsentsSchema }) body: RecordConsentsRequestDto,
+    @Body({ schema: recordConsentsSchema }) body: RecordConsentsRequest,
   ) {
     return this.consentService.recordConsents(accountId, body)
   }
