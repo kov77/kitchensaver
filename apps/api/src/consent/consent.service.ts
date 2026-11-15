@@ -2,16 +2,11 @@ import { Injectable } from '@nestjs/common'
 
 import { ApiException } from '../common/api-exception.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import type { OnboardingStatusDto } from './consent.dto.js'
+import type {
+  OnboardingStatusDto,
+  RecordConsentsRequest,
+} from './consent.dto.js'
 import { CONSENT_CATEGORIES, CURRENT_LEGAL_VERSIONS } from './legal-versions.js'
-
-export interface ConsentInput {
-  adultConfirmed: boolean
-  acceptTerms: boolean
-  acknowledgePrivacy: boolean
-  termsVersion: string
-  privacyVersion: string
-}
 
 @Injectable()
 export class ConsentService {
@@ -43,29 +38,16 @@ export class ConsentService {
     }
   }
 
-  async recordConsents(accountId: string, input: ConsentInput) {
-    const { termsVersion, privacyVersion } = input
+  async recordConsents(accountId: string, input: RecordConsentsRequest) {
     this.assertConfirmed(input)
     this.assertCurrentVersions(input)
 
     await this.prisma.accountConsent.createMany({
-      data: [
-        {
-          accountId,
-          category: 'ADULT_ATTESTATION',
-          documentVersion: CURRENT_LEGAL_VERSIONS.ADULT_ATTESTATION,
-        },
-        {
-          accountId,
-          category: 'TERMS_OF_SERVICE',
-          documentVersion: termsVersion,
-        },
-        {
-          accountId,
-          category: 'PRIVACY_POLICY',
-          documentVersion: privacyVersion,
-        },
-      ],
+      data: CONSENT_CATEGORIES.map((category) => ({
+        accountId,
+        category,
+        documentVersion: CURRENT_LEGAL_VERSIONS[category],
+      })),
       skipDuplicates: true,
     })
     return this.getOnboardingStatus(accountId)
@@ -75,7 +57,7 @@ export class ConsentService {
     adultConfirmed,
     acceptTerms,
     acknowledgePrivacy,
-  }: ConsentInput) {
+  }: RecordConsentsRequest) {
     if (!adultConfirmed) {
       throw new ApiException(
         422,
@@ -102,7 +84,7 @@ export class ConsentService {
   private assertCurrentVersions({
     termsVersion,
     privacyVersion,
-  }: ConsentInput) {
+  }: RecordConsentsRequest) {
     const isCurrent =
       termsVersion === CURRENT_LEGAL_VERSIONS.TERMS_OF_SERVICE &&
       privacyVersion === CURRENT_LEGAL_VERSIONS.PRIVACY_POLICY

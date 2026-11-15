@@ -31,11 +31,11 @@ async function setup() {
     ).id
   const consentCount = async () =>
     prisma.accountConsent.count({ where: { accountId: await accountId() } })
-  const post = (body: unknown) =>
+  const post = (body: object) =>
     request(server)
       .post('/api/v1/me/consents')
       .set('Authorization', user.authorization)
-      .send(body as object)
+      .send(body)
   const get = (path: string) =>
     request(server).get(path).set('Authorization', user.authorization)
   return { app, prisma, user, post, get, accountId, consentCount }
