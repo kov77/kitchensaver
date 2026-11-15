@@ -62,7 +62,11 @@ describe('authentication guard', () => {
       .get('/api/v1/me')
       .set('Authorization', `Bearer ${token}`)
 
-    expect(body).toEqual({ message: 'Unauthorized', statusCode: 401 })
+    expect(body).toEqual({
+      code: 'UNAUTHORIZED',
+      message: 'Unauthorized',
+      requestId: expect.any(String),
+    })
   })
 
   test('answers 503, not 401, when tokens cannot be verified', async () => {

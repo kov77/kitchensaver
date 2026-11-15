@@ -8,11 +8,30 @@ datasource db {
 }
 
 model Account {
-  id                  String    @id @default(uuid(7)) @db.Uuid
-  externalAuthSubject String    @unique
-  createdAt           DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt           DateTime  @updatedAt @db.Timestamptz(3)
-  deletedAt           DateTime? @db.Timestamptz(3)
+  id                  String           @id @default(uuid(7)) @db.Uuid
+  externalAuthSubject String           @unique
+  createdAt           DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime         @updatedAt @db.Timestamptz(3)
+  deletedAt           DateTime?        @db.Timestamptz(3)
+  consents            AccountConsent[]
 
   @@map("account")
+}
+
+enum ConsentCategory {
+  ADULT_ATTESTATION
+  TERMS_OF_SERVICE
+  PRIVACY_POLICY
+}
+
+model AccountConsent {
+  id              String          @id @default(uuid(7)) @db.Uuid
+  accountId       String          @db.Uuid
+  category        ConsentCategory
+  documentVersion String
+  acceptedAt      DateTime        @default(now()) @db.Timestamptz(3)
+  account         Account         @relation(fields: [accountId], references: [id])
+
+  @@unique([accountId, category, documentVersion])
+  @@map("account_consent")
 }

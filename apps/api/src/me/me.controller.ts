@@ -7,16 +7,27 @@ import {
 } from '@nestjs/swagger'
 
 import { CurrentAccount } from '../auth/current-account.decorator.js'
+import { AllowWithoutConsent } from '../consent/allow-without-consent.decorator.js'
+import { ConsentService } from '../consent/consent.service.js'
 import { MeResponseDto } from './me.dto.js'
 
 @ApiTags('me')
 @ApiBearerAuth()
 @Controller('me')
 export class MeController {
+  constructor(private readonly consentService: ConsentService) {}
+
   @Get()
-  @ApiOkResponse({ type: MeResponseDto, description: 'The current account' })
+  @AllowWithoutConsent()
+  @ApiOkResponse({
+    type: MeResponseDto,
+    description: 'The current account and its onboarding status',
+  })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid access token' })
-  get(@CurrentAccount() accountId: string): MeResponseDto {
-    return { id: accountId }
+  async get(@CurrentAccount() accountId: string): Promise<MeResponseDto> {
+    return {
+      id: accountId,
+      onboarding: await this.consentService.getOnboardingStatus(accountId),
+    }
   }
 }
