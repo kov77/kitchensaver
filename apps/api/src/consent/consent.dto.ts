@@ -3,12 +3,14 @@ import { z } from 'zod'
 
 import { ConsentCategory } from '../generated/prisma/client.js'
 
+const versionSchema = z.string().min(1).max(64)
+
 export const recordConsentsSchema = z.object({
   adultConfirmed: z.boolean(),
   acceptTerms: z.boolean(),
   acknowledgePrivacy: z.boolean(),
-  termsVersion: z.string().min(1).max(64),
-  privacyVersion: z.string().min(1).max(64),
+  termsVersion: versionSchema,
+  privacyVersion: versionSchema,
 })
 
 export class RecordConsentsRequestDto {
