@@ -14,6 +14,7 @@ model Account {
   updatedAt           DateTime         @updatedAt @db.Timestamptz(3)
   deletedAt           DateTime?        @db.Timestamptz(3)
   consents            AccountConsent[]
+  people              PersonProfile[]
 
   @@map("account")
 }
@@ -30,8 +31,22 @@ model AccountConsent {
   category        ConsentCategory
   documentVersion String
   acceptedAt      DateTime        @default(now()) @db.Timestamptz(3)
-  account         Account         @relation(fields: [accountId], references: [id])
+  account         Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@unique([accountId, category, documentVersion])
   @@map("account_consent")
+}
+
+model PersonProfile {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  accountId   String    @db.Uuid
+  name        String
+  dateOfBirth DateTime  @db.Date
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  archivedAt  DateTime? @db.Timestamptz(3)
+  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, archivedAt])
+  @@map("person_profile")
 }
