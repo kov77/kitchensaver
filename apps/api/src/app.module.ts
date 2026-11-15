@@ -8,6 +8,7 @@ import { ApiExceptionFilter } from './common/api-exception.filter.js'
 import { ConsentModule } from './consent/consent.module.js'
 import { HealthController } from './health/health.controller.js'
 import { MeModule } from './me/me.module.js'
+import { PeopleModule } from './people/people.module.js'
 import { PrismaModule } from './prisma/prisma.module.js'
 
 @Module({
@@ -21,6 +22,7 @@ import { PrismaModule } from './prisma/prisma.module.js'
     AuthModule,
     ConsentModule,
     MeModule,
+    PeopleModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_FILTER, useClass: ApiExceptionFilter }],
