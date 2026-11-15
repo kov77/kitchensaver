@@ -8,6 +8,7 @@ import {
   type TokenVerifier,
 } from '../../src/auth/token-verifier.js'
 import type { Env } from '../../src/config/env.js'
+import { ProbeController } from './probe.controller.js'
 import { createTestTokenVerifier } from './test-auth.js'
 
 export async function createTestApp(
@@ -16,6 +17,7 @@ export async function createTestApp(
 ) {
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
+    controllers: [ProbeController],
   })
     .overrideProvider(TOKEN_VERIFIER)
     .useValue(tokenVerifier)
