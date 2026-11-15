@@ -4,12 +4,18 @@ import { ApiException } from '../common/api-exception.js'
 import { EntitlementsService } from '../entitlements/entitlements.service.js'
 import type { PersonProfile, Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import { calculateAge, isSupportedAge } from './age.js'
+import {
+  calculateAge,
+  isSupportedAge,
+  MAX_PROFILE_AGE,
+  MIN_PROFILE_AGE,
+} from './age.js'
 import type {
   PeopleStatusFilter,
   PersonDetailDto,
   PersonListItemDto,
 } from './people.dto.js'
+import { personNotFound } from './people.errors.js'
 
 // Requests of one account queue on the Account row lock, so the Prisma defaults (2s/5s) are too tight.
 const LOCK_TIMEOUT_MS = 10_000
@@ -46,17 +52,13 @@ function toDetail(person: PersonProfile): PersonDetailDto {
   }
 }
 
-function personNotFound() {
-  return new ApiException(404, 'PERSON_NOT_FOUND', 'Person not found')
-}
-
 function parseSupportedDateOfBirth(isoDate: string) {
   const dateOfBirth = toDate(isoDate)
   if (!isSupportedAge(calculateAge(dateOfBirth, new Date()))) {
     throw new ApiException(
       422,
       'PERSON_AGE_NOT_SUPPORTED',
-      'The person must be between 13 and 120 years old',
+      `The person must be between ${MIN_PROFILE_AGE} and ${MAX_PROFILE_AGE} years old`,
     )
   }
   return dateOfBirth

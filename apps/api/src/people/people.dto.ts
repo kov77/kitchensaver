@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { z } from 'zod'
 
-const nameSchema = z.string().trim().min(1).max(80)
+const NAME_MAX_LENGTH = 80
+
+const nameSchema = z.string().trim().min(1).max(NAME_MAX_LENGTH)
 const dateOfBirthSchema = z.iso.date()
 
 export const createPersonSchema = z.object({
@@ -26,12 +28,12 @@ export const listPeopleQuerySchema = z.object({
 export type PeopleStatusFilter = z.infer<typeof listPeopleQuerySchema>['status']
 
 export class CreatePersonRequestDto {
-  @ApiProperty({ maxLength: 80 }) name: string
+  @ApiProperty({ maxLength: NAME_MAX_LENGTH }) name: string
   @ApiProperty({ format: 'date', example: '1990-05-17' }) dateOfBirth: string
 }
 
 export class UpdatePersonRequestDto {
-  @ApiPropertyOptional({ maxLength: 80 }) name?: string
+  @ApiPropertyOptional({ maxLength: NAME_MAX_LENGTH }) name?: string
   @ApiPropertyOptional({ format: 'date' }) dateOfBirth?: string
 }
 

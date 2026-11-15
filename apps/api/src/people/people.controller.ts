@@ -23,7 +23,6 @@ import {
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger'
 
-import { ApiException } from '../common/api-exception.js'
 import { CurrentAccount } from '../auth/current-account.decorator.js'
 import {
   CreatePersonRequestDto,
@@ -35,14 +34,14 @@ import {
   UpdatePersonRequestDto,
   updatePersonSchema,
 } from './people.dto.js'
+import { personNotFound } from './people.errors.js'
 import { PeopleService } from './people.service.js'
 
 const PersonId = () =>
   Param(
     'id',
     new ParseUUIDPipe({
-      exceptionFactory: () =>
-        new ApiException(404, 'PERSON_NOT_FOUND', 'Person not found'),
+      exceptionFactory: personNotFound,
     }),
   )
 
