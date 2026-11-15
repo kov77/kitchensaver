@@ -38,15 +38,82 @@ model AccountConsent {
 }
 
 model PersonProfile {
-  id          String    @id @default(uuid(7)) @db.Uuid
-  accountId   String    @db.Uuid
-  name        String
-  dateOfBirth DateTime  @db.Date
-  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
-  archivedAt  DateTime? @db.Timestamptz(3)
-  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  id             String                @id @default(uuid(7)) @db.Uuid
+  accountId      String                @db.Uuid
+  name           String
+  dateOfBirth    DateTime              @db.Date
+  createdAt      DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime              @updatedAt @db.Timestamptz(3)
+  archivedAt     DateTime?             @db.Timestamptz(3)
+  account        Account               @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  goal           NutritionGoal?
+  bodyParameters PersonBodyParameters?
 
   @@index([accountId, archivedAt])
   @@map("person_profile")
+}
+
+enum GoalMode {
+  MANUAL
+  ESTIMATED
+}
+
+enum GoalType {
+  LOSE
+  MAINTAIN
+  GAIN
+  CUSTOM
+}
+
+enum CalculationMethod {
+  DRI_2023_ADULT
+  DRI_2023_AGES_3_18
+}
+
+enum ActivityLevel {
+  INACTIVE
+  LOW_ACTIVE
+  ACTIVE
+  VERY_ACTIVE
+}
+
+enum FormulaSex {
+  MALE
+  FEMALE
+}
+
+model NutritionGoal {
+  id                       String             @id @default(uuid(7)) @db.Uuid
+  personProfileId          String             @unique @db.Uuid
+  mode                     GoalMode
+  goalType                 GoalType
+  dailyKcal                Int
+  proteinG                 Int?
+  fatG                     Int?
+  carbsG                   Int?
+  estimatedMaintenanceKcal Int?
+  calculationMethod        CalculationMethod?
+  estimatedAt              DateTime?          @db.Timestamptz(3)
+  revision                 Int                @default(1)
+  confirmedAt              DateTime           @db.Timestamptz(3)
+  reviewRequiredAt         DateTime?          @db.Timestamptz(3)
+  createdAt                DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime           @updatedAt @db.Timestamptz(3)
+  personProfile            PersonProfile      @relation(fields: [personProfileId], references: [id], onDelete: Cascade)
+
+  @@map("nutrition_goal")
+}
+
+model PersonBodyParameters {
+  id              String        @id @default(uuid(7)) @db.Uuid
+  personProfileId String        @unique @db.Uuid
+  heightCm        Float
+  weightKg        Float
+  activityLevel   ActivityLevel
+  formulaSex      FormulaSex
+  createdAt       DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @db.Timestamptz(3)
+  personProfile   PersonProfile @relation(fields: [personProfileId], references: [id], onDelete: Cascade)
+
+  @@map("person_body_parameters")
 }
