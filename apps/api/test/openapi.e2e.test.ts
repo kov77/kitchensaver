@@ -34,6 +34,30 @@ describe('OpenAPI documentation', () => {
     expect(body.paths['/health'].get.security).toBeUndefined()
   })
 
+  test('documents the goal and body parameter routes', async () => {
+    const app = await createTestApp('development')
+
+    const { body } = await request(app.getHttpServer()).get(
+      `/${SWAGGER_PATH}-json`,
+    )
+
+    const { paths } = body
+    expect(paths['/api/v1/people/{id}/goal'].get).toBeDefined()
+    expect(paths['/api/v1/people/{id}/goal'].put.requestBody).toBeDefined()
+    expect(paths['/api/v1/people/{id}/goals/estimate'].post).toBeDefined()
+    expect(paths['/api/v1/people/{id}/body-parameters'].delete).toBeDefined()
+    const { schema } =
+      paths['/api/v1/people/{id}/goals/estimate'].post.requestBody.content[
+        'application/json'
+      ]
+    expect(schema.properties.goalType.enum).toEqual([
+      'LOSE',
+      'MAINTAIN',
+      'GAIN',
+    ])
+    expect(schema.required).toEqual(['goalType'])
+  })
+
   test('serves the Swagger UI outside production', async () => {
     const app = await createTestApp('development')
 

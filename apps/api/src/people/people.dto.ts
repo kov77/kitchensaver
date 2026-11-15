@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
 import * as zod from 'zod'
 
+import { GoalMode, GoalType } from '../generated/prisma/client.js'
+
 const NAME_MIN_LENGTH = 1
 const NAME_MAX_LENGTH = 80
 
@@ -30,10 +32,28 @@ export type CreatePersonRequest = zod.infer<typeof createPersonSchema>
 export type UpdatePersonRequest = zod.infer<typeof updatePersonSchema>
 export type ListPeopleQuery = zod.infer<typeof listPeopleQuerySchema>
 
+export class GoalSummaryDto {
+  @ApiProperty({ enum: GoalMode }) mode: GoalMode
+  @ApiProperty() dailyKcal: number
+  @ApiProperty({ enum: GoalType }) goalType: GoalType
+}
+
+export class PlanReadinessDto {
+  @ApiProperty() ready: boolean
+  @ApiProperty({
+    enum: ['MISSING_GOAL', 'GOAL_REVIEW_REQUIRED', 'GOAL_NOT_VALID_FOR_AGE'],
+    isArray: true,
+  })
+  reasons: string[]
+}
+
 export class PersonListItemDto {
   @ApiProperty({ format: 'uuid' }) id: string
   @ApiProperty() name: string
   @ApiProperty() age: number
+  @ApiProperty({ type: GoalSummaryDto, nullable: true })
+  goal: GoalSummaryDto | null
+  @ApiProperty({ type: PlanReadinessDto }) planReadiness: PlanReadinessDto
   @ApiProperty({ type: String, format: 'date-time', nullable: true })
   archivedAt: string | null
 }

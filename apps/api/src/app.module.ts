@@ -8,6 +8,7 @@ import { ApiExceptionFilter } from './common/api-exception.filter.js'
 import { ConsentModule } from './consent/consent.module.js'
 import { HealthController } from './health/health.controller.js'
 import { MeModule } from './me/me.module.js'
+import { NutritionGoalsModule } from './nutrition-goals/nutrition-goals.module.js'
 import { PeopleModule } from './people/people.module.js'
 import { PrismaModule } from './prisma/prisma.module.js'
 
@@ -23,6 +24,7 @@ import { PrismaModule } from './prisma/prisma.module.js'
     ConsentModule,
     MeModule,
     PeopleModule,
+    NutritionGoalsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_FILTER, useClass: ApiExceptionFilter }],

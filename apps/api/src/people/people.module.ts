@@ -8,5 +8,6 @@ import { PeopleService } from './people.service.js'
   imports: [EntitlementsModule],
   controllers: [PeopleController],
   providers: [PeopleService],
+  exports: [PeopleService],
 })
 export class PeopleModule {}

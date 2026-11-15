@@ -4,8 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  Param,
-  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -34,16 +32,8 @@ import {
   type UpdatePersonRequest,
   updatePersonSchema,
 } from './people.dto.js'
-import { personNotFound } from './people.errors.js'
 import { PeopleService } from './people.service.js'
-
-const PersonId = () =>
-  Param(
-    'id',
-    new ParseUUIDPipe({
-      exceptionFactory: personNotFound,
-    }),
-  )
+import { PersonId } from './person-id.param.js'
 
 @ApiTags('people')
 @ApiBearerAuth()
