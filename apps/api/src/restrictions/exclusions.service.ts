@@ -4,7 +4,7 @@ import { ApiException } from '../common/api-exception.js'
 import { hasPrismaCode } from '../common/prisma-errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import { normalizeName } from './normalize-name.js'
+import { exclusionRow } from './restriction-rows.js'
 import type { AddExclusionRequest } from './restrictions.dto.js'
 import { exclusionNotFound } from './restrictions.errors.js'
 
@@ -30,19 +30,11 @@ export class ExclusionsService {
     })
   }
 
-  async add(
-    accountId: string,
-    personId: string,
-    { ingredientName }: AddExclusionRequest,
-  ) {
+  async add(accountId: string, personId: string, request: AddExclusionRequest) {
     await this.people.assertExists(accountId, personId)
     try {
       return await this.prisma.personExclusion.create({
-        data: {
-          personProfileId: personId,
-          ingredientName,
-          normalizedName: normalizeName(ingredientName),
-        },
+        data: { personProfileId: personId, ...exclusionRow(request) },
         select: exclusionSelect,
       })
     } catch (error) {

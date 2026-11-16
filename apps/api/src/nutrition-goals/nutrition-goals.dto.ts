@@ -8,6 +8,7 @@ import {
   GoalMode,
   GoalType,
 } from '../generated/prisma/client.js'
+import { dateOfBirthSchema } from '../people/people.dto.js'
 
 // Input-sanity limits, not medical thresholds (D031); reviewed by the founder.
 const heightCmSchema = zod.number().min(90).max(250)
@@ -29,6 +30,12 @@ const estimatedGoalTypeSchema = zod.enum(['LOSE', 'MAINTAIN', 'GAIN'])
 const optionalBodyParametersSchema = bodyParametersSchema.partial()
 
 export const estimateGoalSchema = optionalBodyParametersSchema.extend({
+  goalType: estimatedGoalTypeSchema,
+})
+
+// Onboarding preview: no profile exists yet, so every input comes in the body.
+export const previewGoalSchema = bodyParametersSchema.extend({
+  dateOfBirth: dateOfBirthSchema,
   goalType: estimatedGoalTypeSchema,
 })
 
@@ -55,6 +62,7 @@ export const saveGoalSchema = zod.discriminatedUnion('mode', [
 
 export type BodyParametersRequest = zod.infer<typeof bodyParametersSchema>
 export type EstimateGoalRequest = zod.infer<typeof estimateGoalSchema>
+export type PreviewGoalRequest = zod.infer<typeof previewGoalSchema>
 export type SaveGoalRequest = zod.infer<typeof saveGoalSchema>
 
 export class BodyParametersDto {

@@ -4,7 +4,7 @@ import { ApiException } from '../common/api-exception.js'
 import { hasPrismaCode } from '../common/prisma-errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import { normalizeName } from './normalize-name.js'
+import { preferenceRow } from './restriction-rows.js'
 import type {
   AddPreferenceRequest,
   UpdatePreferenceRequest,
@@ -37,17 +37,12 @@ export class PreferencesService {
   async add(
     accountId: string,
     personId: string,
-    { ingredientName, rating }: AddPreferenceRequest,
+    request: AddPreferenceRequest,
   ) {
     await this.people.assertExists(accountId, personId)
     try {
       return await this.prisma.personFoodPreference.create({
-        data: {
-          personProfileId: personId,
-          ingredientName,
-          normalizedName: normalizeName(ingredientName),
-          rating,
-        },
+        data: { personProfileId: personId, ...preferenceRow(request) },
         select: preferenceSelect,
       })
     } catch (error) {
