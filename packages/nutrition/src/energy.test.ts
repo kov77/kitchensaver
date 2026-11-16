@@ -4,6 +4,7 @@ import {
   type ActivityLevel,
   estimateMaintenanceEnergy,
   type FormulaSex,
+  canEstimateEnergy,
   methodForAge,
 } from './energy.js'
 
@@ -115,6 +116,22 @@ describe('method boundary and growth cost', () => {
         weightKg: 13,
         activityLevel: 'ACTIVE',
         formulaSex: 'MALE',
+      }),
+    ).toBeNull()
+  })
+
+  test('offers no new estimate above 70 years but keeps the adult method', () => {
+    expect(canEstimateEnergy(70)).toBe(true)
+    expect(canEstimateEnergy(71)).toBe(false)
+    expect(canEstimateEnergy(2)).toBe(false)
+    expect(methodForAge(71)).toBe('DRI_2023_ADULT')
+    expect(
+      estimateMaintenanceEnergy({
+        ageYears: 71,
+        heightCm: 165,
+        weightKg: 65,
+        activityLevel: 'ACTIVE',
+        formulaSex: 'FEMALE',
       }),
     ).toBeNull()
   })
