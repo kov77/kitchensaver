@@ -5,12 +5,9 @@ import { ApiException } from '../common/api-exception.js'
 import { EntitlementsService } from '../entitlements/entitlements.service.js'
 import { Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import {
-  calculateAge,
-  isSupportedAge,
-  MAX_PROFILE_AGE,
-  MIN_PROFILE_AGE,
-} from './age.js'
+import { assertActiveSlotAvailable } from './active-slot.js'
+import { calculateAge } from './age.js'
+import { parseSupportedDateOfBirth } from './date-of-birth.js'
 import type {
   CreatePersonRequest,
   ListPeopleQuery,
@@ -25,10 +22,6 @@ import { planReadiness } from './plan-readiness.js'
 const TRANSACTION_TIMEOUT_MS = 10_000
 // The database gives up waiting for the lock before the Prisma transaction timeout cuts the connection.
 const LOCK_WAIT_MS = 5_000
-
-function toDate(isoDate: string) {
-  return new Date(`${isoDate}T00:00:00Z`)
-}
 
 function toIsoDate(date: Date) {
   return date.toISOString().slice(0, 10)
@@ -88,35 +81,6 @@ function isLockTimeout(error: unknown) {
     error.code === 'P2010' &&
     lockTimeoutMetaSchema.safeParse(error.meta).success
   )
-}
-
-async function assertActiveSlotAvailable(
-  { personProfile }: Prisma.TransactionClient,
-  accountId: string,
-  activeProfilesLimit: number,
-) {
-  const activeCount = await personProfile.count({
-    where: { accountId, archivedAt: null },
-  })
-  if (activeCount < activeProfilesLimit) return
-  throw new ApiException(
-    409,
-    'PROFILE_LIMIT_REACHED',
-    'The limit of active profiles is reached',
-    { limit: activeProfilesLimit },
-  )
-}
-
-function parseSupportedDateOfBirth(isoDate: string) {
-  const dateOfBirth = toDate(isoDate)
-  if (!isSupportedAge(calculateAge(dateOfBirth, new Date()))) {
-    throw new ApiException(
-      422,
-      'PERSON_AGE_NOT_SUPPORTED',
-      `The person must be between ${MIN_PROFILE_AGE} and ${MAX_PROFILE_AGE} years old`,
-    )
-  }
-  return dateOfBirth
 }
 
 @Injectable()
@@ -239,7 +203,7 @@ export class PeopleService {
   }
 
   // The Account row lock serializes limit checks of one account across parallel requests.
-  private withAccountLock<T>(
+  withAccountLock<T>(
     accountId: string,
     work: (tx: Prisma.TransactionClient) => Promise<T>,
   ) {

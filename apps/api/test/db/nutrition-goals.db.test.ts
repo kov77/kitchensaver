@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest'
 import * as zod from 'zod'
 
 import { PrismaService } from '../../src/prisma/prisma.service.js'
+import { birthDateForAge } from '../support/dates.js'
 import { createConsentedActor } from '../support/factories.js'
 import {
   createPeopleClient,
@@ -12,14 +13,6 @@ import { createTestApp } from '../support/test-app.js'
 import { createActor } from '../support/test-auth.js'
 
 const createdPersonSchema = zod.object({ id: zod.string() })
-
-function birthDateForAge(years: number) {
-  const now = new Date()
-  const date = new Date(
-    Date.UTC(now.getUTCFullYear() - years, now.getUTCMonth() - 6, 1),
-  )
-  return date.toISOString().slice(0, 10)
-}
 
 const bodyParameters = {
   heightCm: 170,

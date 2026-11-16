@@ -84,6 +84,31 @@ describe('OpenAPI documentation', () => {
     expect(schema.properties.rating).toMatchObject({ minimum: 1, maximum: 5 })
   })
 
+  test('documents onboarding with its required idempotency header', async () => {
+    const app = await createTestApp('development')
+
+    const { body } = await request(app.getHttpServer()).get(
+      `/${SWAGGER_PATH}-json`,
+    )
+
+    const { paths } = body
+    const { parameters, requestBody } = paths['/api/v1/people/onboarding'].post
+    expect(parameters).toContainEqual(
+      expect.objectContaining({
+        name: 'Idempotency-Key',
+        in: 'header',
+        required: true,
+      }),
+    )
+    const { schema } = requestBody.content['application/json']
+    expect(schema.required).toEqual(['name', 'dateOfBirth'])
+    expect(schema.additionalProperties).toBe(false)
+    const preview = paths['/api/v1/people/goals/estimate'].post
+    expect(
+      preview.requestBody.content['application/json'].schema.required,
+    ).toEqual(expect.arrayContaining(['dateOfBirth', 'heightCm', 'goalType']))
+  })
+
   test('serves the Swagger UI outside production', async () => {
     const app = await createTestApp('development')
 

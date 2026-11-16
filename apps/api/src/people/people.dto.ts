@@ -4,7 +4,7 @@ import * as zod from 'zod'
 import { nameSchema } from '../common/name.schema.js'
 import { GoalMode, GoalType } from '../generated/prisma/client.js'
 
-const dateOfBirthSchema = zod.iso.date()
+export const dateOfBirthSchema = zod.iso.date()
 
 export const createPersonSchema = zod.strictObject({
   name: nameSchema,

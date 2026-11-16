@@ -30,12 +30,16 @@ export class BodyParametersService {
 
   async get(accountId: string, personId: string) {
     await this.people.assertExists(accountId, personId)
-    const stored = await this.prisma.personBodyParameters.findUnique({
+    const stored = await this.find(personId)
+    if (!stored) throw bodyParametersNotFound()
+    return stored
+  }
+
+  find(personId: string) {
+    return this.prisma.personBodyParameters.findUnique({
       where: { personProfileId: personId },
       select: bodyParametersSelect,
     })
-    if (!stored) throw bodyParametersNotFound()
-    return stored
   }
 
   async save(

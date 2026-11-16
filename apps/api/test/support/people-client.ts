@@ -14,6 +14,15 @@ export function createPeopleClient(
       [method](`/api/v1/people${path}`)
       .set('Authorization', authorization)
   return {
+    onboard: (body: object, idempotencyKey?: string) =>
+      send('post', '/onboarding')
+        .set(
+          idempotencyKey === undefined
+            ? {}
+            : { 'Idempotency-Key': idempotencyKey },
+        )
+        .send(body),
+    previewGoal: (body: object) => send('post', '/goals/estimate').send(body),
     list: (query = '') => send('get', query),
     create: (body: object) => send('post', '').send(body),
     get: (id: string) => send('get', `/${id}`),

@@ -16,5 +16,6 @@ import { PreferencesService } from './preferences.service.js'
     PreferencesController,
   ],
   providers: [AllergiesService, ExclusionsService, PreferencesService],
+  exports: [AllergiesService, ExclusionsService, PreferencesService],
 })
 export class RestrictionsModule {}

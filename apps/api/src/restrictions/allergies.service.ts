@@ -6,6 +6,7 @@ import { AllergenCode } from '../generated/prisma/client.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { normalizeName } from './normalize-name.js'
+import { allergyRow } from './restriction-rows.js'
 import type {
   AddAllergyRequest,
   AllergyDto,
@@ -55,20 +56,9 @@ export class AllergiesService {
     request: AddAllergyRequest,
   ): Promise<AllergyDto> {
     await this.people.assertExists(accountId, personId)
-    const labelFields =
-      request.allergenCode === AllergenCode.OTHER
-        ? {
-            customLabel: request.customLabel,
-            normalizedLabel: normalizeName(request.customLabel),
-          }
-        : {}
     try {
       const allergy = await this.prisma.personAllergy.create({
-        data: {
-          personProfileId: personId,
-          allergenCode: request.allergenCode,
-          ...labelFields,
-        },
+        data: { personProfileId: personId, ...allergyRow(request) },
         select: allergySelect,
       })
       return withResolved(allergy)
