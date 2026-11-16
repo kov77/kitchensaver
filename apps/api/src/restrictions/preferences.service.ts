@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import { ApiException } from '../common/api-exception.js'
 import { hasPrismaCode } from '../common/prisma-errors.js'
+import { personNotFound } from '../people/people.errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { preferenceRow } from './restriction-rows.js'
@@ -9,7 +10,11 @@ import type {
   AddPreferenceRequest,
   UpdatePreferenceRequest,
 } from './restrictions.dto.js'
-import { preferenceNotFound } from './restrictions.errors.js'
+import { MAX_PREFERENCES } from './restriction-limits.js'
+import {
+  preferenceNotFound,
+  restrictionLimitReached,
+} from './restrictions.errors.js'
 
 const preferenceSelect = {
   id: true,
@@ -40,12 +45,19 @@ export class PreferencesService {
     request: AddPreferenceRequest,
   ) {
     await this.people.assertExists(accountId, personId)
+    const count = await this.prisma.personFoodPreference.count({
+      where: { personProfileId: personId },
+    })
+    if (count >= MAX_PREFERENCES) {
+      throw restrictionLimitReached(MAX_PREFERENCES)
+    }
     try {
       return await this.prisma.personFoodPreference.create({
         data: { personProfileId: personId, ...preferenceRow(request) },
         select: preferenceSelect,
       })
     } catch (error) {
+      if (hasPrismaCode(error, 'P2003')) throw personNotFound()
       if (!hasPrismaCode(error, 'P2002')) throw error
       throw new ApiException(
         409,

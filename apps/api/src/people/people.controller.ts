@@ -58,7 +58,9 @@ export class PeopleController {
   @ApiUnprocessableEntityResponse({
     description: 'PERSON_AGE_NOT_SUPPORTED or VALIDATION_FAILED',
   })
-  @ApiConflictResponse({ description: 'PROFILE_LIMIT_REACHED' })
+  @ApiConflictResponse({
+    description: 'PROFILE_LIMIT_REACHED or PROFILE_TOTAL_LIMIT_REACHED',
+  })
   create(
     @CurrentAccount() accountId: string,
     @Body({ schema: createPersonSchema }) body: CreatePersonRequest,

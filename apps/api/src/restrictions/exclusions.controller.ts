@@ -39,7 +39,9 @@ export class ExclusionsController {
   @Post(':id/exclusions')
   @ApiCreatedResponse({ type: ExclusionDto })
   @ApiNotFoundResponse({ description: 'PERSON_NOT_FOUND' })
-  @ApiConflictResponse({ description: 'EXCLUSION_ALREADY_EXISTS' })
+  @ApiConflictResponse({
+    description: 'EXCLUSION_ALREADY_EXISTS or RESTRICTION_LIMIT_REACHED',
+  })
   add(
     @CurrentAccount() accountId: string,
     @PersonId() id: string,

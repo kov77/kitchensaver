@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
 import { ApiException } from '../common/api-exception.js'
+import { hasPrismaCode } from '../common/prisma-errors.js'
+import { personNotFound } from '../people/people.errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import type { BodyParametersRequest } from './nutrition-goals.dto.js'
@@ -48,12 +50,17 @@ export class BodyParametersService {
     request: BodyParametersRequest,
   ) {
     await this.people.assertExists(accountId, personId)
-    return this.prisma.personBodyParameters.upsert({
-      where: { personProfileId: personId },
-      create: { personProfileId: personId, ...request },
-      update: request,
-      select: bodyParametersSelect,
-    })
+    try {
+      return await this.prisma.personBodyParameters.upsert({
+        where: { personProfileId: personId },
+        create: { personProfileId: personId, ...request },
+        update: request,
+        select: bodyParametersSelect,
+      })
+    } catch (error) {
+      if (hasPrismaCode(error, 'P2003')) throw personNotFound()
+      throw error
+    }
   }
 
   async remove(accountId: string, personId: string) {

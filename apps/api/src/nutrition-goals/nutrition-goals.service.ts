@@ -2,9 +2,11 @@ import { compareMacroEnergy } from '@kitchensaver/nutrition'
 import { Injectable } from '@nestjs/common'
 
 import { ApiException } from '../common/api-exception.js'
+import { hasPrismaCode } from '../common/prisma-errors.js'
 import type { Prisma } from '../generated/prisma/client.js'
 import { calculateAge } from '../people/age.js'
 import { parseSupportedDateOfBirth } from '../people/date-of-birth.js'
+import { personNotFound } from '../people/people.errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { buildGoalFields, previewEstimate } from './goal-calculation.js'
@@ -104,13 +106,18 @@ export class NutritionGoalsService {
         ? await this.getBodyParameters(personId)
         : null
     const fields = buildGoalFields(request, ageYears, stored, new Date())
-    const goal = await this.prisma.nutritionGoal.upsert({
-      where: { personProfileId: personId },
-      create: { personProfileId: personId, ...fields },
-      update: { ...fields, revision: { increment: 1 } },
-      select: goalSelect,
-    })
-    return { ...goal, ...checkMacros(goal) }
+    try {
+      const goal = await this.prisma.nutritionGoal.upsert({
+        where: { personProfileId: personId },
+        create: { personProfileId: personId, ...fields },
+        update: { ...fields, revision: { increment: 1 } },
+        select: goalSelect,
+      })
+      return { ...goal, ...checkMacros(goal) }
+    } catch (error) {
+      if (hasPrismaCode(error, 'P2003')) throw personNotFound()
+      throw error
+    }
   }
 
   private async getAge(accountId: string, personId: string) {

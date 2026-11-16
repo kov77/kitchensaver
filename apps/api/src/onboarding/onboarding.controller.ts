@@ -36,7 +36,8 @@ export class OnboardingController {
   })
   @ApiCreatedResponse({ type: OnboardingDto })
   @ApiConflictResponse({
-    description: 'PROFILE_LIMIT_REACHED or IDEMPOTENCY_KEY_REUSED',
+    description:
+      'PROFILE_LIMIT_REACHED, PROFILE_TOTAL_LIMIT_REACHED or IDEMPOTENCY_KEY_REUSED',
   })
   @ApiUnprocessableEntityResponse({
     description:

@@ -1,3 +1,4 @@
+import { canEstimateEnergy } from '@kitchensaver/nutrition'
 import { Injectable } from '@nestjs/common'
 import * as zod from 'zod'
 
@@ -5,7 +6,10 @@ import { ApiException } from '../common/api-exception.js'
 import { EntitlementsService } from '../entitlements/entitlements.service.js'
 import { Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import { assertActiveSlotAvailable } from './active-slot.js'
+import {
+  assertActiveSlotAvailable,
+  assertCanCreateProfile,
+} from './profile-limits.js'
 import { calculateAge } from './age.js'
 import { parseSupportedDateOfBirth } from './date-of-birth.js'
 import type {
@@ -55,10 +59,11 @@ function toListItem({
 
 function toDetail(person: PersonWithGoal): PersonDetailDto {
   const { dateOfBirth, createdAt } = person
+  const listItem = toListItem(person)
   return {
-    ...toListItem(person),
+    ...listItem,
     dateOfBirth: toIsoDate(dateOfBirth),
-    capabilities: { goalEstimation: true },
+    capabilities: { goalEstimation: canEstimateEnergy(listItem.age) },
     createdAt: createdAt.toISOString(),
   }
 }
@@ -126,9 +131,9 @@ export class PeopleService {
     { name, dateOfBirth: isoDateOfBirth }: CreatePersonRequest,
   ) {
     const dateOfBirth = parseSupportedDateOfBirth(isoDateOfBirth)
-    const { activeProfiles } = await this.entitlements.getLimits(accountId)
+    const limits = await this.entitlements.getLimits(accountId)
     const person = await this.withAccountLock(accountId, async (tx) => {
-      await assertActiveSlotAvailable(tx, accountId, activeProfiles)
+      await assertCanCreateProfile(tx, accountId, limits)
       return tx.personProfile.create({
         data: { accountId, name, dateOfBirth },
         include: { goal: true },
