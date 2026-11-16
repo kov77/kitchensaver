@@ -50,7 +50,9 @@ export class AllergiesController {
   @Post(':id/allergies')
   @ApiCreatedResponse({ type: AllergyDto })
   @ApiNotFoundResponse({ description: 'PERSON_NOT_FOUND' })
-  @ApiConflictResponse({ description: 'ALLERGY_ALREADY_EXISTS' })
+  @ApiConflictResponse({
+    description: 'ALLERGY_ALREADY_EXISTS or RESTRICTION_LIMIT_REACHED',
+  })
   add(
     @CurrentAccount() accountId: string,
     @PersonId() id: string,

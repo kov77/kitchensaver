@@ -9,6 +9,11 @@ import {
 } from '../nutrition-goals/nutrition-goals.dto.js'
 import { createPersonSchema, PersonDetailDto } from '../people/people.dto.js'
 import {
+  MAX_ALLERGIES,
+  MAX_EXCLUSIONS,
+  MAX_PREFERENCES,
+} from '../restrictions/restriction-limits.js'
+import {
   allergyRow,
   exclusionRow,
   preferenceRow,
@@ -32,6 +37,7 @@ export const onboardingSchema = createPersonSchema.extend({
   goal: saveGoalSchema.optional(),
   allergies: zod
     .array(addAllergySchema)
+    .max(MAX_ALLERGIES)
     .refine((allergies) =>
       hasUniqueValues(
         allergies
@@ -45,6 +51,7 @@ export const onboardingSchema = createPersonSchema.extend({
     .default([]),
   exclusions: zod
     .array(addExclusionSchema)
+    .max(MAX_EXCLUSIONS)
     .refine((exclusions) =>
       hasUniqueValues(
         exclusions
@@ -55,6 +62,7 @@ export const onboardingSchema = createPersonSchema.extend({
     .default([]),
   preferences: zod
     .array(addPreferenceSchema)
+    .max(MAX_PREFERENCES)
     .refine((preferences) =>
       hasUniqueValues(
         preferences

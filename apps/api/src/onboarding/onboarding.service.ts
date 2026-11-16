@@ -7,10 +7,10 @@ import { EntitlementsService } from '../entitlements/entitlements.service.js'
 import { BodyParametersService } from '../nutrition-goals/body-parameters.service.js'
 import { buildGoalFields } from '../nutrition-goals/goal-calculation.js'
 import { NutritionGoalsService } from '../nutrition-goals/nutrition-goals.service.js'
-import { assertActiveSlotAvailable } from '../people/active-slot.js'
 import { calculateAge } from '../people/age.js'
 import { parseSupportedDateOfBirth } from '../people/date-of-birth.js'
 import { PeopleService } from '../people/people.service.js'
+import { assertCanCreateProfile } from '../people/profile-limits.js'
 import { AllergiesService } from '../restrictions/allergies.service.js'
 import { ExclusionsService } from '../restrictions/exclusions.service.js'
 import { PreferencesService } from '../restrictions/preferences.service.js'
@@ -54,7 +54,7 @@ export class OnboardingService {
         bodyParameters ?? null,
         now,
       )
-    const { activeProfiles } = await this.entitlements.getLimits(accountId)
+    const limits = await this.entitlements.getLimits(accountId)
     const requestHash = createHash('sha256')
       .update(JSON.stringify(request))
       .digest('hex')
@@ -83,7 +83,7 @@ export class OnboardingService {
           )
         }
 
-        await assertActiveSlotAvailable(tx, accountId, activeProfiles)
+        await assertCanCreateProfile(tx, accountId, limits)
         const { id } = await tx.personProfile.create({
           data: { accountId, name, dateOfBirth },
           select: { id: true },

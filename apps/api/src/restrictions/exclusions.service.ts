@@ -2,11 +2,16 @@ import { Injectable } from '@nestjs/common'
 
 import { ApiException } from '../common/api-exception.js'
 import { hasPrismaCode } from '../common/prisma-errors.js'
+import { personNotFound } from '../people/people.errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { exclusionRow } from './restriction-rows.js'
 import type { AddExclusionRequest } from './restrictions.dto.js'
-import { exclusionNotFound } from './restrictions.errors.js'
+import { MAX_EXCLUSIONS } from './restriction-limits.js'
+import {
+  exclusionNotFound,
+  restrictionLimitReached,
+} from './restrictions.errors.js'
 
 const exclusionSelect = {
   id: true,
@@ -32,12 +37,17 @@ export class ExclusionsService {
 
   async add(accountId: string, personId: string, request: AddExclusionRequest) {
     await this.people.assertExists(accountId, personId)
+    const count = await this.prisma.personExclusion.count({
+      where: { personProfileId: personId },
+    })
+    if (count >= MAX_EXCLUSIONS) throw restrictionLimitReached(MAX_EXCLUSIONS)
     try {
       return await this.prisma.personExclusion.create({
         data: { personProfileId: personId, ...exclusionRow(request) },
         select: exclusionSelect,
       })
     } catch (error) {
+      if (hasPrismaCode(error, 'P2003')) throw personNotFound()
       if (!hasPrismaCode(error, 'P2002')) throw error
       throw new ApiException(
         409,

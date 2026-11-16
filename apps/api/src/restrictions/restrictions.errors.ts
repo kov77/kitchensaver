@@ -14,6 +14,15 @@ export function preferenceNotFound() {
   return new ApiException(404, 'PREFERENCE_NOT_FOUND', 'Preference not found')
 }
 
+export function restrictionLimitReached(limit: number) {
+  return new ApiException(
+    409,
+    'RESTRICTION_LIMIT_REACHED',
+    'This profile holds the maximum number of entries of this kind',
+    { limit },
+  )
+}
+
 export const AllergyId = () =>
   Param('allergyId', new ParseUUIDPipe({ exceptionFactory: allergyNotFound }))
 

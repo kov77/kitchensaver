@@ -81,6 +81,7 @@ const AGES_3_18_EQUATIONS: Record<
 
 const ADULT_FROM_AGE = 19
 const MIN_SUPPORTED_AGE = 3
+const MAX_SUPPORTED_AGE = 70
 
 // Energy cost of growth, kcal/d, added to TEE for ages 3-18 (Table 5-15 of the report).
 function growthEnergyCost(ageYears: number, formulaSex: FormulaSex) {
@@ -96,6 +97,12 @@ export function methodForAge(ageYears: number): CalculationMethod | null {
   return ageYears < ADULT_FROM_AGE ? 'DRI_2023_AGES_3_18' : 'DRI_2023_ADULT'
 }
 
+// Which method belongs to an age is a different question from whether a new estimate is offered:
+// a stored goal stays valid when the person passes MAX_SUPPORTED_AGE.
+export function canEstimateEnergy(ageYears: number) {
+  return methodForAge(ageYears) !== null && ageYears <= MAX_SUPPORTED_AGE
+}
+
 // Maintenance energy (plus growth below 19), never a weight-change target.
 export function estimateMaintenanceEnergy({
   ageYears,
@@ -105,7 +112,7 @@ export function estimateMaintenanceEnergy({
   formulaSex,
 }: EnergyInput): EnergyEstimate | null {
   const method = methodForAge(ageYears)
-  if (!method) return null
+  if (!method || !canEstimateEnergy(ageYears)) return null
 
   const isAdult = method === 'DRI_2023_ADULT'
   const equations = isAdult ? ADULT_EQUATIONS : AGES_3_18_EQUATIONS

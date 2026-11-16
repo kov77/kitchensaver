@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { ApiException } from '../common/api-exception.js'
 import { hasPrismaCode } from '../common/prisma-errors.js'
 import { AllergenCode } from '../generated/prisma/client.js'
+import { personNotFound } from '../people/people.errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { normalizeName } from './normalize-name.js'
@@ -12,7 +13,11 @@ import type {
   AllergyDto,
   UpdateAllergyRequest,
 } from './restrictions.dto.js'
-import { allergyNotFound } from './restrictions.errors.js'
+import { MAX_ALLERGIES } from './restriction-limits.js'
+import {
+  allergyNotFound,
+  restrictionLimitReached,
+} from './restrictions.errors.js'
 
 const allergySelect = {
   id: true,
@@ -56,6 +61,10 @@ export class AllergiesService {
     request: AddAllergyRequest,
   ): Promise<AllergyDto> {
     await this.people.assertExists(accountId, personId)
+    const count = await this.prisma.personAllergy.count({
+      where: { personProfileId: personId },
+    })
+    if (count >= MAX_ALLERGIES) throw restrictionLimitReached(MAX_ALLERGIES)
     try {
       const allergy = await this.prisma.personAllergy.create({
         data: { personProfileId: personId, ...allergyRow(request) },
@@ -64,6 +73,7 @@ export class AllergiesService {
       return withResolved(allergy)
     } catch (error) {
       if (hasPrismaCode(error, 'P2002')) throw allergyAlreadyExists()
+      if (hasPrismaCode(error, 'P2003')) throw personNotFound()
       throw error
     }
   }

@@ -1,4 +1,5 @@
 import {
+  canEstimateEnergy,
   compareMacroEnergy,
   estimateMaintenanceEnergy,
   isGoalTypeAllowedForAge,
@@ -38,12 +39,21 @@ function assertMacrosMatchEnergy(dailyKcal: number, macros: Macros) {
   )
 }
 
+function estimationUnavailable() {
+  return new ApiException(
+    422,
+    'GOAL_ESTIMATION_UNAVAILABLE',
+    'No estimation method applies to this age',
+  )
+}
+
 // Any body parameter missing in the request is taken from the stored ones.
 function computeEstimate(
   ageYears: number,
   provided: Partial<BodyParametersRequest>,
   stored: BodyParametersRequest | null,
 ) {
+  if (!canEstimateEnergy(ageYears)) throw estimationUnavailable()
   const { heightCm, weightKg, activityLevel, formulaSex } = {
     ...stored,
     ...provided,
@@ -67,13 +77,7 @@ function computeEstimate(
     activityLevel,
     formulaSex,
   })
-  if (!estimate) {
-    throw new ApiException(
-      422,
-      'GOAL_ESTIMATION_UNAVAILABLE',
-      'No estimation method applies to this age',
-    )
-  }
+  if (!estimate) throw estimationUnavailable()
   return estimate
 }
 
@@ -93,9 +97,7 @@ export function previewEstimate(
       'AGE_IN_COMPLETED_YEARS',
       'MAINTENANCE_ENERGY_NOT_A_TARGET',
       'LARGE_INDIVIDUAL_VARIATION',
-      method === 'DRI_2023_ADULT'
-        ? 'ADULT_EQUATIONS_APPLIED_AT_ALL_AGES'
-        : 'INCLUDES_GROWTH_ALLOWANCE',
+      ...(method === 'DRI_2023_ADULT' ? [] : ['INCLUDES_GROWTH_ALLOWANCE']),
     ],
     isEstimate: true,
   }
