@@ -1,12 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 import * as zod from 'zod'
 
+import { nameSchema } from '../common/name.schema.js'
 import { GoalMode, GoalType } from '../generated/prisma/client.js'
 
-const NAME_MIN_LENGTH = 1
-const NAME_MAX_LENGTH = 80
-
-const nameSchema = zod.string().trim().min(NAME_MIN_LENGTH).max(NAME_MAX_LENGTH)
 const dateOfBirthSchema = zod.iso.date()
 
 export const createPersonSchema = zod.strictObject({

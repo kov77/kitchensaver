@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 
-import { Prisma } from '../generated/prisma/client.js'
+import { hasPrismaCode } from '../common/prisma-errors.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 
 const accountSelect = { id: true, deletedAt: true } as const
@@ -29,10 +29,7 @@ export class AuthService {
         select: accountSelect,
       })
     } catch (error) {
-      const isUniqueViolation =
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      if (!isUniqueViolation) throw error
+      if (!hasPrismaCode(error, 'P2002')) throw error
       return this.prisma.account.findUniqueOrThrow({
         where,
         select: accountSelect,

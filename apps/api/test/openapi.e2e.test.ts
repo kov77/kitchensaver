@@ -58,6 +58,32 @@ describe('OpenAPI documentation', () => {
     expect(schema.required).toEqual(['goalType'])
   })
 
+  test('documents the allergy, exclusion and preference routes', async () => {
+    const app = await createTestApp('development')
+
+    const { body } = await request(app.getHttpServer()).get(
+      `/${SWAGGER_PATH}-json`,
+    )
+
+    const { paths } = body
+    expect(
+      paths['/api/v1/people/{id}/allergies'].post.requestBody,
+    ).toBeDefined()
+    expect(
+      paths['/api/v1/people/{id}/allergies/{allergyId}'].patch,
+    ).toBeDefined()
+    expect(
+      paths['/api/v1/people/{id}/exclusions/{exclusionId}'].delete,
+    ).toBeDefined()
+    expect(paths['/api/v1/people/{id}/preferences'].get).toBeDefined()
+    const { schema } =
+      paths['/api/v1/people/{id}/preferences'].post.requestBody.content[
+        'application/json'
+      ]
+    expect(schema.required).toEqual(['ingredientName', 'rating'])
+    expect(schema.properties.rating).toMatchObject({ minimum: 1, maximum: 5 })
+  })
+
   test('serves the Swagger UI outside production', async () => {
     const app = await createTestApp('development')
 

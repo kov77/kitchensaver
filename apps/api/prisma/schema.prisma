@@ -38,16 +38,19 @@ model AccountConsent {
 }
 
 model PersonProfile {
-  id             String                @id @default(uuid(7)) @db.Uuid
-  accountId      String                @db.Uuid
+  id             String                 @id @default(uuid(7)) @db.Uuid
+  accountId      String                 @db.Uuid
   name           String
-  dateOfBirth    DateTime              @db.Date
-  createdAt      DateTime              @default(now()) @db.Timestamptz(3)
-  updatedAt      DateTime              @updatedAt @db.Timestamptz(3)
-  archivedAt     DateTime?             @db.Timestamptz(3)
-  account        Account               @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  dateOfBirth    DateTime               @db.Date
+  createdAt      DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime               @updatedAt @db.Timestamptz(3)
+  archivedAt     DateTime?              @db.Timestamptz(3)
+  account        Account                @relation(fields: [accountId], references: [id], onDelete: Cascade)
   goal           NutritionGoal?
   bodyParameters PersonBodyParameters?
+  allergies      PersonAllergy[]
+  exclusions     PersonExclusion[]
+  preferences    PersonFoodPreference[]
 
   @@index([accountId, archivedAt])
   @@map("person_profile")
@@ -116,4 +119,59 @@ model PersonBodyParameters {
   personProfile   PersonProfile @relation(fields: [personProfileId], references: [id], onDelete: Cascade)
 
   @@map("person_body_parameters")
+}
+
+enum AllergenCode {
+  MILK
+  EGG
+  FISH
+  CRUSTACEAN_SHELLFISH
+  MOLLUSC
+  TREE_NUT
+  PEANUT
+  WHEAT
+  SOY
+  SESAME
+  MUSTARD
+  SULPHITES
+  OTHER
+}
+
+model PersonAllergy {
+  id              String        @id @default(uuid(7)) @db.Uuid
+  personProfileId String        @db.Uuid
+  allergenCode    AllergenCode
+  customLabel     String?
+  normalizedLabel String        @default("")
+  createdAt       DateTime      @default(now()) @db.Timestamptz(3)
+  personProfile   PersonProfile @relation(fields: [personProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([personProfileId, allergenCode, normalizedLabel])
+  @@map("person_allergy")
+}
+
+model PersonExclusion {
+  id              String        @id @default(uuid(7)) @db.Uuid
+  personProfileId String        @db.Uuid
+  ingredientName  String
+  normalizedName  String
+  createdAt       DateTime      @default(now()) @db.Timestamptz(3)
+  personProfile   PersonProfile @relation(fields: [personProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([personProfileId, normalizedName])
+  @@map("person_exclusion")
+}
+
+model PersonFoodPreference {
+  id              String        @id @default(uuid(7)) @db.Uuid
+  personProfileId String        @db.Uuid
+  ingredientName  String
+  normalizedName  String
+  rating          Int           @db.SmallInt
+  createdAt       DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @db.Timestamptz(3)
+  personProfile   PersonProfile @relation(fields: [personProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([personProfileId, normalizedName])
+  @@map("person_food_preference")
 }
