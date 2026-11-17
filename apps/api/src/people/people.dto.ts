@@ -2,7 +2,11 @@ import { ApiProperty } from '@nestjs/swagger'
 import * as zod from 'zod'
 
 import { nameSchema } from '../common/name.schema.js'
-import { GoalMode, GoalType } from '../generated/prisma/client.js'
+import {
+  AllergyStatus,
+  GoalMode,
+  GoalType,
+} from '../generated/prisma/client.js'
 
 export const dateOfBirthSchema = zod.iso.date()
 
@@ -38,7 +42,12 @@ export class GoalSummaryDto {
 export class PlanReadinessDto {
   @ApiProperty() ready: boolean
   @ApiProperty({
-    enum: ['MISSING_GOAL', 'GOAL_REVIEW_REQUIRED', 'GOAL_NOT_VALID_FOR_AGE'],
+    enum: [
+      'MISSING_GOAL',
+      'GOAL_REVIEW_REQUIRED',
+      'GOAL_NOT_VALID_FOR_AGE',
+      'ALLERGY_STATUS_MISSING',
+    ],
     isArray: true,
   })
   reasons: string[]
@@ -61,6 +70,14 @@ export class PersonCapabilitiesDto {
 
 export class PersonDetailDto extends PersonListItemDto {
   @ApiProperty({ format: 'date' }) dateOfBirth: string
+  @ApiProperty({
+    enum: AllergyStatus,
+    nullable: true,
+    description: 'null until the allergy question is answered',
+  })
+  allergyStatus: AllergyStatus | null
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  allergyStatusAt: string | null
   @ApiProperty({ type: PersonCapabilitiesDto })
   capabilities: PersonCapabilitiesDto
   @ApiProperty({ format: 'date-time' }) createdAt: string

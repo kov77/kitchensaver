@@ -22,6 +22,8 @@ export function createPeopleClient(
             : { 'Idempotency-Key': idempotencyKey },
         )
         .send(body),
+    setAllergyStatus: (id: string, body: object) =>
+      send('put', `/${id}/allergy-status`).send(body),
     previewGoal: (body: object) => send('post', '/goals/estimate').send(body),
     list: (query = '') => send('get', query),
     create: (body: object) => send('post', '').send(body),

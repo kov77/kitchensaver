@@ -14,6 +14,8 @@ import { createActor } from '../support/test-auth.js'
 
 const createdPersonSchema = zod.object({ id: zod.string() })
 
+const noAllergies = { status: 'NONE', warningAcknowledged: true } as const
+
 const bodyParameters = {
   heightCm: 170,
   weightKg: 70,
@@ -571,15 +573,19 @@ describe('plan readiness', () => {
 
     expect(detail.body.planReadiness).toEqual({
       ready: false,
-      reasons: ['MISSING_GOAL'],
+      reasons: ['MISSING_GOAL', 'ALLERGY_STATUS_MISSING'],
     })
-    expect(list.body[0].planReadiness.reasons).toEqual(['MISSING_GOAL'])
+    expect(list.body[0].planReadiness.reasons).toEqual([
+      'MISSING_GOAL',
+      'ALLERGY_STATUS_MISSING',
+    ])
     expect(detail.body.goal).toBeNull()
   })
 
   test('is ready once a goal is saved', async () => {
     const { asUser } = await setup()
     const id = await createPerson(asUser)
+    await asUser.setAllergyStatus(id, noAllergies)
     await asUser.saveGoal(id, { mode: 'MANUAL', dailyKcal: 2200 })
 
     const detail = await asUser.get(id)
@@ -595,6 +601,7 @@ describe('plan readiness', () => {
   test('asks for a review after a real date-of-birth change of an estimated goal', async () => {
     const { asUser } = await setup()
     const id = await createPerson(asUser)
+    await asUser.setAllergyStatus(id, noAllergies)
     await asUser.saveGoal(id, {
       mode: 'ESTIMATED',
       goalType: 'MAINTAIN',
@@ -624,6 +631,7 @@ describe('plan readiness', () => {
   test('leaves a manual goal alone when the date of birth changes', async () => {
     const { asUser } = await setup()
     const id = await createPerson(asUser)
+    await asUser.setAllergyStatus(id, noAllergies)
     await asUser.saveGoal(id, { mode: 'MANUAL', dailyKcal: 2200 })
 
     await asUser.patch(id, { dateOfBirth: birthDateForAge(35) })
@@ -650,6 +658,7 @@ describe('plan readiness', () => {
   test('reports a goal whose method no longer fits the new age', async () => {
     const { asUser } = await setup()
     const id = await createPerson(asUser, 30)
+    await asUser.setAllergyStatus(id, noAllergies)
     await asUser.saveGoal(id, {
       mode: 'ESTIMATED',
       goalType: 'LOSE',
