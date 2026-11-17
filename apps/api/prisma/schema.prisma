@@ -46,6 +46,8 @@ model PersonProfile {
   createdAt         DateTime               @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime               @updatedAt @db.Timestamptz(3)
   archivedAt        DateTime?              @db.Timestamptz(3)
+  allergyStatus     AllergyStatus?
+  allergyStatusAt   DateTime?              @db.Timestamptz(3)
   account           Account                @relation(fields: [accountId], references: [id], onDelete: Cascade)
   goal              NutritionGoal?
   bodyParameters    PersonBodyParameters?
@@ -121,6 +123,12 @@ model PersonBodyParameters {
   personProfile   PersonProfile @relation(fields: [personProfileId], references: [id], onDelete: Cascade)
 
   @@map("person_body_parameters")
+}
+
+enum AllergyStatus {
+  HAS_ALLERGIES
+  NONE
+  UNKNOWN
 }
 
 enum AllergenCode {
