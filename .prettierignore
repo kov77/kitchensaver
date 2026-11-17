@@ -4,5 +4,6 @@ build
 coverage
 .expo
 generated
+apps/api/openapi.json
 pnpm-lock.yaml
 expo-env.d.ts
