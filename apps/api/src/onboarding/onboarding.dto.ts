@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import * as zod from 'zod'
 
+import { AllergyStatus } from '../generated/prisma/client.js'
 import {
   BodyParametersDto,
   bodyParametersSchema,
@@ -12,6 +13,7 @@ import {
   MAX_ALLERGIES,
   MAX_EXCLUSIONS,
   MAX_PREFERENCES,
+  MIN_ALLERGIES_WHEN_LISTED,
 } from '../restrictions/restriction-limits.js'
 import {
   allergyRow,
@@ -35,20 +37,29 @@ function hasUniqueValues(values: string[]) {
 export const onboardingSchema = createPersonSchema.extend({
   bodyParameters: bodyParametersSchema.optional(),
   goal: saveGoalSchema.optional(),
-  allergies: zod
-    .array(addAllergySchema)
-    .max(MAX_ALLERGIES)
-    .refine((allergies) =>
-      hasUniqueValues(
-        allergies
-          .map(allergyRow)
-          .map(
-            ({ allergenCode, normalizedLabel }) =>
-              `${allergenCode}:${normalizedLabel}`,
+  allergies: zod.discriminatedUnion('status', [
+    zod.strictObject({
+      status: zod.literal(AllergyStatus.HAS_ALLERGIES),
+      items: zod
+        .array(addAllergySchema)
+        .min(MIN_ALLERGIES_WHEN_LISTED)
+        .max(MAX_ALLERGIES)
+        .refine((items) =>
+          hasUniqueValues(
+            items
+              .map(allergyRow)
+              .map(
+                ({ allergenCode, normalizedLabel }) =>
+                  `${allergenCode}:${normalizedLabel}`,
+              ),
           ),
-      ),
-    )
-    .default([]),
+        ),
+    }),
+    zod.strictObject({
+      status: zod.enum(AllergyStatus).exclude([AllergyStatus.HAS_ALLERGIES]),
+      warningAcknowledged: zod.literal(true),
+    }),
+  ]),
   exclusions: zod
     .array(addExclusionSchema)
     .max(MAX_EXCLUSIONS)

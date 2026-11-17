@@ -23,6 +23,8 @@ const bodyParameters = {
   formulaSex: 'MALE',
 } as const
 
+const noAllergies = { status: 'NONE', warningAcknowledged: true } as const
+
 async function setup() {
   const app = await createTestApp()
   const prisma = app.get(PrismaService)
@@ -112,6 +114,28 @@ describe('restriction caps', () => {
     },
   )
 
+  test('the allergy cap is exact under parallel requests', async () => {
+    const { asUser } = await setup()
+    const personId = await createPerson(asUser)
+    const attempts = MAX_ALLERGIES + 5
+
+    const responses = await Promise.all(
+      Array.from({ length: attempts }, (_, index) =>
+        asUser.restrictions('allergies').add(personId, {
+          allergenCode: 'OTHER',
+          customLabel: `parallel-${index}`,
+        }),
+      ),
+    )
+    const listed = await asUser.restrictions('allergies').list(personId)
+
+    expect(responses.filter(({ status }) => status === 201)).toHaveLength(
+      MAX_ALLERGIES,
+    )
+    expect(responses.filter(({ status }) => status === 409)).toHaveLength(5)
+    expect(listed.body).toHaveLength(MAX_ALLERGIES)
+  })
+
   test.each(kinds)(
     '$kind: a full list of one profile does not block another profile',
     async ({ kind, limit, fill, body }) => {
@@ -130,10 +154,13 @@ describe('restriction caps', () => {
     [
       'allergies',
       {
-        allergies: Array.from({ length: MAX_ALLERGIES + 1 }, (_, index) => ({
-          allergenCode: 'OTHER',
-          customLabel: `label-${index}`,
-        })),
+        allergies: {
+          status: 'HAS_ALLERGIES',
+          items: Array.from({ length: MAX_ALLERGIES + 1 }, (_, index) => ({
+            allergenCode: 'OTHER',
+            customLabel: `label-${index}`,
+          })),
+        },
       },
     ],
     [
@@ -159,7 +186,12 @@ describe('restriction caps', () => {
       const { asUser, prisma, user } = await setup()
 
       const response = await asUser.onboard(
-        { name: 'Anna', dateOfBirth: birthDateForAge(30), ...list },
+        {
+          name: 'Anna',
+          dateOfBirth: birthDateForAge(30),
+          allergies: noAllergies,
+          ...list,
+        },
         randomUUID(),
       )
 
@@ -180,10 +212,13 @@ describe('restriction caps', () => {
       {
         name: 'Anna',
         dateOfBirth: birthDateForAge(30),
-        allergies: Array.from({ length: MAX_ALLERGIES }, (_, index) => ({
-          allergenCode: 'OTHER',
-          customLabel: `label-${index}`,
-        })),
+        allergies: {
+          status: 'HAS_ALLERGIES',
+          items: Array.from({ length: MAX_ALLERGIES }, (_, index) => ({
+            allergenCode: 'OTHER',
+            customLabel: `label-${index}`,
+          })),
+        },
       },
       randomUUID(),
     )
@@ -231,7 +266,11 @@ describe('total profile cap', () => {
     const { asUser, prisma, user } = await setupWithArchivedProfiles(TOTAL)
 
     const response = await asUser.onboard(
-      { name: 'Anna', dateOfBirth: birthDateForAge(30) },
+      {
+        name: 'Anna',
+        dateOfBirth: birthDateForAge(30),
+        allergies: noAllergies,
+      },
       randomUUID(),
     )
 
@@ -349,6 +388,7 @@ describe('automatic estimate up to age 70', () => {
       {
         name: 'Anna',
         dateOfBirth,
+        allergies: noAllergies,
         bodyParameters,
         goal: { mode: 'ESTIMATED', goalType: 'MAINTAIN', dailyKcal: 2000 },
       },
@@ -358,6 +398,7 @@ describe('automatic estimate up to age 70', () => {
       {
         name: 'Anna',
         dateOfBirth,
+        allergies: noAllergies,
         goal: { mode: 'MANUAL', dailyKcal: 2000 },
       },
       randomUUID(),

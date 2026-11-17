@@ -101,7 +101,7 @@ describe('OpenAPI documentation', () => {
       }),
     )
     const { schema } = requestBody.content['application/json']
-    expect(schema.required).toEqual(['name', 'dateOfBirth'])
+    expect(schema.required).toEqual(['name', 'dateOfBirth', 'allergies'])
     expect(schema.additionalProperties).toBe(false)
     const preview = paths['/api/v1/people/goals/estimate'].post
     expect(

@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import { Injectable } from '@nestjs/common'
 
 import { ApiException } from '../common/api-exception.js'
+import { AllergyStatus } from '../generated/prisma/client.js'
 import { EntitlementsService } from '../entitlements/entitlements.service.js'
 import { BodyParametersService } from '../nutrition-goals/body-parameters.service.js'
 import { buildGoalFields } from '../nutrition-goals/goal-calculation.js'
@@ -85,7 +86,13 @@ export class OnboardingService {
 
         await assertCanCreateProfile(tx, accountId, limits)
         const { id } = await tx.personProfile.create({
-          data: { accountId, name, dateOfBirth },
+          data: {
+            accountId,
+            name,
+            dateOfBirth,
+            allergyStatus: allergies.status,
+            allergyStatusAt: now,
+          },
           select: { id: true },
         })
         const owner = { personProfileId: id }
@@ -97,12 +104,14 @@ export class OnboardingService {
         if (goalFields) {
           await tx.nutritionGoal.create({ data: { ...owner, ...goalFields } })
         }
-        await tx.personAllergy.createMany({
-          data: allergies.map((allergy) => ({
-            ...owner,
-            ...allergyRow(allergy),
-          })),
-        })
+        if (allergies.status === AllergyStatus.HAS_ALLERGIES) {
+          await tx.personAllergy.createMany({
+            data: allergies.items.map((allergy) => ({
+              ...owner,
+              ...allergyRow(allergy),
+            })),
+          })
+        }
         await tx.personExclusion.createMany({
           data: exclusions.map((exclusion) => ({
             ...owner,

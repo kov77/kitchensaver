@@ -6,6 +6,7 @@ import { AllergenCode } from '../generated/prisma/client.js'
 import { personNotFound } from '../people/people.errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
+import { markAsHavingAllergies, resetAllergyStatus } from './allergy-status.js'
 import { normalizeName } from './normalize-name.js'
 import { allergyRow } from './restriction-rows.js'
 import type {
@@ -61,15 +62,24 @@ export class AllergiesService {
     request: AddAllergyRequest,
   ): Promise<AllergyDto> {
     await this.people.assertExists(accountId, personId)
-    const count = await this.prisma.personAllergy.count({
-      where: { personProfileId: personId },
-    })
-    if (count >= MAX_ALLERGIES) throw restrictionLimitReached(MAX_ALLERGIES)
     try {
-      const allergy = await this.prisma.personAllergy.create({
-        data: { personProfileId: personId, ...allergyRow(request) },
-        select: allergySelect,
-      })
+      const allergy = await this.people.withAccountLock(
+        accountId,
+        async ({ personAllergy, personProfile }) => {
+          const count = await personAllergy.count({
+            where: { personProfileId: personId },
+          })
+          if (count >= MAX_ALLERGIES) {
+            throw restrictionLimitReached(MAX_ALLERGIES)
+          }
+          const created = await personAllergy.create({
+            data: { personProfileId: personId, ...allergyRow(request) },
+            select: allergySelect,
+          })
+          await markAsHavingAllergies(personProfile, accountId, personId)
+          return created
+        },
+      )
       return withResolved(allergy)
     } catch (error) {
       if (hasPrismaCode(error, 'P2002')) throw allergyAlreadyExists()
@@ -113,9 +123,20 @@ export class AllergiesService {
 
   async remove(accountId: string, personId: string, allergyId: string) {
     await this.people.assertExists(accountId, personId)
-    const { count } = await this.prisma.personAllergy.deleteMany({
-      where: { id: allergyId, personProfileId: personId },
-    })
-    if (count === 0) throw allergyNotFound()
+    await this.people.withAccountLock(
+      accountId,
+      async ({ personAllergy, personProfile }) => {
+        const { count } = await personAllergy.deleteMany({
+          where: { id: allergyId, personProfileId: personId },
+        })
+        if (count === 0) throw allergyNotFound()
+        const remaining = await personAllergy.count({
+          where: { personProfileId: personId },
+        })
+        if (remaining === 0) {
+          await resetAllergyStatus(personProfile, accountId, personId)
+        }
+      },
+    )
   }
 }

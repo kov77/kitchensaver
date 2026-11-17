@@ -41,6 +41,7 @@ function toListItem({
   dateOfBirth,
   archivedAt,
   goal,
+  allergyStatus,
 }: PersonWithGoal): PersonListItemDto {
   const age = calculateAge(dateOfBirth, new Date())
   return {
@@ -52,17 +53,19 @@ function toListItem({
       dailyKcal: goal.dailyKcal,
       goalType: goal.goalType,
     },
-    planReadiness: planReadiness(age, goal),
+    planReadiness: planReadiness(age, goal, allergyStatus),
     archivedAt: archivedAt?.toISOString() ?? null,
   }
 }
 
 function toDetail(person: PersonWithGoal): PersonDetailDto {
-  const { dateOfBirth, createdAt } = person
+  const { dateOfBirth, createdAt, allergyStatus, allergyStatusAt } = person
   const listItem = toListItem(person)
   return {
     ...listItem,
     dateOfBirth: toIsoDate(dateOfBirth),
+    allergyStatus,
+    allergyStatusAt: allergyStatusAt?.toISOString() ?? null,
     capabilities: { goalEstimation: canEstimateEnergy(listItem.age) },
     createdAt: createdAt.toISOString(),
   }

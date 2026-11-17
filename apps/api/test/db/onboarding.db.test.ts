@@ -18,15 +18,20 @@ const bodyParameters = {
   formulaSex: 'MALE',
 } as const
 
+const noAllergies = { status: 'NONE', warningAcknowledged: true } as const
+
 const fullRequest = {
   name: 'Anna',
   dateOfBirth: birthDateForAge(30),
   bodyParameters,
   goal: { mode: 'ESTIMATED', goalType: 'MAINTAIN', dailyKcal: 2600 },
-  allergies: [
-    { allergenCode: 'PEANUT' },
-    { allergenCode: 'OTHER', customLabel: 'Kiwi' },
-  ],
+  allergies: {
+    status: 'HAS_ALLERGIES',
+    items: [
+      { allergenCode: 'PEANUT' },
+      { allergenCode: 'OTHER', customLabel: 'Kiwi' },
+    ],
+  },
   exclusions: [{ ingredientName: 'Cilantro' }],
   preferences: [{ ingredientName: 'Broccoli', rating: 2 }],
 }
@@ -56,7 +61,11 @@ describe('POST /people/onboarding', () => {
     const { asUser, user, countProfiles } = await setup()
 
     const response = await asUser.onboard(
-      { name: 'Anna', dateOfBirth: birthDateForAge(30) },
+      {
+        name: 'Anna',
+        dateOfBirth: birthDateForAge(30),
+        allergies: noAllergies,
+      },
       randomUUID(),
     )
 
@@ -127,6 +136,7 @@ describe('POST /people/onboarding', () => {
       {
         name: 'Anna',
         dateOfBirth: birthDateForAge(30),
+        allergies: noAllergies,
         goal: { mode: 'MANUAL', dailyKcal: 2100 },
       },
       randomUUID(),
@@ -148,6 +158,7 @@ describe('POST /people/onboarding', () => {
       {
         name: 'Ben',
         dateOfBirth: birthDateForAge(15),
+        allergies: noAllergies,
         bodyParameters: { ...bodyParameters, heightCm: 165, weightKg: 56 },
         goal: { mode: 'ESTIMATED', goalType: 'MAINTAIN', dailyKcal: 2400 },
       },
@@ -473,21 +484,29 @@ describe('onboarding is all or nothing', () => {
       await app.get(PrismaService).personAllergy.count({
         where: { personProfile: { accountId: user.accountId } },
       }),
-    ).toBe(fullRequest.allergies.length)
+    ).toBe(fullRequest.allergies.items.length)
   })
 
   test.each([
     [
       'the same allergen twice',
-      { allergies: [{ allergenCode: 'MILK' }, { allergenCode: 'MILK' }] },
+      {
+        allergies: {
+          status: 'HAS_ALLERGIES',
+          items: [{ allergenCode: 'MILK' }, { allergenCode: 'MILK' }],
+        },
+      },
     ],
     [
       'the same OTHER label written differently',
       {
-        allergies: [
-          { allergenCode: 'OTHER', customLabel: 'Kiwi' },
-          { allergenCode: 'OTHER', customLabel: ' kiwi ' },
-        ],
+        allergies: {
+          status: 'HAS_ALLERGIES',
+          items: [
+            { allergenCode: 'OTHER', customLabel: 'Kiwi' },
+            { allergenCode: 'OTHER', customLabel: ' kiwi ' },
+          ],
+        },
       },
     ],
     [
@@ -506,7 +525,15 @@ describe('onboarding is all or nothing', () => {
       },
     ],
     ['an unknown field', { nickname: 'Annie' }],
-    ['an invalid allergy', { allergies: [{ allergenCode: 'OTHER' }] }],
+    [
+      'an invalid allergy',
+      {
+        allergies: {
+          status: 'HAS_ALLERGIES',
+          items: [{ allergenCode: 'OTHER' }],
+        },
+      },
+    ],
     [
       'an invalid rating',
       { preferences: [{ ingredientName: 'x', rating: 9 }] },

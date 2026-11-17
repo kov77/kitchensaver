@@ -4,7 +4,14 @@ import * as zod from 'zod'
 
 import { ApiException } from '../common/api-exception.js'
 
-const idempotencyKeySchema = zod.string().regex(/^[A-Za-z0-9_-]{16,64}$/)
+const KEY_MIN_LENGTH = 16
+const KEY_MAX_LENGTH = 64
+
+const idempotencyKeySchema = zod
+  .string()
+  .min(KEY_MIN_LENGTH)
+  .max(KEY_MAX_LENGTH)
+  .regex(/^[A-Za-z0-9_-]+$/)
 
 export const IdempotencyKey = createParamDecorator(
   (_data: unknown, context: ExecutionContext): string => {
@@ -14,7 +21,7 @@ export const IdempotencyKey = createParamDecorator(
     throw new ApiException(
       422,
       'IDEMPOTENCY_KEY_INVALID',
-      'Send an Idempotency-Key header of 16-64 characters: letters, digits, - and _',
+      `Send an Idempotency-Key header of ${KEY_MIN_LENGTH}-${KEY_MAX_LENGTH} characters: letters, digits, - and _`,
     )
   },
 )
