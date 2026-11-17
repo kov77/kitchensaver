@@ -1,4 +1,4 @@
-export const MIN_PROFILE_AGE = 13
+export const MIN_PROFILE_AGE = 18
 export const MAX_PROFILE_AGE = 120
 
 function isLeapYear(year: number) {
