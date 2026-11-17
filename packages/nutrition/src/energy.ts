@@ -103,7 +103,7 @@ export function canEstimateEnergy(ageYears: number) {
   return methodForAge(ageYears) !== null && ageYears <= MAX_SUPPORTED_AGE
 }
 
-// Maintenance energy (plus growth below 19), never a weight-change target.
+// Includes the growth allowance below 19.
 export function estimateMaintenanceEnergy({
   ageYears,
   heightCm,

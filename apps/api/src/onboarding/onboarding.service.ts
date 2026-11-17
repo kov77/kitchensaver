@@ -22,7 +22,6 @@ import {
 } from '../restrictions/restriction-rows.js'
 import type { OnboardingDto, OnboardingRequest } from './onboarding.dto.js'
 
-// D036: a key is honoured for 24 hours, like Stripe's.
 const IDEMPOTENCY_WINDOW_MS = 24 * 60 * 60 * 1000
 
 @Injectable()

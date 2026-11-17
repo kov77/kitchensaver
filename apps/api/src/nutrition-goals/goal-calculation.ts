@@ -47,7 +47,6 @@ function estimationUnavailable() {
   )
 }
 
-// Any body parameter missing in the request is taken from the stored ones.
 function computeEstimate(
   ageYears: number,
   provided: Partial<BodyParametersRequest>,
@@ -103,7 +102,6 @@ export function previewEstimate(
   }
 }
 
-// Validates a goal and returns the columns to store; the server never trusts a client estimate.
 export function buildGoalFields(
   request: SaveGoalRequest,
   ageYears: number,
