@@ -13,6 +13,8 @@
     "typecheck": "tsc --noEmit",
     "pretest": "pnpm --filter @kitchensaver/nutrition build",
     "test": "vitest run",
+    "preopenapi:export": "pnpm build",
+    "openapi:export": "node dist/openapi/export-openapi.js openapi.json",
     "db:generate": "prisma generate",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",

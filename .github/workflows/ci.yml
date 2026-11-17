@@ -43,6 +43,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: OpenAPI spec is up to date
+        run: |
+          pnpm --filter @kitchensaver/api openapi:export
+          git diff --exit-code -- apps/api/openapi.json
+
       - name: Lint
         run: pnpm lint
 

@@ -1,0 +1,2846 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The API process is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/me/consents": {
+      "post": {
+        "operationId": "ConsentController_record",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "adultConfirmed": {
+                    "type": "boolean"
+                  },
+                  "acceptTerms": {
+                    "type": "boolean"
+                  },
+                  "acknowledgePrivacy": {
+                    "type": "boolean"
+                  },
+                  "termsVersion": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "privacyVersion": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  }
+                },
+                "required": [
+                  "adultConfirmed",
+                  "acceptTerms",
+                  "acknowledgePrivacy",
+                  "termsVersion",
+                  "privacyVersion"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingStatusDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "422": {
+            "description": "ADULT_CONFIRMATION_REQUIRED, TERMS_NOT_ACCEPTED, PRIVACY_NOT_ACKNOWLEDGED, LEGAL_VERSION_NOT_CURRENT or VALIDATION_FAILED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "me"
+        ]
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "MeController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The current account and its onboarding status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "me"
+        ]
+      }
+    },
+    "/api/v1/people": {
+      "get": {
+        "operationId": "PeopleController_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "active",
+              "type": "string",
+              "enum": [
+                "active",
+                "archived",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonListItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "people"
+        ]
+      },
+      "post": {
+        "operationId": "PeopleController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  }
+                },
+                "required": [
+                  "name",
+                  "dateOfBirth"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDetailDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "409": {
+            "description": "PROFILE_LIMIT_REACHED or PROFILE_TOTAL_LIMIT_REACHED"
+          },
+          "422": {
+            "description": "PERSON_AGE_NOT_SUPPORTED or VALIDATION_FAILED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "people"
+        ]
+      }
+    },
+    "/api/v1/people/{id}": {
+      "get": {
+        "operationId": "PeopleController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDetailDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "people"
+        ]
+      },
+      "patch": {
+        "operationId": "PeopleController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDetailDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          },
+          "422": {
+            "description": "PERSON_AGE_NOT_SUPPORTED or VALIDATION_FAILED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "people"
+        ]
+      },
+      "delete": {
+        "operationId": "PeopleController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "people"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/archive": {
+      "post": {
+        "operationId": "PeopleController_archive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDetailDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "people"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/restore": {
+      "post": {
+        "operationId": "PeopleController_restore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonDetailDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          },
+          "409": {
+            "description": "PROFILE_LIMIT_REACHED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "people"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/goal": {
+      "get": {
+        "operationId": "NutritionGoalsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NutritionGoalDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND or GOAL_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "nutrition-goals"
+        ]
+      },
+      "put": {
+        "operationId": "NutritionGoalsController_save",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "MANUAL"
+                        ]
+                      },
+                      "goalType": {
+                        "default": "CUSTOM",
+                        "type": "string",
+                        "enum": [
+                          "LOSE",
+                          "MAINTAIN",
+                          "GAIN",
+                          "CUSTOM"
+                        ]
+                      },
+                      "dailyKcal": {
+                        "type": "integer",
+                        "minimum": 500,
+                        "maximum": 10000
+                      },
+                      "proteinG": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2000
+                      },
+                      "fatG": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2000
+                      },
+                      "carbsG": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2000
+                      },
+                      "confirmMacroMismatch": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "mode",
+                      "dailyKcal"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "heightCm": {
+                        "type": "number",
+                        "minimum": 90,
+                        "maximum": 250
+                      },
+                      "weightKg": {
+                        "type": "number",
+                        "minimum": 20,
+                        "maximum": 400
+                      },
+                      "activityLevel": {
+                        "type": "string",
+                        "enum": [
+                          "INACTIVE",
+                          "LOW_ACTIVE",
+                          "ACTIVE",
+                          "VERY_ACTIVE"
+                        ]
+                      },
+                      "formulaSex": {
+                        "type": "string",
+                        "enum": [
+                          "MALE",
+                          "FEMALE"
+                        ]
+                      },
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "ESTIMATED"
+                        ]
+                      },
+                      "goalType": {
+                        "type": "string",
+                        "enum": [
+                          "LOSE",
+                          "MAINTAIN",
+                          "GAIN"
+                        ]
+                      },
+                      "dailyKcal": {
+                        "type": "integer",
+                        "minimum": 500,
+                        "maximum": 10000
+                      },
+                      "proteinG": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2000
+                      },
+                      "fatG": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2000
+                      },
+                      "carbsG": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2000
+                      },
+                      "confirmMacroMismatch": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "mode",
+                      "goalType",
+                      "dailyKcal"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NutritionGoalDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          },
+          "422": {
+            "description": "GOAL_MACROS_MISMATCH, GOAL_TYPE_NOT_SUPPORTED_FOR_AGE, BODY_PARAMETERS_REQUIRED, GOAL_ESTIMATION_UNAVAILABLE or VALIDATION_FAILED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "nutrition-goals"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/goals/estimate": {
+      "post": {
+        "operationId": "NutritionGoalsController_estimate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "heightCm": {
+                    "type": "number",
+                    "minimum": 90,
+                    "maximum": 250
+                  },
+                  "weightKg": {
+                    "type": "number",
+                    "minimum": 20,
+                    "maximum": 400
+                  },
+                  "activityLevel": {
+                    "type": "string",
+                    "enum": [
+                      "INACTIVE",
+                      "LOW_ACTIVE",
+                      "ACTIVE",
+                      "VERY_ACTIVE"
+                    ]
+                  },
+                  "formulaSex": {
+                    "type": "string",
+                    "enum": [
+                      "MALE",
+                      "FEMALE"
+                    ]
+                  },
+                  "goalType": {
+                    "type": "string",
+                    "enum": [
+                      "LOSE",
+                      "MAINTAIN",
+                      "GAIN"
+                    ]
+                  }
+                },
+                "required": [
+                  "goalType"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalEstimateDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          },
+          "422": {
+            "description": "GOAL_TYPE_NOT_SUPPORTED_FOR_AGE, BODY_PARAMETERS_REQUIRED, GOAL_ESTIMATION_UNAVAILABLE or VALIDATION_FAILED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "nutrition-goals"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/body-parameters": {
+      "get": {
+        "operationId": "BodyParametersController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BodyParametersDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND or BODY_PARAMETERS_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "nutrition-goals"
+        ]
+      },
+      "put": {
+        "operationId": "BodyParametersController_save",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "heightCm": {
+                    "type": "number",
+                    "minimum": 90,
+                    "maximum": 250
+                  },
+                  "weightKg": {
+                    "type": "number",
+                    "minimum": 20,
+                    "maximum": 400
+                  },
+                  "activityLevel": {
+                    "type": "string",
+                    "enum": [
+                      "INACTIVE",
+                      "LOW_ACTIVE",
+                      "ACTIVE",
+                      "VERY_ACTIVE"
+                    ]
+                  },
+                  "formulaSex": {
+                    "type": "string",
+                    "enum": [
+                      "MALE",
+                      "FEMALE"
+                    ]
+                  }
+                },
+                "required": [
+                  "heightCm",
+                  "weightKg",
+                  "activityLevel",
+                  "formulaSex"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BodyParametersDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "nutrition-goals"
+        ]
+      },
+      "delete": {
+        "operationId": "BodyParametersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND or BODY_PARAMETERS_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "nutrition-goals"
+        ]
+      }
+    },
+    "/api/v1/people/goals/estimate": {
+      "post": {
+        "operationId": "GoalPreviewController_estimate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "heightCm": {
+                    "type": "number",
+                    "minimum": 90,
+                    "maximum": 250
+                  },
+                  "weightKg": {
+                    "type": "number",
+                    "minimum": 20,
+                    "maximum": 400
+                  },
+                  "activityLevel": {
+                    "type": "string",
+                    "enum": [
+                      "INACTIVE",
+                      "LOW_ACTIVE",
+                      "ACTIVE",
+                      "VERY_ACTIVE"
+                    ]
+                  },
+                  "formulaSex": {
+                    "type": "string",
+                    "enum": [
+                      "MALE",
+                      "FEMALE"
+                    ]
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  },
+                  "goalType": {
+                    "type": "string",
+                    "enum": [
+                      "LOSE",
+                      "MAINTAIN",
+                      "GAIN"
+                    ]
+                  }
+                },
+                "required": [
+                  "heightCm",
+                  "weightKg",
+                  "activityLevel",
+                  "formulaSex",
+                  "dateOfBirth",
+                  "goalType"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalEstimateDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "422": {
+            "description": "PERSON_AGE_NOT_SUPPORTED, GOAL_TYPE_NOT_SUPPORTED_FOR_AGE, GOAL_ESTIMATION_UNAVAILABLE or VALIDATION_FAILED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "nutrition-goals"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/allergies": {
+      "get": {
+        "operationId": "AllergiesController_list",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AllergyDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      },
+      "post": {
+        "operationId": "AllergiesController_add",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "allergenCode": {
+                        "type": "string",
+                        "enum": [
+                          "OTHER"
+                        ]
+                      },
+                      "customLabel": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      }
+                    },
+                    "required": [
+                      "allergenCode",
+                      "customLabel"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "allergenCode": {
+                        "type": "string",
+                        "enum": [
+                          "MILK",
+                          "EGG",
+                          "FISH",
+                          "CRUSTACEAN_SHELLFISH",
+                          "MOLLUSC",
+                          "TREE_NUT",
+                          "PEANUT",
+                          "WHEAT",
+                          "SOY",
+                          "SESAME",
+                          "MUSTARD",
+                          "SULPHITES"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "allergenCode"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllergyDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          },
+          "409": {
+            "description": "ALLERGY_ALREADY_EXISTS or RESTRICTION_LIMIT_REACHED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/allergies/{allergyId}": {
+      "patch": {
+        "operationId": "AllergiesController_updateLabel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allergyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customLabel": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "customLabel"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllergyDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND or ALLERGY_NOT_FOUND"
+          },
+          "409": {
+            "description": "ALLERGY_ALREADY_EXISTS"
+          },
+          "422": {
+            "description": "ALLERGY_LABEL_NOT_APPLICABLE or VALIDATION_FAILED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      },
+      "delete": {
+        "operationId": "AllergiesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "allergyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND or ALLERGY_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/allergy-status": {
+      "put": {
+        "operationId": "AllergyStatusController_set",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "NONE",
+                      "UNKNOWN"
+                    ]
+                  },
+                  "warningAcknowledged": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  }
+                },
+                "required": [
+                  "status",
+                  "warningAcknowledged"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllergyStatusDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          },
+          "409": {
+            "description": "ALLERGIES_EXIST"
+          },
+          "422": {
+            "description": "VALIDATION_FAILED (warningAcknowledged must be true)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/exclusions": {
+      "get": {
+        "operationId": "ExclusionsController_list",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExclusionDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      },
+      "post": {
+        "operationId": "ExclusionsController_add",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ingredientName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "ingredientName"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExclusionDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          },
+          "409": {
+            "description": "EXCLUSION_ALREADY_EXISTS or RESTRICTION_LIMIT_REACHED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/exclusions/{exclusionId}": {
+      "delete": {
+        "operationId": "ExclusionsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exclusionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND or EXCLUSION_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/preferences": {
+      "get": {
+        "operationId": "PreferencesController_list",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PreferenceDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      },
+      "post": {
+        "operationId": "PreferencesController_add",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ingredientName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  }
+                },
+                "required": [
+                  "ingredientName",
+                  "rating"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferenceDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND"
+          },
+          "409": {
+            "description": "PREFERENCE_ALREADY_EXISTS or RESTRICTION_LIMIT_REACHED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      }
+    },
+    "/api/v1/people/{id}/preferences/{preferenceId}": {
+      "patch": {
+        "operationId": "PreferencesController_updateRating",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "preferenceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  }
+                },
+                "required": [
+                  "rating"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferenceDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND or PREFERENCE_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      },
+      "delete": {
+        "operationId": "PreferencesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "preferenceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "404": {
+            "description": "PERSON_NOT_FOUND or PREFERENCE_NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "restrictions"
+        ]
+      }
+    },
+    "/api/v1/people/onboarding": {
+      "post": {
+        "operationId": "OnboardingController_onboard",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "16-64 characters (letters, digits, - and _), one key per onboarding attempt; a repeat within 24 hours returns the first result",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  },
+                  "bodyParameters": {
+                    "type": "object",
+                    "properties": {
+                      "heightCm": {
+                        "type": "number",
+                        "minimum": 90,
+                        "maximum": 250
+                      },
+                      "weightKg": {
+                        "type": "number",
+                        "minimum": 20,
+                        "maximum": 400
+                      },
+                      "activityLevel": {
+                        "type": "string",
+                        "enum": [
+                          "INACTIVE",
+                          "LOW_ACTIVE",
+                          "ACTIVE",
+                          "VERY_ACTIVE"
+                        ]
+                      },
+                      "formulaSex": {
+                        "type": "string",
+                        "enum": [
+                          "MALE",
+                          "FEMALE"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "heightCm",
+                      "weightKg",
+                      "activityLevel",
+                      "formulaSex"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "goal": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "MANUAL"
+                            ]
+                          },
+                          "goalType": {
+                            "default": "CUSTOM",
+                            "type": "string",
+                            "enum": [
+                              "LOSE",
+                              "MAINTAIN",
+                              "GAIN",
+                              "CUSTOM"
+                            ]
+                          },
+                          "dailyKcal": {
+                            "type": "integer",
+                            "minimum": 500,
+                            "maximum": 10000
+                          },
+                          "proteinG": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2000
+                          },
+                          "fatG": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2000
+                          },
+                          "carbsG": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2000
+                          },
+                          "confirmMacroMismatch": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "mode",
+                          "dailyKcal"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "heightCm": {
+                            "type": "number",
+                            "minimum": 90,
+                            "maximum": 250
+                          },
+                          "weightKg": {
+                            "type": "number",
+                            "minimum": 20,
+                            "maximum": 400
+                          },
+                          "activityLevel": {
+                            "type": "string",
+                            "enum": [
+                              "INACTIVE",
+                              "LOW_ACTIVE",
+                              "ACTIVE",
+                              "VERY_ACTIVE"
+                            ]
+                          },
+                          "formulaSex": {
+                            "type": "string",
+                            "enum": [
+                              "MALE",
+                              "FEMALE"
+                            ]
+                          },
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "ESTIMATED"
+                            ]
+                          },
+                          "goalType": {
+                            "type": "string",
+                            "enum": [
+                              "LOSE",
+                              "MAINTAIN",
+                              "GAIN"
+                            ]
+                          },
+                          "dailyKcal": {
+                            "type": "integer",
+                            "minimum": 500,
+                            "maximum": 10000
+                          },
+                          "proteinG": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2000
+                          },
+                          "fatG": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2000
+                          },
+                          "carbsG": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2000
+                          },
+                          "confirmMacroMismatch": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "mode",
+                          "goalType",
+                          "dailyKcal"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "allergies": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "HAS_ALLERGIES"
+                            ]
+                          },
+                          "items": {
+                            "minItems": 1,
+                            "maxItems": 20,
+                            "type": "array",
+                            "items": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "allergenCode": {
+                                      "type": "string",
+                                      "enum": [
+                                        "OTHER"
+                                      ]
+                                    },
+                                    "customLabel": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 80
+                                    }
+                                  },
+                                  "required": [
+                                    "allergenCode",
+                                    "customLabel"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "allergenCode": {
+                                      "type": "string",
+                                      "enum": [
+                                        "MILK",
+                                        "EGG",
+                                        "FISH",
+                                        "CRUSTACEAN_SHELLFISH",
+                                        "MOLLUSC",
+                                        "TREE_NUT",
+                                        "PEANUT",
+                                        "WHEAT",
+                                        "SOY",
+                                        "SESAME",
+                                        "MUSTARD",
+                                        "SULPHITES"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "allergenCode"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "status",
+                          "items"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "NONE",
+                              "UNKNOWN"
+                            ]
+                          },
+                          "warningAcknowledged": {
+                            "type": "boolean",
+                            "enum": [
+                              true
+                            ]
+                          }
+                        },
+                        "required": [
+                          "status",
+                          "warningAcknowledged"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "exclusions": {
+                    "default": [],
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ingredientName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        }
+                      },
+                      "required": [
+                        "ingredientName"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "preferences": {
+                    "default": [],
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ingredientName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "rating": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 5
+                        }
+                      },
+                      "required": [
+                        "ingredientName",
+                        "rating"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "dateOfBirth",
+                  "allergies"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token"
+          },
+          "403": {
+            "description": "CONSENT_REQUIRED"
+          },
+          "409": {
+            "description": "PROFILE_LIMIT_REACHED, PROFILE_TOTAL_LIMIT_REACHED or IDEMPOTENCY_KEY_REUSED"
+          },
+          "422": {
+            "description": "IDEMPOTENCY_KEY_INVALID, PERSON_AGE_NOT_SUPPORTED, goal errors (see PUT /people/:id/goal) or VALIDATION_FAILED"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "people"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "KitchenSaver API",
+    "description": "REST API of the KitchenSaver mobile app",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "HealthResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ],
+            "example": "ok"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "LegalVersionsDto": {
+        "type": "object",
+        "properties": {
+          "adultAttestationVersion": {
+            "type": "string"
+          },
+          "termsVersion": {
+            "type": "string"
+          },
+          "privacyVersion": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "adultAttestationVersion",
+          "termsVersion",
+          "privacyVersion"
+        ]
+      },
+      "OnboardingStatusDto": {
+        "type": "object",
+        "properties": {
+          "complete": {
+            "type": "boolean"
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ADULT_ATTESTATION",
+                "TERMS_OF_SERVICE",
+                "PRIVACY_POLICY"
+              ]
+            }
+          },
+          "currentVersions": {
+            "$ref": "#/components/schemas/LegalVersionsDto"
+          }
+        },
+        "required": [
+          "complete",
+          "missing",
+          "currentVersions"
+        ]
+      },
+      "MeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onboarding": {
+            "$ref": "#/components/schemas/OnboardingStatusDto"
+          }
+        },
+        "required": [
+          "id",
+          "onboarding"
+        ]
+      },
+      "GoalSummaryDto": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "ESTIMATED"
+            ]
+          },
+          "dailyKcal": {
+            "type": "number"
+          },
+          "goalType": {
+            "type": "string",
+            "enum": [
+              "LOSE",
+              "MAINTAIN",
+              "GAIN",
+              "CUSTOM"
+            ]
+          }
+        },
+        "required": [
+          "mode",
+          "dailyKcal",
+          "goalType"
+        ]
+      },
+      "PlanReadinessDto": {
+        "type": "object",
+        "properties": {
+          "ready": {
+            "type": "boolean"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MISSING_GOAL",
+                "GOAL_REVIEW_REQUIRED",
+                "GOAL_NOT_VALID_FOR_AGE",
+                "ALLERGY_STATUS_MISSING"
+              ]
+            }
+          }
+        },
+        "required": [
+          "ready",
+          "reasons"
+        ]
+      },
+      "PersonListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "age": {
+            "type": "number"
+          },
+          "goal": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GoalSummaryDto"
+              }
+            ]
+          },
+          "planReadiness": {
+            "$ref": "#/components/schemas/PlanReadinessDto"
+          },
+          "archivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "age",
+          "goal",
+          "planReadiness",
+          "archivedAt"
+        ]
+      },
+      "PersonCapabilitiesDto": {
+        "type": "object",
+        "properties": {
+          "goalEstimation": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "goalEstimation"
+        ]
+      },
+      "PersonDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "age": {
+            "type": "number"
+          },
+          "goal": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GoalSummaryDto"
+              }
+            ]
+          },
+          "planReadiness": {
+            "$ref": "#/components/schemas/PlanReadinessDto"
+          },
+          "archivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "allergyStatus": {
+            "type": "string",
+            "enum": [
+              "HAS_ALLERGIES",
+              "NONE",
+              "UNKNOWN"
+            ],
+            "nullable": true,
+            "description": "null until the allergy question is answered"
+          },
+          "allergyStatusAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/PersonCapabilitiesDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "age",
+          "goal",
+          "planReadiness",
+          "archivedAt",
+          "dateOfBirth",
+          "allergyStatus",
+          "allergyStatusAt",
+          "capabilities",
+          "createdAt"
+        ]
+      },
+      "MacroWarningDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "MACROS_ENERGY_MISMATCH"
+            ]
+          },
+          "calculatedKcal": {
+            "type": "number"
+          },
+          "dailyKcal": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "code",
+          "calculatedKcal",
+          "dailyKcal"
+        ]
+      },
+      "NutritionGoalDto": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "ESTIMATED"
+            ]
+          },
+          "goalType": {
+            "type": "string",
+            "enum": [
+              "LOSE",
+              "MAINTAIN",
+              "GAIN",
+              "CUSTOM"
+            ]
+          },
+          "dailyKcal": {
+            "type": "number"
+          },
+          "proteinG": {
+            "type": "number",
+            "nullable": true
+          },
+          "fatG": {
+            "type": "number",
+            "nullable": true
+          },
+          "carbsG": {
+            "type": "number",
+            "nullable": true
+          },
+          "estimatedMaintenanceKcal": {
+            "type": "number",
+            "nullable": true
+          },
+          "calculationMethod": {
+            "type": "string",
+            "enum": [
+              "DRI_2023_ADULT",
+              "DRI_2023_AGES_3_18"
+            ],
+            "nullable": true
+          },
+          "estimatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revision": {
+            "type": "number"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reviewRequiredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "macroCheck": {
+            "type": "string",
+            "enum": [
+              "OK",
+              "MISMATCH_CONFIRMED",
+              "SKIPPED_INCOMPLETE"
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MacroWarningDto"
+            }
+          }
+        },
+        "required": [
+          "mode",
+          "goalType",
+          "dailyKcal",
+          "proteinG",
+          "fatG",
+          "carbsG",
+          "estimatedMaintenanceKcal",
+          "calculationMethod",
+          "estimatedAt",
+          "revision",
+          "confirmedAt",
+          "reviewRequiredAt",
+          "macroCheck",
+          "warnings"
+        ]
+      },
+      "ProposedMacrosDto": {
+        "type": "object",
+        "properties": {
+          "proteinG": {
+            "type": "number"
+          },
+          "fatG": {
+            "type": "number"
+          },
+          "carbsG": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "proteinG",
+          "fatG",
+          "carbsG"
+        ]
+      },
+      "GoalEstimateDto": {
+        "type": "object",
+        "properties": {
+          "estimatedMaintenanceKcal": {
+            "type": "number"
+          },
+          "proposedMacros": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProposedMacrosDto"
+              }
+            ]
+          },
+          "calculationMethod": {
+            "type": "string",
+            "enum": [
+              "DRI_2023_ADULT",
+              "DRI_2023_AGES_3_18"
+            ]
+          },
+          "methodology": {
+            "type": "string"
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isEstimate": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "estimatedMaintenanceKcal",
+          "proposedMacros",
+          "calculationMethod",
+          "methodology",
+          "assumptions",
+          "isEstimate"
+        ]
+      },
+      "BodyParametersDto": {
+        "type": "object",
+        "properties": {
+          "heightCm": {
+            "type": "number"
+          },
+          "weightKg": {
+            "type": "number"
+          },
+          "activityLevel": {
+            "type": "string",
+            "enum": [
+              "INACTIVE",
+              "LOW_ACTIVE",
+              "ACTIVE",
+              "VERY_ACTIVE"
+            ]
+          },
+          "formulaSex": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "heightCm",
+          "weightKg",
+          "activityLevel",
+          "formulaSex",
+          "updatedAt"
+        ]
+      },
+      "AllergyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allergenCode": {
+            "type": "string",
+            "enum": [
+              "MILK",
+              "EGG",
+              "FISH",
+              "CRUSTACEAN_SHELLFISH",
+              "MOLLUSC",
+              "TREE_NUT",
+              "PEANUT",
+              "WHEAT",
+              "SOY",
+              "SESAME",
+              "MUSTARD",
+              "SULPHITES",
+              "OTHER"
+            ]
+          },
+          "customLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolved": {
+            "type": "boolean",
+            "description": "False for OTHER: the allergen is not mapped to a known code"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "allergenCode",
+          "customLabel",
+          "resolved",
+          "createdAt"
+        ]
+      },
+      "AllergyStatusDto": {
+        "type": "object",
+        "properties": {
+          "allergyStatus": {
+            "type": "string",
+            "enum": [
+              "HAS_ALLERGIES",
+              "NONE",
+              "UNKNOWN"
+            ]
+          },
+          "allergyStatusAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "allergyStatus",
+          "allergyStatusAt"
+        ]
+      },
+      "ExclusionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ingredientName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "ingredientName",
+          "createdAt"
+        ]
+      },
+      "PreferenceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ingredientName": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "ingredientName",
+          "rating",
+          "updatedAt"
+        ]
+      },
+      "OnboardingDto": {
+        "type": "object",
+        "properties": {
+          "person": {
+            "$ref": "#/components/schemas/PersonDetailDto"
+          },
+          "goal": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NutritionGoalDto"
+              }
+            ]
+          },
+          "bodyParameters": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BodyParametersDto"
+              }
+            ]
+          },
+          "allergies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllergyDto"
+            }
+          },
+          "exclusions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExclusionDto"
+            }
+          },
+          "preferences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreferenceDto"
+            }
+          }
+        },
+        "required": [
+          "person",
+          "goal",
+          "bodyParameters",
+          "allergies",
+          "exclusions",
+          "preferences"
+        ]
+      }
+    }
+  }
+}

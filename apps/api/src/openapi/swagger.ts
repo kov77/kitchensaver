@@ -9,9 +9,7 @@ export function isSwaggerServed(nodeEnv: Env['NODE_ENV']) {
   return nodeEnv !== 'production'
 }
 
-export function setupSwagger(app: INestApplication, nodeEnv: Env['NODE_ENV']) {
-  if (!isSwaggerServed(nodeEnv)) return
-
+export function createOpenApiDocument(app: INestApplication) {
   const config = new DocumentBuilder()
     .setTitle('KitchenSaver API')
     .setDescription('REST API of the KitchenSaver mobile app')
@@ -19,7 +17,11 @@ export function setupSwagger(app: INestApplication, nodeEnv: Env['NODE_ENV']) {
     .addBearerAuth()
     .build()
 
-  SwaggerModule.setup(SWAGGER_PATH, app, () =>
-    SwaggerModule.createDocument(app, config),
-  )
+  return SwaggerModule.createDocument(app, config)
+}
+
+export function setupSwagger(app: INestApplication, nodeEnv: Env['NODE_ENV']) {
+  if (!isSwaggerServed(nodeEnv)) return
+
+  SwaggerModule.setup(SWAGGER_PATH, app, () => createOpenApiDocument(app))
 }
