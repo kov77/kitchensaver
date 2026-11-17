@@ -5,3 +5,4 @@ coverage
 .expo
 generated
 pnpm-lock.yaml
+expo-env.d.ts
