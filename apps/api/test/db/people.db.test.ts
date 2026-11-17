@@ -106,8 +106,8 @@ describe('create and read', () => {
 
 describe('age rules', () => {
   test.each([
-    ['exactly 13 today', birthDateFor(13, 0), 201],
-    ['13 tomorrow (12 years 364 days)', birthDateFor(13, 1), 422],
+    ['exactly 18 today', birthDateFor(18, 0), 201],
+    ['18 tomorrow (17 years 364 days)', birthDateFor(18, 1), 422],
     ['exactly 120 today', birthDateFor(120, 0), 201],
     ['121 today', birthDateFor(121, 0), 422],
     ['born tomorrow', birthDateFor(0, 1), 422],
@@ -160,7 +160,7 @@ describe('age rules', () => {
     const { id } = await createPerson(asUser)
 
     const rejected = await asUser.patch(id, {
-      dateOfBirth: birthDateFor(12, 0),
+      dateOfBirth: birthDateFor(17, 0),
     })
     const stored = await asUser.get(id)
 

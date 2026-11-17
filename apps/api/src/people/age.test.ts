@@ -29,8 +29,7 @@ describe('calculateAge', () => {
 
 describe('isSupportedAge', () => {
   test.each([
-    [12, false],
-    [13, true],
+    [17, false],
     [18, true],
     [120, true],
     [121, false],

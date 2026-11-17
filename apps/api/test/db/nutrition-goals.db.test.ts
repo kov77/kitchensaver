@@ -32,6 +32,7 @@ async function setup() {
   return {
     server,
     prisma,
+    user,
     asUser: createPeopleClient(server, user),
     asOtherUser: createPeopleClient(server, otherUser),
   }
@@ -225,9 +226,9 @@ describe('estimate preview', () => {
     expect(response.body.code).toBe('BODY_PARAMETERS_REQUIRED')
   })
 
-  test('uses the ages 3-18 method and offers no macros for a 15-year-old', async () => {
+  test('uses the ages 3-18 method with a growth allowance at 18', async () => {
     const { asUser } = await setup()
-    const id = await createPerson(asUser, 15)
+    const id = await createPerson(asUser, 18)
 
     const response = await asUser.estimateGoal(id, {
       ...bodyParameters,
@@ -237,21 +238,7 @@ describe('estimate preview', () => {
 
     expect(response.status).toBe(200)
     expect(response.body.calculationMethod).toBe('DRI_2023_AGES_3_18')
-    expect(response.body.proposedMacros).toBeNull()
     expect(response.body.assumptions).toContain('INCLUDES_GROWTH_ALLOWANCE')
-  })
-
-  test('rejects weight loss under 18', async () => {
-    const { asUser } = await setup()
-    const id = await createPerson(asUser, 15)
-
-    const response = await asUser.estimateGoal(id, {
-      ...bodyParameters,
-      goalType: 'LOSE',
-    })
-
-    expect(response.status).toBe(422)
-    expect(response.body.code).toBe('GOAL_TYPE_NOT_SUPPORTED_FOR_AGE')
   })
 
   test('rejects an unknown field', async () => {
@@ -437,37 +424,6 @@ describe('saving a goal', () => {
 
     expect(response.status).toBe(422)
     expect(response.body.code).toBe('VALIDATION_FAILED')
-  })
-
-  test.each([
-    ['a manual goal', { mode: 'MANUAL' }],
-    ['an estimated goal', { mode: 'ESTIMATED', ...bodyParameters }],
-  ])('rejects weight loss under 18 for %s', async (_name, fields) => {
-    const { asUser } = await setup()
-    const id = await createPerson(asUser, 15)
-
-    const response = await asUser.saveGoal(id, {
-      goalType: 'LOSE',
-      dailyKcal: 2000,
-      ...fields,
-    })
-
-    expect(response.status).toBe(422)
-    expect(response.body.code).toBe('GOAL_TYPE_NOT_SUPPORTED_FOR_AGE')
-    expect((await asUser.getGoal(id)).status).toBe(404)
-  })
-
-  test('allows a maintain goal under 18', async () => {
-    const { asUser } = await setup()
-    const id = await createPerson(asUser, 15)
-
-    const response = await asUser.saveGoal(id, {
-      mode: 'MANUAL',
-      goalType: 'MAINTAIN',
-      dailyKcal: 2400,
-    })
-
-    expect(response.status).toBe(200)
   })
 
   test.each([
@@ -666,13 +622,41 @@ describe('plan readiness', () => {
       ...bodyParameters,
     })
 
-    await asUser.patch(id, { dateOfBirth: birthDateForAge(16) })
+    await asUser.patch(id, { dateOfBirth: birthDateForAge(18) })
     const detail = await asUser.get(id)
 
     expect(detail.body.planReadiness).toEqual({
       ready: false,
       reasons: ['GOAL_REVIEW_REQUIRED', 'GOAL_NOT_VALID_FOR_AGE'],
     })
+  })
+})
+
+describe('a profile created before the adults-only rule', () => {
+  test('keeps the under-18 rules for goals and macros', async () => {
+    const { prisma, user, asUser } = await setup()
+    const { id } = await prisma.personProfile.create({
+      data: {
+        accountId: user.accountId,
+        name: 'Legacy',
+        dateOfBirth: new Date(`${birthDateForAge(15)}T00:00:00Z`),
+      },
+      select: { id: true },
+    })
+
+    const weightLoss = await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      goalType: 'LOSE',
+      dailyKcal: 2000,
+    })
+    const estimate = await asUser.estimateGoal(id, {
+      ...bodyParameters,
+      goalType: 'MAINTAIN',
+    })
+
+    expect(weightLoss.status).toBe(422)
+    expect(weightLoss.body.code).toBe('GOAL_TYPE_NOT_SUPPORTED_FOR_AGE')
+    expect(estimate.body.proposedMacros).toBeNull()
   })
 })
 

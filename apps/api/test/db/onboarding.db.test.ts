@@ -151,13 +151,13 @@ describe('POST /people/onboarding', () => {
     expect(response.body.bodyParameters).toBeNull()
   })
 
-  test('onboards a teenager with the growth equations', async () => {
+  test('onboards an 18-year-old with the growth equations', async () => {
     const { asUser } = await setup()
 
     const response = await asUser.onboard(
       {
         name: 'Ben',
-        dateOfBirth: birthDateForAge(15),
+        dateOfBirth: birthDateForAge(18),
         allergies: noAllergies,
         bodyParameters: { ...bodyParameters, heightCm: 165, weightKg: 56 },
         goal: { mode: 'ESTIMATED', goalType: 'MAINTAIN', dailyKcal: 2400 },
@@ -390,12 +390,9 @@ describe('onboarding is all or nothing', () => {
       422,
     ],
     [
-      'a weight-loss goal for a teenager',
-      {
-        dateOfBirth: birthDateForAge(15),
-        goal: { mode: 'ESTIMATED', goalType: 'LOSE', dailyKcal: 2000 },
-      },
-      'GOAL_TYPE_NOT_SUPPORTED_FOR_AGE',
+      'a minor',
+      { dateOfBirth: birthDateForAge(17) },
+      'PERSON_AGE_NOT_SUPPORTED',
       422,
     ],
     [
@@ -590,16 +587,15 @@ describe('POST /people/goals/estimate', () => {
     expect(preview.body).toEqual(bound.body)
   })
 
-  test('gives no macro suggestion under 18', async () => {
+  test('uses the growth equations at 18', async () => {
     const { asUser } = await setup()
 
     const response = await asUser.previewGoal({
       ...previewRequest,
-      dateOfBirth: birthDateForAge(15),
+      dateOfBirth: birthDateForAge(18),
     })
 
     expect(response.status).toBe(200)
-    expect(response.body.proposedMacros).toBeNull()
     expect(response.body.calculationMethod).toBe('DRI_2023_AGES_3_18')
   })
 
@@ -610,9 +606,9 @@ describe('POST /people/goals/estimate', () => {
       'PERSON_AGE_NOT_SUPPORTED',
     ],
     [
-      'a weight-loss goal for a teenager',
-      { dateOfBirth: birthDateForAge(15), goalType: 'LOSE' },
-      'GOAL_TYPE_NOT_SUPPORTED_FOR_AGE',
+      'a minor',
+      { dateOfBirth: birthDateForAge(17) },
+      'PERSON_AGE_NOT_SUPPORTED',
     ],
     ['a missing height', { heightCm: undefined }, 'VALIDATION_FAILED'],
     ['an unknown field', { nickname: 'x' }, 'VALIDATION_FAILED'],
