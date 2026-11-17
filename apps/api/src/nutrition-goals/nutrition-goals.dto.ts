@@ -10,7 +10,7 @@ import {
 } from '../generated/prisma/client.js'
 import { dateOfBirthSchema } from '../people/people.dto.js'
 
-// Input-sanity limits, not medical thresholds (D031); reviewed by the founder.
+// Input-sanity limits, not medical thresholds (D031).
 const heightCmSchema = zod.number().min(90).max(250)
 const weightKgSchema = zod.number().min(20).max(400)
 const dailyKcalSchema = zod.number().int().min(500).max(10_000)
