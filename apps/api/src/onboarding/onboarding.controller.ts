@@ -11,6 +11,7 @@ import {
 } from '@nestjs/swagger'
 
 import { CurrentAccount } from '../auth/current-account.decorator.js'
+import { StrictRateLimit } from '../rate-limit/strict-rate-limit.decorator.js'
 import { IdempotencyKey } from './idempotency-key.decorator.js'
 import {
   OnboardingDto,
@@ -28,6 +29,7 @@ export class OnboardingController {
   constructor(private readonly onboarding: OnboardingService) {}
 
   @Post('onboarding')
+  @StrictRateLimit()
   @ApiHeader({
     name: 'Idempotency-Key',
     required: true,

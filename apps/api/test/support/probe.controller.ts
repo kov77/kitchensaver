@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common'
 
+import { StrictRateLimit } from '../../src/rate-limit/strict-rate-limit.decorator.js'
 import { Public } from '../../src/auth/public.decorator.js'
 import { AllowWithoutConsent } from '../../src/consent/allow-without-consent.decorator.js'
 
@@ -32,5 +33,14 @@ export class ProbeController {
   @AllowWithoutConsent()
   unvalidated(@Body() body: unknown) {
     return body
+  }
+}
+
+@Controller('probe-strict')
+@StrictRateLimit()
+export class StrictProbeController {
+  @Get()
+  strictRoute() {
+    return { ok: true }
   }
 }

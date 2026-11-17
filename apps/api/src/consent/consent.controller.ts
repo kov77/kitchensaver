@@ -8,6 +8,7 @@ import {
 } from '@nestjs/swagger'
 
 import { CurrentAccount } from '../auth/current-account.decorator.js'
+import { StrictRateLimit } from '../rate-limit/strict-rate-limit.decorator.js'
 import { AllowWithoutConsent } from './allow-without-consent.decorator.js'
 import {
   OnboardingStatusDto,
@@ -24,6 +25,7 @@ export class ConsentController {
 
   @Post()
   @AllowWithoutConsent()
+  @StrictRateLimit()
   @HttpCode(200)
   @ApiOkResponse({ type: OnboardingStatusDto })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid access token' })
