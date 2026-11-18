@@ -1,11 +1,13 @@
 import type { TextStyle } from 'react-native'
 
+import { fontFamily } from './fonts'
+
 export const typography = {
-  title: { fontSize: 29, fontWeight: '700' },
-  subtitle: { fontSize: 14, fontWeight: '400' },
-  label: { fontSize: 12, fontWeight: '700' },
-  input: { fontSize: 15, fontWeight: '500' },
-  button: { fontSize: 15, fontWeight: '700' },
-  link: { fontSize: 12, fontWeight: '500' },
-  body: { fontSize: 15, fontWeight: '400' },
+  title: { fontSize: 29, fontFamily: fontFamily.bold },
+  subtitle: { fontSize: 14, fontFamily: fontFamily.regular },
+  label: { fontSize: 12, fontFamily: fontFamily.bold },
+  input: { fontSize: 15, fontFamily: fontFamily.medium },
+  button: { fontSize: 15, fontFamily: fontFamily.bold },
+  link: { fontSize: 12, fontFamily: fontFamily.medium },
+  body: { fontSize: 15, fontFamily: fontFamily.regular },
 } satisfies Record<string, TextStyle>
