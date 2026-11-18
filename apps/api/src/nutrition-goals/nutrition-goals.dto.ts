@@ -10,7 +10,6 @@ import {
 } from '../generated/prisma/client.js'
 import { dateOfBirthSchema } from '../people/people.dto.js'
 
-// Input-sanity limits, not medical thresholds (D031).
 const heightCmSchema = zod.number().min(90).max(250)
 const weightKgSchema = zod.number().min(20).max(400)
 const dailyKcalSchema = zod.number().int().min(500).max(10_000)
@@ -23,17 +22,14 @@ export const bodyParametersSchema = zod.strictObject({
   formulaSex: zod.enum(FormulaSex),
 })
 
-// CUSTOM has no formula, so it exists only for manual goals.
 const estimatedGoalTypeSchema = zod.enum(['LOSE', 'MAINTAIN', 'GAIN'])
 
-// Any body parameter left out is taken from the stored ones.
 const optionalBodyParametersSchema = bodyParametersSchema.partial()
 
 export const estimateGoalSchema = optionalBodyParametersSchema.extend({
   goalType: estimatedGoalTypeSchema,
 })
 
-// Onboarding preview: no profile exists yet, so every input comes in the body.
 export const previewGoalSchema = bodyParametersSchema.extend({
   dateOfBirth: dateOfBirthSchema,
   goalType: estimatedGoalTypeSchema,

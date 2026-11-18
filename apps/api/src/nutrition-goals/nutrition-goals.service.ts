@@ -35,7 +35,6 @@ const goalSelect = {
 
 type StoredGoal = Prisma.NutritionGoalGetPayload<{ select: typeof goalSelect }>
 
-// The mismatch warning is recomputed on every read; only the user's confirmation is stored (D031).
 function checkMacros({ dailyKcal, proteinG, fatG, carbsG }: StoredGoal) {
   if (proteinG === null || fatG === null || carbsG === null) {
     return { macroCheck: 'SKIPPED_INCOMPLETE', warnings: [] }
@@ -86,7 +85,6 @@ export class NutritionGoalsService {
     return previewEstimate(ageYears, request, stored)
   }
 
-  // Stateless preview for onboarding: nothing is read from or written to the database.
   estimateForDateOfBirth({
     dateOfBirth: isoDateOfBirth,
     ...request

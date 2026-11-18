@@ -45,7 +45,7 @@ export class OnboardingService {
       request
     const dateOfBirth = parseSupportedDateOfBirth(request.dateOfBirth)
     const now = new Date()
-    // Everything that can be rejected without the database is checked before the lock is taken.
+
     const goalFields =
       goal &&
       buildGoalFields(
@@ -132,7 +132,6 @@ export class OnboardingService {
     return this.loadView(accountId, personProfileId)
   }
 
-  // The same view serves the first response and every replay, so a replay shows the profile as it is now.
   private async loadView(
     accountId: string,
     personId: string,

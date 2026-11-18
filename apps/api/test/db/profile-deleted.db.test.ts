@@ -38,7 +38,6 @@ async function createPerson(api: PeopleClient) {
 }
 
 describe('a profile deleted while a write is in flight', () => {
-  // The ownership check passes, then the profile disappears before the write.
   function deleteProfileAfterCheck(
     people: PeopleService,
     prisma: PrismaService,

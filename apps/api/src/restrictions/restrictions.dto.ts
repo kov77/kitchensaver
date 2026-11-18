@@ -7,7 +7,6 @@ import { MAX_RATING, MIN_RATING } from './restriction-limits.js'
 
 const ratingSchema = zod.number().int().min(MIN_RATING).max(MAX_RATING)
 
-// Only OTHER carries a label; the strict schemas reject one on any other code.
 export const addAllergySchema = zod.discriminatedUnion('allergenCode', [
   zod.strictObject({
     allergenCode: zod.literal(AllergenCode.OTHER),
@@ -18,7 +17,6 @@ export const addAllergySchema = zod.discriminatedUnion('allergenCode', [
   }),
 ])
 
-// HAS_ALLERGIES is set by adding an allergy, never directly.
 export const setAllergyStatusSchema = zod.strictObject({
   status: zod.enum(AllergyStatus).exclude([AllergyStatus.HAS_ALLERGIES]),
   warningAcknowledged: zod.literal(true),

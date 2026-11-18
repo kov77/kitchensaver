@@ -19,13 +19,12 @@ function isoDate(date: Date) {
   return date.toISOString().slice(0, 10)
 }
 
-// The date of birth of a person who turns `years` on `daysFromBirthday` days from today (UTC).
 function birthDateFor(years: number, daysFromBirthday: number) {
   const now = new Date()
   const year = now.getUTCFullYear() - years
   const month = now.getUTCMonth()
   const sameDay = new Date(Date.UTC(year, month, now.getUTCDate()))
-  // Feb 29 has no counterpart in a non-leap year: use the last day of the month instead of rolling into March.
+
   const anniversary =
     sameDay.getUTCMonth() === month
       ? sameDay

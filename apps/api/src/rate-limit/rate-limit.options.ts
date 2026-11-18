@@ -37,7 +37,7 @@ export function createRateLimitOptions({
         name: 'account',
         ttl: WINDOW_MS,
         limit: requestsPerMinute,
-        // The default key is per route; this one is a single budget per account.
+
         generateKey: (_context, accountId, name) => `${name}-${accountId}`,
       },
       {
