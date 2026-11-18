@@ -136,7 +136,7 @@ importers:
         specifier: 58.0.32
         version: 58.0.32(725712a09e1da6c2c542a5ad86f156d6)
       expo-secure-store:
-        specifier: ~58.0.3
+        specifier: 58.0.3
         version: 58.0.3(expo@58.0.26)
       expo-status-bar:
         specifier: 58.0.5
