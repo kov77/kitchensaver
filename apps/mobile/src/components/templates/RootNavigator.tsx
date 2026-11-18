@@ -2,14 +2,16 @@ import { Stack } from 'expo-router'
 import { View } from 'react-native'
 
 import { Spinner } from '@/components/atoms/Spinner'
-import { useSession } from '@/core/auth/SessionProvider'
+import type { AppAccess } from '@/core/types'
 
 import { styles } from './RootNavigator.styles'
 
-export function RootNavigator() {
-  const { state } = useSession()
+type RootNavigatorProps = {
+  access: Exclude<AppAccess, 'unavailable'>
+}
 
-  if (state.status === 'loading') {
+export function RootNavigator({ access }: RootNavigatorProps) {
+  if (access === 'loading') {
     return (
       <View style={styles.loading}>
         <Spinner />
@@ -19,10 +21,13 @@ export function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={state.status === 'signedIn'}>
+      <Stack.Protected guard={access === 'ready'}>
         <Stack.Screen name="index" />
       </Stack.Protected>
-      <Stack.Protected guard={state.status === 'signedOut'}>
+      <Stack.Protected guard={access === 'consentRequired'}>
+        <Stack.Screen name="consent" />
+      </Stack.Protected>
+      <Stack.Protected guard={access === 'signedOut'}>
         <Stack.Screen name="sign-in" />
         <Stack.Screen name="sign-up" />
       </Stack.Protected>
