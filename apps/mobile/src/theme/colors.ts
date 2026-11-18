@@ -4,6 +4,7 @@ export const colors = {
   brandSoft: '#E8F4E0',
   background: '#F8FAF5',
   surface: '#FFFFFF',
+  surfaceMuted: '#F2F6EE',
   text: '#203129',
   textMuted: '#7D9080',
   textOnBrand: '#FFFFFF',
