@@ -8,7 +8,6 @@ import {
 } from './rate-limit.options.js'
 import { RateLimitGuard } from './rate-limit.guard.js'
 
-// Imported after AuthModule: the guard needs the account that AuthGuard resolves.
 @Module({
   imports: [
     ThrottlerModule.forRoot(createRateLimitOptions(DEFAULT_RATE_LIMITS)),

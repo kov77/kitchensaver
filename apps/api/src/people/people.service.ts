@@ -22,9 +22,8 @@ import type {
 import { personNotFound } from './people.errors.js'
 import { planReadiness } from './plan-readiness.js'
 
-// Requests of one account queue on the Account row lock, so the Prisma defaults (2s/5s) are too tight.
 const TRANSACTION_TIMEOUT_MS = 10_000
-// The database gives up waiting for the lock before the Prisma transaction timeout cuts the connection.
+
 const LOCK_WAIT_MS = 5_000
 
 function toIsoDate(date: Date) {
@@ -168,7 +167,7 @@ export class PeopleService {
         dateOfBirth !== undefined &&
         dateOfBirth.getTime() !== existing.dateOfBirth.getTime()
       if (!isDateOfBirthChanged) return
-      // estimate was computed from the old age, so the user must confirm the goal again (D031).
+
       await tx.nutritionGoal.updateMany({
         where: { personProfileId: id, mode: 'ESTIMATED' },
         data: { reviewRequiredAt: new Date() },
@@ -210,7 +209,6 @@ export class PeopleService {
     if (count === 0) throw personNotFound()
   }
 
-  // The Account row lock serializes limit checks of one account across parallel requests.
   withAccountLock<T>(
     accountId: string,
     work: (tx: Prisma.TransactionClient) => Promise<T>,

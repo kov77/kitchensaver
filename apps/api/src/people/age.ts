@@ -13,7 +13,6 @@ function utcParts(date: Date) {
   }
 }
 
-// Whole years on the UTC calendar date; a Feb 29 birthday counts as Mar 1 in non-leap years.
 export function calculateAge(dateOfBirth: Date, now: Date): number {
   const birth = utcParts(dateOfBirth)
   const { year, month, day } = utcParts(now)

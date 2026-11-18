@@ -6,8 +6,6 @@ import { createValidationPipe } from './common/validation.pipe.js'
 import { isSwaggerServed, setupSwagger } from './openapi/swagger.js'
 
 export function configureApp(app: INestApplication, nodeEnv: Env['NODE_ENV']) {
-  // The Swagger UI needs inline scripts, so the default policy is relaxed
-  // only where it is served.
   app.use(
     helmet({
       contentSecurityPolicy: isSwaggerServed(nodeEnv) ? false : undefined,

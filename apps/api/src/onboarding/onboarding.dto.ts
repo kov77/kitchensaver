@@ -33,7 +33,6 @@ function hasUniqueValues(values: string[]) {
   return new Set(values).size === values.length
 }
 
-// Duplicates would break the unique indexes halfway through the transaction.
 export const onboardingSchema = createPersonSchema.extend({
   bodyParameters: bodyParametersSchema.optional(),
   goal: saveGoalSchema.optional(),

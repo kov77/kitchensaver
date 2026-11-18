@@ -24,8 +24,6 @@ interface Equation {
   weight: number
 }
 
-// Dietary Reference Intakes for Energy, National Academies, 2023
-// (https://doi.org/10.17226/26818), TEE equations: kcal/d from age in years, height in cm, weight in kg.
 const ADULT_EQUATIONS: Record<FormulaSex, Record<ActivityLevel, Equation>> = {
   MALE: {
     INACTIVE: { intercept: 753.07, age: -10.83, height: 6.5, weight: 14.1 },
@@ -83,7 +81,6 @@ const ADULT_FROM_AGE = 19
 const MIN_SUPPORTED_AGE = 3
 const MAX_SUPPORTED_AGE = 70
 
-// Energy cost of growth, kcal/d, added to TEE for ages 3-18 (Table 5-15 of the report).
 function growthEnergyCost(ageYears: number, formulaSex: FormulaSex) {
   const isMale = formulaSex === 'MALE'
   if (ageYears < 4) return isMale ? 20 : 15
@@ -97,13 +94,10 @@ export function methodForAge(ageYears: number): CalculationMethod | null {
   return ageYears < ADULT_FROM_AGE ? 'DRI_2023_AGES_3_18' : 'DRI_2023_ADULT'
 }
 
-// Which method belongs to an age is a different question from whether a new estimate is offered:
-// a stored goal stays valid when the person passes MAX_SUPPORTED_AGE.
 export function canEstimateEnergy(ageYears: number) {
   return methodForAge(ageYears) !== null && ageYears <= MAX_SUPPORTED_AGE
 }
 
-// Includes the growth allowance below 19.
 export function estimateMaintenanceEnergy({
   ageYears,
   heightCm,
