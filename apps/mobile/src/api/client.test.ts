@@ -1,4 +1,4 @@
-import { createApiClient } from '../../src/api/client'
+import { createApiClient } from './client'
 
 const BASE_URL = 'http://api.test'
 const ME_RESPONSE = {
