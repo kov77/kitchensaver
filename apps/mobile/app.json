@@ -5,7 +5,13 @@
     "scheme": "kitchensaver",
     "version": "1.0.0",
     "orientation": "portrait",
-    "plugins": ["expo-router", "expo-status-bar"],
+    "ios": {
+      "bundleIdentifier": "com.kitchensaver.dev"
+    },
+    "android": {
+      "package": "com.kitchensaver.dev"
+    },
+    "plugins": ["expo-router", "expo-status-bar", "expo-secure-store"],
     "experiments": {
       "typedRoutes": true
     }

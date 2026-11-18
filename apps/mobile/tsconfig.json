@@ -1,7 +1,8 @@
 {
   "extends": ["expo/tsconfig.base", "../../tsconfig.base.json"],
   "compilerOptions": {
-    "types": ["jest"]
+    "types": ["jest"],
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }
