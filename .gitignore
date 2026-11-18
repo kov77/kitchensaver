@@ -17,6 +17,8 @@ build/
 expo-env.d.ts
 apps/api/src/generated/
 apps/mobile/src/api/generated/
+apps/mobile/ios/
+apps/mobile/android/
 
 # misc
 .DS_Store
