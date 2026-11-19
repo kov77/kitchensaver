@@ -17,7 +17,7 @@ jest.mock('expo-router', () => {
   return { Stack }
 })
 
-const ALL_SCREENS = ['index', 'consent', 'sign-in', 'sign-up']
+const ALL_SCREENS = ['index', 'consent', 'onboarding', 'sign-in', 'sign-up']
 
 function renderedScreens() {
   return ALL_SCREENS.filter((name) => screen.queryByText(name) !== null)
@@ -34,6 +34,12 @@ describe('RootNavigator', () => {
     await render(<RootNavigator access="consentRequired" />)
 
     expect(renderedScreens()).toEqual(['consent'])
+  })
+
+  it('shows only the onboarding until the account has a profile', async () => {
+    await render(<RootNavigator access="onboardingRequired" />)
+
+    expect(renderedScreens()).toEqual(['onboarding'])
   })
 
   it('opens the app once the confirmations are recorded', async () => {
