@@ -10,9 +10,14 @@ import { PEOPLE_TEXT } from './constants'
 import { PeopleScreen } from './PeopleScreen'
 
 const mockSignOut = jest.fn()
+const mockPush = jest.fn()
 
 jest.mock('@/api/apiClient', () => ({
   apiClient: { GET: jest.fn() },
+}))
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush }),
 }))
 
 jest.mock('@/core/auth/SessionProvider', () => ({
@@ -93,6 +98,32 @@ describe('PeopleScreen', () => {
     expect(screen.getByText(PEOPLE_TEXT.noGoal)).toBeTruthy()
     expect(
       screen.getByText('Not ready to plan: add a daily calorie goal'),
+    ).toBeTruthy()
+  })
+
+  it('opens the goal of the person that was pressed', async () => {
+    respondWith(200, [READY_PERSON, NEW_PERSON])
+    await renderPeople()
+
+    await userEvent
+      .setup()
+      .press(await screen.findByRole('button', { name: /^alena, 29/ }))
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/goal/[personId]',
+      params: { personId: 'person-2' },
+    })
+  })
+
+  it('reads the readiness hint aloud with the card', async () => {
+    respondWith(200, [NEW_PERSON])
+
+    await renderPeople()
+
+    expect(
+      await screen.findByRole('button', {
+        name: /alena, 29\..*Not ready to plan: add a daily calorie goal/,
+      }),
     ).toBeTruthy()
   })
 

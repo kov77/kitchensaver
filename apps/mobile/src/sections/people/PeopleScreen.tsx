@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
 import { usePeople } from '@/api/queries/usePeople'
@@ -16,6 +17,7 @@ import { PersonCard } from './PersonCard'
 
 export function PeopleScreen() {
   const { signOut } = useSession()
+  const router = useRouter()
   const {
     data: people,
     error,
@@ -47,7 +49,16 @@ export function PeopleScreen() {
       {people ? (
         <View style={styles.list}>
           {people.map((person) => (
-            <PersonCard key={person.id} person={person} />
+            <PersonCard
+              key={person.id}
+              person={person}
+              onPress={() =>
+                router.push({
+                  pathname: '/goal/[personId]',
+                  params: { personId: person.id },
+                })
+              }
+            />
           ))}
         </View>
       ) : null}
