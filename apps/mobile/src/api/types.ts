@@ -11,6 +11,11 @@ export type RecordConsentsBody =
 
 export type PersonListItem = Schemas['PersonListItemDto']
 
+export type PersonGoal = NonNullable<PersonListItem['goal']>
+
+export type PlanReadinessReason =
+  PersonListItem['planReadiness']['reasons'][number]
+
 export type OnboardingBody =
   paths['/api/v1/people/onboarding']['post']['requestBody']['content']['application/json']
 
