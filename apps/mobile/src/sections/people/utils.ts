@@ -1,6 +1,8 @@
 import type { PersonListItem } from '@/api/types'
 
-import { GOAL_TYPE_LABELS, PEOPLE_TEXT, READINESS_HINTS } from './constants'
+import { GOAL_TYPE_LABELS } from '@/core/constants'
+
+import { PEOPLE_TEXT, READINESS_HINTS } from './constants'
 
 export function getInitial(name: string) {
   const [firstCharacter = ''] = Array.from(name.trim())

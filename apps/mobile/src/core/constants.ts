@@ -1,3 +1,5 @@
+import type { GoalType } from './types'
+
 export const RESPONSE_STATUS_CODE = {
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
@@ -35,3 +37,16 @@ export const DISPLAY_DATE_FORMAT = { dateStyle: 'long' } as const
 export const MIN_PROFILE_AGE = 18
 export const MAX_PROFILE_AGE = 120
 export const NAME_MAX_LENGTH = 80
+
+export const GOAL_LIMITS = {
+  dailyKcal: { min: 500, max: 10_000 },
+  heightCm: { min: 90, max: 250 },
+  weightKg: { min: 20, max: 400 },
+} as const
+
+export const GOAL_TYPE_LABELS: Record<GoalType, string> = {
+  LOSE: 'Lose weight',
+  MAINTAIN: 'Maintain weight',
+  GAIN: 'Gain weight',
+  CUSTOM: 'Custom goal',
+}

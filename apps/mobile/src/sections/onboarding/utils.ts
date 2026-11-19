@@ -1,5 +1,7 @@
 import type { OnboardingBody } from '@/api/types'
+import type { GoalDraft } from '@/core/types'
 import { toIsoDate } from '@/utils/dates'
+import { toSaveGoalBody } from '@/utils/goal'
 
 import { ALLERGY_ANSWER, OTHER_ALLERGEN_CODE } from './constants'
 import type { AllergyValues } from './schemas'
@@ -32,11 +34,13 @@ function buildAllergies({
 
 export function buildOnboardingBody(
   { name, dateOfBirth }: ProfileSubmission,
+  goal: GoalDraft | null,
   allergies: AllergyValues,
 ): OnboardingBody {
   return {
     name,
     dateOfBirth: toIsoDate(dateOfBirth),
+    ...(goal && { goal: toSaveGoalBody(goal) }),
     allergies: buildAllergies(allergies),
   }
 }

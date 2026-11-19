@@ -12,6 +12,7 @@ describe('buildOnboardingBody', () => {
   it('sends the date of birth as a calendar date', () => {
     const body = buildOnboardingBody(
       PROFILE,
+      null,
       allergies({ answer: ALLERGY_ANSWER.NO }),
     )
 
@@ -19,9 +20,34 @@ describe('buildOnboardingBody', () => {
     expect(body.name).toBe('Alex')
   })
 
+  it('leaves the goal out when it was skipped', () => {
+    const body = buildOnboardingBody(
+      PROFILE,
+      null,
+      allergies({ answer: ALLERGY_ANSWER.NO }),
+    )
+
+    expect(body).not.toHaveProperty('goal')
+  })
+
+  it('includes a goal the user set', () => {
+    const body = buildOnboardingBody(
+      PROFILE,
+      { mode: 'MANUAL', goalType: 'MAINTAIN', dailyKcal: 2200 },
+      allergies({ answer: ALLERGY_ANSWER.NO }),
+    )
+
+    expect(body.goal).toEqual({
+      mode: 'MANUAL',
+      goalType: 'MAINTAIN',
+      dailyKcal: 2200,
+    })
+  })
+
   it('lists the chosen allergens and the custom one with its label', () => {
     const body = buildOnboardingBody(
       PROFILE,
+      null,
       allergies({
         answer: ALLERGY_ANSWER.YES,
         allergens: ['MILK', 'OTHER'],
@@ -45,7 +71,7 @@ describe('buildOnboardingBody', () => {
     'records %s together with the acknowledged warning',
     (answer, status) => {
       expect(
-        buildOnboardingBody(PROFILE, allergies({ answer })).allergies,
+        buildOnboardingBody(PROFILE, null, allergies({ answer })).allergies,
       ).toEqual({
         status,
         warningAcknowledged: true,
@@ -55,7 +81,7 @@ describe('buildOnboardingBody', () => {
 
   it('refuses to build a request while the allergy question is unanswered', () => {
     expect(() =>
-      buildOnboardingBody(PROFILE, allergies({ answer: null })),
+      buildOnboardingBody(PROFILE, null, allergies({ answer: null })),
     ).toThrow()
   })
 })

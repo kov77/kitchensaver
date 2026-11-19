@@ -9,6 +9,7 @@ import { randomUUID } from 'expo-crypto'
 
 import { PEOPLE_QUERY_KEY } from '@/api/constants'
 import type { PersonListItem } from '@/api/types'
+import { GOAL_EDITOR_TEXT } from '@/components/organisms/goal/constants'
 import { ERROR_MESSAGES } from '@/core/constants'
 
 import {
@@ -21,7 +22,13 @@ import {
 import { OnboardingScreen } from './OnboardingScreen'
 
 const mockSignOut = jest.fn()
-type PostOptions = { params: { header: Record<string, string> } }
+type PostOptions = {
+  params?: { header: Record<string, string> }
+  body?: unknown
+}
+
+const ONBOARDING_PATH = '/api/v1/people/onboarding'
+const PREVIEW_PATH = '/api/v1/people/goals/estimate'
 
 const mockPost = jest.fn<Promise<unknown>, [string, PostOptions]>()
 
@@ -51,9 +58,14 @@ let queryClient: QueryClient
 let keyCounter: number
 
 function idempotencyKeys() {
-  return mockPost.mock.calls.map(
-    ([, options]) => options.params.header['Idempotency-Key'],
-  )
+  return mockPost.mock.calls
+    .filter(([path]) => path === ONBOARDING_PATH)
+    .map(([, options]) => options.params?.header['Idempotency-Key'])
+}
+
+function onboardingBody() {
+  return mockPost.mock.calls.find(([path]) => path === ONBOARDING_PATH)?.[1]
+    .body
 }
 
 function respond(status: number, data?: unknown) {
@@ -83,6 +95,12 @@ async function fillProfile(name = 'Alex') {
     new Date(1990, 4, 15),
   )
   await user.press(screen.getByRole('button', { name: ONBOARDING_TEXT.next }))
+}
+
+async function skipGoal() {
+  await userEvent
+    .setup()
+    .press(await screen.findByRole('button', { name: ONBOARDING_TEXT.skip }))
 }
 
 function answer(label: string) {
@@ -117,14 +135,13 @@ describe('OnboardingScreen profile step', () => {
     expect(screen.queryByText(ONBOARDING_TEXT.allergyQuestion)).toBeNull()
   })
 
-  it('moves to the allergy question with valid answers', async () => {
+  it('moves to the optional goal step with valid answers', async () => {
     await renderOnboarding()
 
     await fillProfile()
 
-    expect(
-      await screen.findByText(ONBOARDING_TEXT.allergyQuestion),
-    ).toBeTruthy()
+    expect(await screen.findByText(ONBOARDING_TEXT.goalTitle)).toBeTruthy()
+    expect(screen.queryByText(ONBOARDING_TEXT.allergyQuestion)).toBeNull()
   })
 
   it('lets the user log out', async () => {
@@ -138,10 +155,99 @@ describe('OnboardingScreen profile step', () => {
   })
 })
 
+describe('OnboardingScreen goal step', () => {
+  beforeEach(async () => {
+    await renderOnboarding()
+    await fillProfile()
+    await screen.findByText(ONBOARDING_TEXT.goalTitle)
+  })
+
+  it('can be skipped, and then no goal is sent', async () => {
+    mockPost.mockResolvedValue(respond(201, { person: PERSON }))
+    await skipGoal()
+    await answer(ONBOARDING_TEXT.answerUnknown)
+    await finish()
+    await userEvent.setup().press(
+      await screen.findByRole('button', {
+        name: WARNING_DIALOG_BUTTONS.confirm,
+      }),
+    )
+
+    expect(onboardingBody()).not.toHaveProperty('goal')
+  })
+
+  it('sends a manual goal with the profile', async () => {
+    mockPost.mockResolvedValue(respond(201, { person: PERSON }))
+    const user = userEvent.setup()
+    await user.press(
+      screen.getByRole('radio', { name: GOAL_EDITOR_TEXT.modeManual }),
+    )
+    await user.press(screen.getByRole('radio', { name: 'Maintain weight' }))
+    await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.kcalLabel), '2200')
+    await user.press(screen.getByRole('button', { name: ONBOARDING_TEXT.next }))
+    await answer(ONBOARDING_TEXT.answerUnknown)
+    await finish()
+    await user.press(
+      await screen.findByRole('button', {
+        name: WARNING_DIALOG_BUTTONS.confirm,
+      }),
+    )
+
+    expect(onboardingBody()).toMatchObject({
+      goal: { mode: 'MANUAL', goalType: 'MAINTAIN', dailyKcal: 2200 },
+    })
+  })
+
+  it('previews the estimate without a profile, using the date of birth', async () => {
+    mockPost.mockResolvedValue(
+      respond(200, {
+        estimatedMaintenanceKcal: 2275,
+        methodology: 'DRI',
+        assumptions: ['AGE_IN_COMPLETED_YEARS'],
+      }),
+    )
+    const user = userEvent.setup()
+    await user.press(
+      screen.getByRole('radio', { name: GOAL_EDITOR_TEXT.modeEstimate }),
+    )
+    await user.press(screen.getByRole('radio', { name: 'Maintain weight' }))
+    await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.heightLabel), '165')
+    await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.weightLabel), '63')
+    await user.press(screen.getByRole('radio', { name: 'Low active' }))
+    await user.press(screen.getByRole('radio', { name: 'Female' }))
+    await user.press(
+      screen.getByRole('button', { name: GOAL_EDITOR_TEXT.calculate }),
+    )
+
+    await screen.findByText(GOAL_EDITOR_TEXT.disclaimer)
+    expect(mockPost).toHaveBeenCalledWith(PREVIEW_PATH, {
+      body: {
+        dateOfBirth: '1990-05-15',
+        goalType: 'MAINTAIN',
+        heightCm: 165,
+        weightKg: 63,
+        activityLevel: 'LOW_ACTIVE',
+        formulaSex: 'FEMALE',
+      },
+    })
+  })
+
+  it('goes back to the profile with the values kept', async () => {
+    await userEvent
+      .setup()
+      .press(screen.getByRole('button', { name: ONBOARDING_TEXT.back }))
+
+    expect(
+      (await screen.findByLabelText(ONBOARDING_TEXT.nameLabel)).props.value,
+    ).toBe('Alex')
+  })
+})
+
 describe('OnboardingScreen allergy step', () => {
   beforeEach(async () => {
     await renderOnboarding()
     await fillProfile()
+    await skipGoal()
     await screen.findByText(ONBOARDING_TEXT.allergyQuestion)
   })
 
@@ -329,11 +435,11 @@ describe('OnboardingScreen allergy step', () => {
     expect(queryClient.getQueryState(peopleKey)?.isInvalidated).toBe(true)
   })
 
-  it('goes back to the profile step', async () => {
+  it('goes back to the goal step', async () => {
     await userEvent
       .setup()
       .press(screen.getByRole('button', { name: ONBOARDING_TEXT.back }))
 
-    expect(await screen.findByLabelText(ONBOARDING_TEXT.nameLabel)).toBeTruthy()
+    expect(await screen.findByText(ONBOARDING_TEXT.goalTitle)).toBeTruthy()
   })
 })

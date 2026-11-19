@@ -1,4 +1,4 @@
-import type { PersonGoal, PlanReadinessReason } from '@/api/types'
+import type { PlanReadinessReason } from '@/api/types'
 
 export const PEOPLE_TEXT = {
   title: 'Your people',
@@ -9,14 +9,8 @@ export const PEOPLE_TEXT = {
   noGoal: 'No goal yet',
   kcalPerDay: 'kcal/day',
   notReady: 'Not ready to plan',
+  cardHint: 'Opens the daily calorie goal',
 } as const
-
-export const GOAL_TYPE_LABELS: Record<PersonGoal['goalType'], string> = {
-  LOSE: 'Lose weight',
-  MAINTAIN: 'Maintain weight',
-  GAIN: 'Gain weight',
-  CUSTOM: 'Custom goal',
-}
 
 export const READINESS_HINTS: Record<PlanReadinessReason, string> = {
   MISSING_GOAL: 'add a daily calorie goal',
