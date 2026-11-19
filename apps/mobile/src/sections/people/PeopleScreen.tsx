@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 
-import { useMe } from '@/api/queries/useMe'
+import { usePeople } from '@/api/queries/usePeople'
 import { Button } from '@/components/atoms/Button'
 import { Spinner } from '@/components/atoms/Spinner'
 import { Text } from '@/components/atoms/Text'
@@ -10,42 +10,49 @@ import { AppScreen } from '@/components/templates/AppScreen'
 import { useSession } from '@/core/auth/SessionProvider'
 import { getErrorMessage } from '@/utils/errors'
 
-import { HOME_TEXT } from './constants'
-import { styles } from './HomeScreen.styles'
+import { PEOPLE_TEXT } from './constants'
+import { styles } from './PeopleScreen.styles'
+import { PersonCard } from './PersonCard'
 
-export function HomeScreen() {
+export function PeopleScreen() {
   const { signOut } = useSession()
-  const { data, error, isPending, refetch } = useMe({ skipGlobalError: true })
+  const {
+    data: people,
+    error,
+    isFetching,
+    isPending,
+    refetch,
+  } = usePeople({ status: 'active' })
 
   return (
     <AppScreen>
-      <ScreenHeader title={HOME_TEXT.title} subtitle={HOME_TEXT.subtitle} />
+      <ScreenHeader title={PEOPLE_TEXT.title} subtitle={PEOPLE_TEXT.subtitle} />
       {isPending ? <Spinner /> : null}
-      {error ? (
+      {error && !people ? (
         <>
           <FormMessage message={getErrorMessage(error)} />
           <Button
-            title={HOME_TEXT.retry}
+            title={PEOPLE_TEXT.retry}
             variant="secondary"
+            isLoading={isFetching}
             onPress={() => void refetch()}
           />
         </>
       ) : null}
-      {data ? (
-        <View style={styles.details}>
-          <Text variant="body">
-            {HOME_TEXT.accountLabel}: {data.id}
-          </Text>
-          <Text variant="body">
-            {HOME_TEXT.consentLabel}:{' '}
-            {data.onboarding.complete
-              ? HOME_TEXT.consentComplete
-              : HOME_TEXT.consentRequired}
-          </Text>
+      {people?.length === 0 ? (
+        <Text variant="body" color="textMuted">
+          {PEOPLE_TEXT.empty}
+        </Text>
+      ) : null}
+      {people ? (
+        <View style={styles.list}>
+          {people.map((person) => (
+            <PersonCard key={person.id} person={person} />
+          ))}
         </View>
       ) : null}
       <Button
-        title={HOME_TEXT.logOut}
+        title={PEOPLE_TEXT.logOut}
         variant="secondary"
         onPress={() => void signOut()}
       />
