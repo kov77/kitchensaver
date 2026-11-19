@@ -27,6 +27,9 @@ export function RootNavigator({ access }: RootNavigatorProps) {
       <Stack.Protected guard={access === 'consentRequired'}>
         <Stack.Screen name="consent" />
       </Stack.Protected>
+      <Stack.Protected guard={access === 'onboardingRequired'}>
+        <Stack.Screen name="onboarding" />
+      </Stack.Protected>
       <Stack.Protected guard={access === 'signedOut'}>
         <Stack.Screen name="sign-in" />
         <Stack.Screen name="sign-up" />

@@ -165,7 +165,7 @@ describe('ConsentScreen', () => {
 
     await pressContinue()
 
-    expect(await screen.findByText(ERROR_MESSAGES.UNKNOWN)).toBeTruthy()
+    expect(await screen.findByText(ERROR_MESSAGES.UNPROCESSABLE)).toBeTruthy()
     expect(
       screen.getByRole('checkbox', { name: CONSENT_TEXT.termsLabel }),
     ).toBeChecked()

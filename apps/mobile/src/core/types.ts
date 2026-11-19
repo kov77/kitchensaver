@@ -1,2 +1,7 @@
 export type AppAccess =
-  'loading' | 'unavailable' | 'signedOut' | 'consentRequired' | 'ready'
+  | 'loading'
+  | 'unavailable'
+  | 'signedOut'
+  | 'consentRequired'
+  | 'onboardingRequired'
+  | 'ready'

@@ -16,7 +16,8 @@ describe('getErrorMessage', () => {
     [500, ERROR_MESSAGES.SERVER],
     [503, ERROR_MESSAGES.SERVER],
     [400, ERROR_MESSAGES.UNKNOWN],
-    [422, ERROR_MESSAGES.UNKNOWN],
+    [409, ERROR_MESSAGES.CONFLICT],
+    [422, ERROR_MESSAGES.UNPROCESSABLE],
   ])('maps status %s to a plain message', (status, message) => {
     expect(getErrorMessage(new ApiRequestError(status))).toBe(message)
   })

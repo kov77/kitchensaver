@@ -10,4 +10,5 @@ export const colors = {
   textOnBrand: '#FFFFFF',
   warning: '#A56535',
   warningSoft: '#FFF0E1',
+  overlay: 'rgba(32, 49, 41, 0.5)',
 } as const
