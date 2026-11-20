@@ -11,6 +11,7 @@ type ChoiceFieldProps<Value extends string> = {
   value: Value | null
   onChange: (value: Value) => void
   errorMessage?: string
+  labelColor?: 'text' | 'textMuted'
 }
 
 export function ChoiceField<Value extends string>({
@@ -19,10 +20,11 @@ export function ChoiceField<Value extends string>({
   value,
   onChange,
   errorMessage,
+  labelColor = 'textMuted',
 }: ChoiceFieldProps<Value>) {
   return (
     <View style={styles.container}>
-      <Text variant="label" color="textMuted" accessibilityRole="header">
+      <Text variant="label" color={labelColor} accessibilityRole="header">
         {label}
       </Text>
       <View style={styles.options}>
