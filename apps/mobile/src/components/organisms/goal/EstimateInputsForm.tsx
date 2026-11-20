@@ -1,20 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/atoms/Button'
 import { Text } from '@/components/atoms/Text'
-import { ChoiceField } from '@/components/molecules/ChoiceField'
+import { FormChoiceField } from '@/components/molecules/FormChoiceField'
 import { FormMessage } from '@/components/molecules/FormMessage'
-import { TextField } from '@/components/molecules/TextField'
-import { GOAL_TYPE_LABELS } from '@/core/constants'
+import { FormTextField } from '@/components/molecules/FormTextField'
 import type { EstimateInput } from '@/core/types'
 import { parseDecimal } from '@/utils/numbers'
 
 import {
-  ACTIVITY_LABELS,
-  ESTIMATED_GOAL_TYPES,
+  ACTIVITY_OPTIONS,
+  ESTIMATED_GOAL_TYPE_OPTIONS,
   GOAL_EDITOR_TEXT,
-  SEX_LABELS,
+  SEX_OPTIONS,
 } from './constants'
 import { estimateInputsSchema, type EstimateInputsValues } from './schemas'
 
@@ -25,34 +24,13 @@ type EstimateInputsFormProps = {
   onSubmit: (input: EstimateInput) => void
 }
 
-const GOAL_TYPE_OPTIONS = ESTIMATED_GOAL_TYPES.map((value) => ({
-  value,
-  label: GOAL_TYPE_LABELS[value],
-}))
-
-const ACTIVITY_OPTIONS = Object.entries(ACTIVITY_LABELS).map(
-  ([value, label]) => ({
-    value: value as keyof typeof ACTIVITY_LABELS,
-    label,
-  }),
-)
-
-const SEX_OPTIONS = Object.entries(SEX_LABELS).map(([value, label]) => ({
-  value: value as keyof typeof SEX_LABELS,
-  label,
-}))
-
 export function EstimateInputsForm({
   initialInput,
   errorMessage,
   isEstimating,
   onSubmit,
 }: EstimateInputsFormProps) {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<EstimateInputsValues>({
+  const { control, handleSubmit } = useForm<EstimateInputsValues>({
     resolver: zodResolver(estimateInputsSchema),
     defaultValues: initialInput
       ? {
@@ -90,72 +68,35 @@ export function EstimateInputsForm({
       <Text variant="body" color="textMuted">
         {GOAL_EDITOR_TEXT.bodyIntro}
       </Text>
-      <Controller
+      <FormChoiceField
         control={control}
         name="goalType"
-        render={({ field: { onChange, value } }) => (
-          <ChoiceField
-            label={GOAL_EDITOR_TEXT.goalTypeLabel}
-            options={GOAL_TYPE_OPTIONS}
-            value={value}
-            onChange={onChange}
-            errorMessage={errors.goalType?.message}
-          />
-        )}
+        label={GOAL_EDITOR_TEXT.goalTypeLabel}
+        options={ESTIMATED_GOAL_TYPE_OPTIONS}
       />
-      <Controller
+      <FormTextField
         control={control}
         name="heightCm"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextField
-            label={GOAL_EDITOR_TEXT.heightLabel}
-            errorMessage={errors.heightCm?.message}
-            keyboardType="decimal-pad"
-            value={value}
-            onBlur={onBlur}
-            onChangeText={onChange}
-          />
-        )}
+        label={GOAL_EDITOR_TEXT.heightLabel}
+        keyboardType="decimal-pad"
       />
-      <Controller
+      <FormTextField
         control={control}
         name="weightKg"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextField
-            label={GOAL_EDITOR_TEXT.weightLabel}
-            errorMessage={errors.weightKg?.message}
-            keyboardType="decimal-pad"
-            value={value}
-            onBlur={onBlur}
-            onChangeText={onChange}
-          />
-        )}
+        label={GOAL_EDITOR_TEXT.weightLabel}
+        keyboardType="decimal-pad"
       />
-      <Controller
+      <FormChoiceField
         control={control}
         name="activityLevel"
-        render={({ field: { onChange, value } }) => (
-          <ChoiceField
-            label={GOAL_EDITOR_TEXT.activityLabel}
-            options={ACTIVITY_OPTIONS}
-            value={value}
-            onChange={onChange}
-            errorMessage={errors.activityLevel?.message}
-          />
-        )}
+        label={GOAL_EDITOR_TEXT.activityLabel}
+        options={ACTIVITY_OPTIONS}
       />
-      <Controller
+      <FormChoiceField
         control={control}
         name="formulaSex"
-        render={({ field: { onChange, value } }) => (
-          <ChoiceField
-            label={GOAL_EDITOR_TEXT.sexLabel}
-            options={SEX_OPTIONS}
-            value={value}
-            onChange={onChange}
-            errorMessage={errors.formulaSex?.message}
-          />
-        )}
+        label={GOAL_EDITOR_TEXT.sexLabel}
+        options={SEX_OPTIONS}
       />
       {errorMessage ? <FormMessage message={errorMessage} /> : null}
       <Button

@@ -1,3 +1,4 @@
+import { GOAL_TYPE_LABELS } from '@/core/constants'
 import type {
   ActivityLevel,
   EstimatedGoalType,
@@ -67,6 +68,15 @@ export const ESTIMATED_GOAL_TYPES: readonly EstimatedGoalType[] = [
   'GAIN',
 ]
 
+const ACTIVITY_LEVELS: readonly ActivityLevel[] = [
+  'INACTIVE',
+  'LOW_ACTIVE',
+  'ACTIVE',
+  'VERY_ACTIVE',
+]
+
+const FORMULA_SEXES: readonly FormulaSex[] = ['MALE', 'FEMALE']
+
 export const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
   INACTIVE: 'Inactive',
   LOW_ACTIVE: 'Low active',
@@ -78,3 +88,22 @@ export const SEX_LABELS: Record<FormulaSex, string> = {
   MALE: 'Male',
   FEMALE: 'Female',
 }
+
+export const GOAL_TYPE_OPTIONS = GOAL_TYPES.map((value) => ({
+  value,
+  label: GOAL_TYPE_LABELS[value],
+}))
+
+export const ESTIMATED_GOAL_TYPE_OPTIONS = ESTIMATED_GOAL_TYPES.map(
+  (value) => ({ value, label: GOAL_TYPE_LABELS[value] }),
+)
+
+export const ACTIVITY_OPTIONS = ACTIVITY_LEVELS.map((value) => ({
+  value,
+  label: ACTIVITY_LABELS[value],
+}))
+
+export const SEX_OPTIONS = FORMULA_SEXES.map((value) => ({
+  value,
+  label: SEX_LABELS[value],
+}))

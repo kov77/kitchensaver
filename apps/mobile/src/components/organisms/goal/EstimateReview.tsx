@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { View } from 'react-native'
 
 import { Button } from '@/components/atoms/Button'
 import { Text } from '@/components/atoms/Text'
-import { TextField } from '@/components/molecules/TextField'
+import { FormTextField } from '@/components/molecules/FormTextField'
 import type { EstimatedGoalType, GoalEstimate } from '@/core/types'
 import { parseDecimal } from '@/utils/numbers'
 
@@ -34,11 +34,7 @@ export function EstimateReview({
   onChangeDetails,
 }: EstimateReviewProps) {
   const { estimatedMaintenanceKcal, methodology, assumptions } = estimate
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<TargetValues>({
+  const { control, handleSubmit } = useForm<TargetValues>({
     resolver: zodResolver(targetSchema),
     defaultValues: {
       dailyKcal:
@@ -80,19 +76,11 @@ export function EstimateReview({
           {GOAL_EDITOR_TEXT.targetHint}
         </Text>
       ) : null}
-      <Controller
+      <FormTextField
         control={control}
         name="dailyKcal"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextField
-            label={GOAL_EDITOR_TEXT.targetLabel}
-            errorMessage={errors.dailyKcal?.message}
-            keyboardType="number-pad"
-            value={value}
-            onBlur={onBlur}
-            onChangeText={onChange}
-          />
-        )}
+        label={GOAL_EDITOR_TEXT.targetLabel}
+        keyboardType="number-pad"
       />
       <Button
         title={submitLabel}
