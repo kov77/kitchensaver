@@ -5,6 +5,15 @@ import {
   NAME_MAX_LENGTH,
 } from '@/core/constants'
 
+import type { FlowState } from './types'
+
+export const EMPTY_PROFILE: { name: string; dateOfBirth: Date | null } = {
+  name: '',
+  dateOfBirth: null,
+}
+
+export const INITIAL_FLOW_STATE: FlowState = { step: 'profile', profile: null }
+
 export const ALLERGY_ANSWER = {
   YES: 'yes',
   NO: 'no',
@@ -12,6 +21,22 @@ export const ALLERGY_ANSWER = {
 } as const
 
 export const OTHER_ALLERGEN_CODE = 'OTHER'
+
+const ALLERGEN_CODES: readonly AllergenCode[] = [
+  'MILK',
+  'EGG',
+  'FISH',
+  'CRUSTACEAN_SHELLFISH',
+  'MOLLUSC',
+  'TREE_NUT',
+  'PEANUT',
+  'WHEAT',
+  'SOY',
+  'SESAME',
+  'MUSTARD',
+  'SULPHITES',
+  'OTHER',
+]
 
 export const ALLERGEN_LABELS: Record<AllergenCode, string> = {
   MILK: 'Milk',
@@ -87,3 +112,8 @@ export const WARNING_DIALOG_BUTTONS = {
   confirm: 'I understand, continue',
   cancel: 'Go back',
 } as const
+
+export const ALLERGEN_OPTIONS = ALLERGEN_CODES.map((value) => ({
+  value,
+  label: ALLERGEN_LABELS[value],
+}))

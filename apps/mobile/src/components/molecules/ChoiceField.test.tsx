@@ -1,5 +1,7 @@
 import { render, screen, userEvent } from '@testing-library/react-native'
 
+import { colors } from '@/theme/colors'
+
 import { ChoiceField } from './ChoiceField'
 
 const OPTIONS = [
@@ -50,5 +52,32 @@ describe('ChoiceField', () => {
     )
 
     expect(screen.getByText('Choose an option.')).toBeTruthy()
+  })
+
+  it('uses the muted label colour unless told otherwise', async () => {
+    await render(
+      <ChoiceField
+        label="Sex"
+        options={OPTIONS}
+        value={null}
+        onChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Sex')).toHaveStyle({ color: colors.textMuted })
+  })
+
+  it('can show the label in the normal text colour', async () => {
+    await render(
+      <ChoiceField
+        label="Sex"
+        options={OPTIONS}
+        value={null}
+        onChange={jest.fn()}
+        labelColor="text"
+      />,
+    )
+
+    expect(screen.getByText('Sex')).toHaveStyle({ color: colors.text })
   })
 })

@@ -1,9 +1,9 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, userEvent } from '@testing-library/react-native'
+import { screen, userEvent } from '@testing-library/react-native'
 
 import { ApiRequestError } from '@/utils/errors'
 import { ERROR_MESSAGES } from '@/core/constants'
 import type { GoalEstimate } from '@/core/types'
+import { renderWithQuery } from '@/test-utils/renderWithQuery'
 
 import { GoalEditor } from './GoalEditor'
 import {
@@ -25,16 +25,14 @@ const onEstimate = jest.fn<Promise<GoalEstimate>, [unknown]>()
 const onSave = jest.fn()
 
 async function renderEditor(saveErrorMessage: string | null = null) {
-  await render(
-    <QueryClientProvider client={new QueryClient()}>
-      <GoalEditor
-        submitLabel="Save goal"
-        isSaving={false}
-        saveErrorMessage={saveErrorMessage}
-        onEstimate={onEstimate}
-        onSave={onSave}
-      />
-    </QueryClientProvider>,
+  await renderWithQuery(
+    <GoalEditor
+      submitLabel="Save goal"
+      isSaving={false}
+      saveErrorMessage={saveErrorMessage}
+      onEstimate={onEstimate}
+      onSave={onSave}
+    />,
   )
 }
 

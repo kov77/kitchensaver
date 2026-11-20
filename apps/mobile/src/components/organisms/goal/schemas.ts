@@ -4,11 +4,11 @@ import { GOAL_LIMITS } from '@/core/constants'
 import { isNumberInRange } from '@/utils/numbers'
 
 import {
-  ACTIVITY_LABELS,
+  ACTIVITY_OPTIONS,
   ESTIMATED_GOAL_TYPES,
   GOAL_EDITOR_ERRORS,
   GOAL_TYPES,
-  SEX_LABELS,
+  SEX_OPTIONS,
 } from './constants'
 
 const kcalSchema = zod
@@ -21,8 +21,9 @@ const kcalSchema = zod
 
 const choice = <Value extends string>(values: readonly Value[]) =>
   zod
-    .enum(values as [Value, ...Value[]])
-    .nullable()
+    .custom<Value | null>(
+      (input) => input === null || values.some((value) => value === input),
+    )
     .refine((value) => value !== null, GOAL_EDITOR_ERRORS.choose)
 
 export const manualGoalSchema = zod.object({
@@ -44,10 +45,8 @@ export const estimateInputsSchema = zod.object({
       (text) => isNumberInRange(text, GOAL_LIMITS.weightKg),
       GOAL_EDITOR_ERRORS.weight,
     ),
-  activityLevel: choice(
-    Object.keys(ACTIVITY_LABELS) as (keyof typeof ACTIVITY_LABELS)[],
-  ),
-  formulaSex: choice(Object.keys(SEX_LABELS) as (keyof typeof SEX_LABELS)[]),
+  activityLevel: choice(ACTIVITY_OPTIONS.map(({ value }) => value)),
+  formulaSex: choice(SEX_OPTIONS.map(({ value }) => value)),
 })
 
 export const targetSchema = zod.object({ dailyKcal: kcalSchema })

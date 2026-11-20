@@ -1,9 +1,14 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, userEvent } from '@testing-library/react-native'
+import { QueryClient } from '@tanstack/react-query'
+import { screen, userEvent } from '@testing-library/react-native'
 
-import { PEOPLE_QUERY_KEY } from '@/api/constants'
+import { getPeopleListKey } from '@/api/queryKeys'
 import { GOAL_EDITOR_TEXT } from '@/components/organisms/goal/constants'
 import { ERROR_MESSAGES } from '@/core/constants'
+import { apiResult } from '@/test-utils/apiResult'
+import {
+  createTestQueryClient,
+  renderWithQuery,
+} from '@/test-utils/renderWithQuery'
 
 import { GOAL_TEXT } from './constants'
 import { GoalScreen } from './GoalScreen'
@@ -26,16 +31,8 @@ jest.mock('expo-router', () => ({
 
 let queryClient: QueryClient
 
-function respond(status: number, data?: unknown) {
-  return { data, response: new Response(null, { status }) }
-}
-
 async function renderGoal() {
-  await render(
-    <QueryClientProvider client={queryClient}>
-      <GoalScreen />
-    </QueryClientProvider>,
-  )
+  await renderWithQuery(<GoalScreen />, queryClient)
 }
 
 async function fillManualGoal() {
@@ -55,12 +52,12 @@ function pressSave() {
 
 beforeEach(() => {
   jest.clearAllMocks()
-  queryClient = new QueryClient()
+  queryClient = createTestQueryClient()
 })
 
 describe('GoalScreen', () => {
   it('saves the goal for the person in the route and goes back', async () => {
-    mockPut.mockResolvedValue(respond(200, { dailyKcal: 2200 }))
+    mockPut.mockResolvedValue(apiResult(200, { dailyKcal: 2200 }))
     await renderGoal()
     await fillManualGoal()
 
@@ -75,9 +72,9 @@ describe('GoalScreen', () => {
   })
 
   it('refreshes the people list so the readiness hint can go away', async () => {
-    const peopleKey = [...PEOPLE_QUERY_KEY, 'active']
+    const peopleKey = getPeopleListKey('active')
     queryClient.setQueryData(peopleKey, [])
-    mockPut.mockResolvedValue(respond(200, { dailyKcal: 2200 }))
+    mockPut.mockResolvedValue(apiResult(200, { dailyKcal: 2200 }))
     await renderGoal()
     await fillManualGoal()
 
@@ -88,7 +85,7 @@ describe('GoalScreen', () => {
   })
 
   it('stays on the screen with a plain message when saving fails', async () => {
-    mockPut.mockResolvedValue(respond(503))
+    mockPut.mockResolvedValue(apiResult(503))
     await renderGoal()
     await fillManualGoal()
 
@@ -100,7 +97,7 @@ describe('GoalScreen', () => {
 
   it('asks the server to estimate for the person in the route', async () => {
     mockPost.mockResolvedValue(
-      respond(200, {
+      apiResult(200, {
         estimatedMaintenanceKcal: 2275,
         methodology: 'DRI',
         assumptions: ['AGE_IN_COMPLETED_YEARS'],

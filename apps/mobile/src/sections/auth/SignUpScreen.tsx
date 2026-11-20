@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/atoms/Button'
 import { FooterLink } from '@/components/molecules/FooterLink'
 import { FormMessage } from '@/components/molecules/FormMessage'
+import { FormTextField } from '@/components/molecules/FormTextField'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
-import { TextField } from '@/components/molecules/TextField'
 import { AppScreen } from '@/components/templates/AppScreen'
 import type { AuthFailure } from '@/core/auth/types'
 import { useSession } from '@/core/auth/SessionProvider'
@@ -25,7 +25,7 @@ export function SignUpScreen() {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: { email: '', password: '' },
@@ -48,44 +48,28 @@ export function SignUpScreen() {
         title={SIGN_UP_TEXT.title}
         subtitle={SIGN_UP_TEXT.subtitle}
       />
-      <Controller
+      <FormTextField
         control={control}
         name="email"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextField
-            label={SIGN_UP_TEXT.emailLabel}
-            errorMessage={errors.email?.message}
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect={false}
-            keyboardType="email-address"
-            placeholder={SIGN_UP_TEXT.emailPlaceholder}
-            textContentType="emailAddress"
-            value={value}
-            onBlur={onBlur}
-            onChangeText={onChange}
-          />
-        )}
+        label={SIGN_UP_TEXT.emailLabel}
+        autoCapitalize="none"
+        autoComplete="email"
+        autoCorrect={false}
+        keyboardType="email-address"
+        placeholder={SIGN_UP_TEXT.emailPlaceholder}
+        textContentType="emailAddress"
       />
-      <Controller
+      <FormTextField
         control={control}
         name="password"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextField
-            label={SIGN_UP_TEXT.passwordLabel}
-            errorMessage={errors.password?.message}
-            isPassword
-            autoCapitalize="none"
-            autoComplete="new-password"
-            autoCorrect={false}
-            placeholder={SIGN_UP_TEXT.passwordPlaceholder}
-            textContentType="newPassword"
-            value={value}
-            onBlur={onBlur}
-            onChangeText={onChange}
-            onSubmitEditing={() => void submit()}
-          />
-        )}
+        label={SIGN_UP_TEXT.passwordLabel}
+        isPassword
+        autoCapitalize="none"
+        autoComplete="new-password"
+        autoCorrect={false}
+        placeholder={SIGN_UP_TEXT.passwordPlaceholder}
+        textContentType="newPassword"
+        onSubmitEditing={() => void submit()}
       />
       {failure ? (
         <FormMessage message={AUTH_FAILURE_MESSAGES[failure]} />

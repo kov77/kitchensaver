@@ -1,16 +1,16 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import {
-  fireEvent,
-  render,
-  screen,
-  userEvent,
-} from '@testing-library/react-native'
+import { QueryClient } from '@tanstack/react-query'
+import { fireEvent, screen, userEvent } from '@testing-library/react-native'
 import { randomUUID } from 'expo-crypto'
 
-import { PEOPLE_QUERY_KEY } from '@/api/constants'
+import { getPeopleListKey } from '@/api/queryKeys'
 import type { PersonListItem } from '@/api/types'
 import { GOAL_EDITOR_TEXT } from '@/components/organisms/goal/constants'
 import { ERROR_MESSAGES } from '@/core/constants'
+import { apiResult } from '@/test-utils/apiResult'
+import {
+  createTestQueryClient,
+  renderWithQuery,
+} from '@/test-utils/renderWithQuery'
 
 import {
   ALLERGEN_LABELS,
@@ -68,16 +68,8 @@ function onboardingBody() {
     .body
 }
 
-function respond(status: number, data?: unknown) {
-  return { data, response: new Response(null, { status }) } as never
-}
-
 async function renderOnboarding() {
-  await render(
-    <QueryClientProvider client={queryClient}>
-      <OnboardingScreen />
-    </QueryClientProvider>,
-  )
+  await renderWithQuery(<OnboardingScreen />, queryClient)
 }
 
 async function fillProfile(name = 'Alex') {
@@ -119,7 +111,7 @@ beforeEach(() => {
   jest
     .mocked(randomUUID)
     .mockImplementation(() => `key-${++keyCounter}-0000000000000000`)
-  queryClient = new QueryClient()
+  queryClient = createTestQueryClient()
 })
 
 describe('OnboardingScreen profile step', () => {
@@ -163,7 +155,7 @@ describe('OnboardingScreen goal step', () => {
   })
 
   it('can be skipped, and then no goal is sent', async () => {
-    mockPost.mockResolvedValue(respond(201, { person: PERSON }))
+    mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
     await skipGoal()
     await answer(ONBOARDING_TEXT.answerUnknown)
     await finish()
@@ -177,7 +169,7 @@ describe('OnboardingScreen goal step', () => {
   })
 
   it('sends a manual goal with the profile', async () => {
-    mockPost.mockResolvedValue(respond(201, { person: PERSON }))
+    mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
     const user = userEvent.setup()
     await user.press(
       screen.getByRole('radio', { name: GOAL_EDITOR_TEXT.modeManual }),
@@ -200,7 +192,7 @@ describe('OnboardingScreen goal step', () => {
 
   it('previews the estimate without a profile, using the date of birth', async () => {
     mockPost.mockResolvedValue(
-      respond(200, {
+      apiResult(200, {
         estimatedMaintenanceKcal: 2275,
         methodology: 'DRI',
         assumptions: ['AGE_IN_COMPLETED_YEARS'],
@@ -287,7 +279,7 @@ describe('OnboardingScreen allergy step', () => {
   })
 
   it('saves the listed allergens with an idempotency key', async () => {
-    mockPost.mockResolvedValue(respond(201, { person: PERSON }))
+    mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
     await answer(ONBOARDING_TEXT.answerYes)
     await userEvent
       .setup()
@@ -314,7 +306,7 @@ describe('OnboardingScreen allergy step', () => {
   ] as const)(
     'warns before saving the answer %s and saves only after confirmation',
     async (label, status, dialog) => {
-      mockPost.mockResolvedValue(respond(201, { person: PERSON }))
+      mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
       await answer(label)
 
       await finish()
@@ -354,7 +346,7 @@ describe('OnboardingScreen allergy step', () => {
   })
 
   it('adds the new person to the cached list so the app can open', async () => {
-    mockPost.mockResolvedValue(respond(201, { person: PERSON }))
+    mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
     await answer(ONBOARDING_TEXT.answerUnknown)
     await finish()
     await userEvent.setup().press(
@@ -365,12 +357,12 @@ describe('OnboardingScreen allergy step', () => {
 
     await screen.findByRole('button', { name: ONBOARDING_TEXT.finish })
     expect(
-      queryClient.getQueryData<PersonListItem[]>([...PEOPLE_QUERY_KEY, 'all']),
+      queryClient.getQueryData<PersonListItem[]>(getPeopleListKey('all')),
     ).toEqual([PERSON])
   })
 
   it('keeps the same key when the same data is sent again after a failure', async () => {
-    mockPost.mockResolvedValue(respond(500))
+    mockPost.mockResolvedValue(apiResult(500))
     await answer(ONBOARDING_TEXT.answerYes)
     await userEvent
       .setup()
@@ -385,7 +377,7 @@ describe('OnboardingScreen allergy step', () => {
   })
 
   it('uses a new key when the data changed after a failure', async () => {
-    mockPost.mockResolvedValue(respond(500))
+    mockPost.mockResolvedValue(apiResult(500))
     const user = userEvent.setup()
     await answer(ONBOARDING_TEXT.answerYes)
     await user.press(
@@ -404,7 +396,7 @@ describe('OnboardingScreen allergy step', () => {
   })
 
   it('shows a plain message and keeps the answers when the server refuses', async () => {
-    mockPost.mockResolvedValue(respond(409))
+    mockPost.mockResolvedValue(apiResult(409))
     await answer(ONBOARDING_TEXT.answerYes)
     await userEvent
       .setup()
@@ -419,9 +411,9 @@ describe('OnboardingScreen allergy step', () => {
   })
 
   it('marks the cached profile list stale after a failure so a saved profile is found', async () => {
-    const peopleKey = [...PEOPLE_QUERY_KEY, 'all']
+    const peopleKey = getPeopleListKey('all')
     queryClient.setQueryData(peopleKey, [])
-    mockPost.mockResolvedValue(respond(409))
+    mockPost.mockResolvedValue(apiResult(409))
     await answer(ONBOARDING_TEXT.answerUnknown)
     await finish()
     await userEvent.setup().press(

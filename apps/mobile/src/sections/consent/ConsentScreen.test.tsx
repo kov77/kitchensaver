@@ -1,9 +1,14 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, userEvent } from '@testing-library/react-native'
+import { QueryClient } from '@tanstack/react-query'
+import { screen, userEvent } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
 import { ME_QUERY_KEY } from '@/api/constants'
 import { ERROR_MESSAGES } from '@/core/constants'
+import { apiResult } from '@/test-utils/apiResult'
+import {
+  createTestQueryClient,
+  renderWithQuery,
+} from '@/test-utils/renderWithQuery'
 
 import { ConsentScreen } from './ConsentScreen'
 import { CONSENT_TEXT, LEGAL_DOCUMENTS } from './constants'
@@ -39,16 +44,8 @@ const COMPLETE_ONBOARDING = {
 
 let queryClient: QueryClient
 
-function respond(status: number, data?: unknown) {
-  return { data, response: new Response(null, { status }) } as never
-}
-
 async function renderConsent() {
-  await render(
-    <QueryClientProvider client={queryClient}>
-      <ConsentScreen />
-    </QueryClientProvider>,
-  )
+  await renderWithQuery(<ConsentScreen />, queryClient)
   await screen.findByRole('button', { name: CONSENT_TEXT.submit })
 }
 
@@ -73,10 +70,8 @@ function pressContinue() {
 
 beforeEach(() => {
   jest.clearAllMocks()
-  queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  })
-  jest.mocked(apiClient.GET).mockResolvedValue(respond(200, PENDING_ME))
+  queryClient = createTestQueryClient()
+  jest.mocked(apiClient.GET).mockResolvedValue(apiResult(200, PENDING_ME))
 })
 
 describe('ConsentScreen', () => {
@@ -112,7 +107,7 @@ describe('ConsentScreen', () => {
   it('sends the confirmations with the versions the server reported', async () => {
     jest
       .mocked(apiClient.POST)
-      .mockResolvedValue(respond(200, COMPLETE_ONBOARDING))
+      .mockResolvedValue(apiResult(200, COMPLETE_ONBOARDING))
     await renderConsent()
     await checkAll()
 
@@ -132,7 +127,7 @@ describe('ConsentScreen', () => {
   it('stores the new onboarding status so the app can open', async () => {
     jest
       .mocked(apiClient.POST)
-      .mockResolvedValue(respond(200, COMPLETE_ONBOARDING))
+      .mockResolvedValue(apiResult(200, COMPLETE_ONBOARDING))
     await renderConsent()
     await checkAll()
 
@@ -159,7 +154,7 @@ describe('ConsentScreen', () => {
   })
 
   it('shows a plain message and keeps the choices when the server refuses', async () => {
-    jest.mocked(apiClient.POST).mockResolvedValue(respond(422))
+    jest.mocked(apiClient.POST).mockResolvedValue(apiResult(422))
     await renderConsent()
     await checkAll()
 
