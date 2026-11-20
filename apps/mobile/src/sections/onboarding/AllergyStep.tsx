@@ -7,21 +7,22 @@ import { Button } from '@/components/atoms/Button'
 import { Chip } from '@/components/atoms/Chip'
 import { Text } from '@/components/atoms/Text'
 import { ConfirmDialog } from '@/components/molecules/ConfirmDialog'
+import { FormChoiceField } from '@/components/molecules/FormChoiceField'
 import { FormMessage } from '@/components/molecules/FormMessage'
+import { FormTextField } from '@/components/molecules/FormTextField'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
-import { TextField } from '@/components/molecules/TextField'
 
 import {
-  ALLERGEN_LABELS,
+  ALLERGEN_OPTIONS,
   ALLERGY_ANSWER,
   ALLERGY_ANSWERS,
   ONBOARDING_TEXT,
   OTHER_ALLERGEN_CODE,
   WARNING_DIALOG_BUTTONS,
-  WARNING_DIALOGS,
 } from './constants'
 import { styles } from './Onboarding.styles'
 import { allergySchema, type AllergyValues } from './schemas'
+import { getWarningDialog } from './utils'
 
 type AllergyStepProps = {
   errorMessage: string | null
@@ -29,8 +30,6 @@ type AllergyStepProps = {
   onBack: () => void
   onSubmit: (values: AllergyValues) => void
 }
-
-type WarnedAnswer = typeof ALLERGY_ANSWER.NO | typeof ALLERGY_ANSWER.UNKNOWN
 
 export function AllergyStep({
   errorMessage,
@@ -59,12 +58,7 @@ export function AllergyStep({
     setPendingValues(values)
   })
 
-  const warnedAnswer: WarnedAnswer | null =
-    pendingValues?.answer === ALLERGY_ANSWER.NO ||
-    pendingValues?.answer === ALLERGY_ANSWER.UNKNOWN
-      ? pendingValues.answer
-      : null
-  const dialog = warnedAnswer ? WARNING_DIALOGS[warnedAnswer] : null
+  const dialog = getWarningDialog(pendingValues)
 
   const confirmWarning = () => {
     if (!pendingValues) return
@@ -75,33 +69,13 @@ export function AllergyStep({
   return (
     <>
       <ScreenHeader title={ONBOARDING_TEXT.allergyTitle} />
-      <View style={styles.group}>
-        <Text variant="label" accessibilityRole="header">
-          {ONBOARDING_TEXT.allergyQuestion}
-        </Text>
-        <Controller
-          control={control}
-          name="answer"
-          render={({ field: { onChange, value } }) => (
-            <View style={styles.chips}>
-              {ALLERGY_ANSWERS.map(({ value: option, label }) => (
-                <Chip
-                  key={option}
-                  label={label}
-                  role="radio"
-                  isSelected={value === option}
-                  onPress={() => onChange(option)}
-                />
-              ))}
-            </View>
-          )}
-        />
-        {errors.answer ? (
-          <Text variant="link" color="warning" accessibilityLiveRegion="polite">
-            {errors.answer.message}
-          </Text>
-        ) : null}
-      </View>
+      <FormChoiceField
+        control={control}
+        name="answer"
+        label={ONBOARDING_TEXT.allergyQuestion}
+        labelColor="text"
+        options={ALLERGY_ANSWERS}
+      />
       {answer === ALLERGY_ANSWER.YES ? (
         <View style={styles.group}>
           <Text variant="label" accessibilityRole="header">
@@ -112,8 +86,8 @@ export function AllergyStep({
             name="allergens"
             render={({ field: { onChange, value } }) => (
               <View style={styles.chips}>
-                {Object.entries(ALLERGEN_LABELS).map(([code, label]) => {
-                  const isSelected = value.some((selected) => selected === code)
+                {ALLERGEN_OPTIONS.map(({ value: code, label }) => {
+                  const isSelected = value.includes(code)
                   return (
                     <Chip
                       key={code}
@@ -144,20 +118,12 @@ export function AllergyStep({
         </View>
       ) : null}
       {answer === ALLERGY_ANSWER.YES &&
-      allergens.some((code) => code === OTHER_ALLERGEN_CODE) ? (
-        <Controller
+      allergens.includes(OTHER_ALLERGEN_CODE) ? (
+        <FormTextField
           control={control}
           name="otherLabel"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextField
-              label={ONBOARDING_TEXT.otherLabel}
-              errorMessage={errors.otherLabel?.message}
-              placeholder={ONBOARDING_TEXT.otherPlaceholder}
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-            />
-          )}
+          label={ONBOARDING_TEXT.otherLabel}
+          placeholder={ONBOARDING_TEXT.otherPlaceholder}
         />
       ) : null}
       {errorMessage ? <FormMessage message={errorMessage} /> : null}

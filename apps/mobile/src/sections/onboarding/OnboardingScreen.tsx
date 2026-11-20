@@ -1,35 +1,27 @@
-import { useState } from 'react'
+import { useReducer } from 'react'
 
 import { useCreateOnboarding } from '@/api/queries/useCreateOnboarding'
 import { AppScreen } from '@/components/templates/AppScreen'
 import { useSession } from '@/core/auth/SessionProvider'
-import type { GoalDraft } from '@/core/types'
 import { getErrorMessage } from '@/utils/errors'
 
 import { AllergyStep } from './AllergyStep'
+import { EMPTY_PROFILE, INITIAL_FLOW_STATE } from './constants'
 import { GoalStep } from './GoalStep'
 import { ProfileStep } from './ProfileStep'
-import type { AllergyValues, ProfileValues } from './schemas'
-import { buildOnboardingBody } from './utils'
+import type { AllergyValues } from './schemas'
+import { buildOnboardingBody, onboardingFlowReducer } from './utils'
 import { useAttemptKey } from './useAttemptKey'
-
-type Profile = { name: string; dateOfBirth: Date }
-
-type Step = 'profile' | 'goal' | 'allergies'
-
-const EMPTY_PROFILE: ProfileValues = { name: '', dateOfBirth: null }
 
 export function OnboardingScreen() {
   const { signOut } = useSession()
   const { mutate: createOnboarding, error, isPending } = useCreateOnboarding()
   const getAttemptKey = useAttemptKey()
-  const [step, setStep] = useState<Step>('profile')
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [goal, setGoal] = useState<GoalDraft | null>(null)
+  const [flow, dispatch] = useReducer(onboardingFlowReducer, INITIAL_FLOW_STATE)
 
   const submit = (allergies: AllergyValues) => {
-    if (!profile) return
-    const body = buildOnboardingBody(profile, goal, allergies)
+    if (flow.step !== 'allergies') return
+    const body = buildOnboardingBody(flow.profile, flow.goal, allergies)
     createOnboarding({
       body,
       idempotencyKey: getAttemptKey(JSON.stringify(body)),
@@ -38,31 +30,25 @@ export function OnboardingScreen() {
 
   return (
     <AppScreen>
-      {step === 'profile' || !profile ? (
+      {flow.step === 'profile' ? (
         <ProfileStep
-          initialValues={profile ?? EMPTY_PROFILE}
-          onNext={(values) => {
-            setProfile(values)
-            setStep('goal')
-          }}
+          initialValues={flow.profile ?? EMPTY_PROFILE}
+          onNext={(profile) => dispatch({ type: 'profileSubmitted', profile })}
           onLogOut={() => void signOut()}
         />
       ) : null}
-      {step === 'goal' && profile ? (
+      {flow.step === 'goal' ? (
         <GoalStep
-          dateOfBirth={profile.dateOfBirth}
-          onNext={(draft) => {
-            setGoal(draft)
-            setStep('allergies')
-          }}
-          onBack={() => setStep('profile')}
+          dateOfBirth={flow.profile.dateOfBirth}
+          onNext={(goal) => dispatch({ type: 'goalChosen', goal })}
+          onBack={() => dispatch({ type: 'back' })}
         />
       ) : null}
-      {step === 'allergies' && profile ? (
+      {flow.step === 'allergies' ? (
         <AllergyStep
           errorMessage={error ? getErrorMessage(error) : null}
           isSubmitting={isPending}
-          onBack={() => setStep('goal')}
+          onBack={() => dispatch({ type: 'back' })}
           onSubmit={submit}
         />
       ) : null}

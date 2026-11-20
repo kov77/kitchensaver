@@ -1,6 +1,10 @@
-import { ALLERGY_ANSWER } from './constants'
+import { ALLERGY_ANSWER, WARNING_DIALOGS } from './constants'
 import type { AllergyValues } from './schemas'
-import { buildOnboardingBody } from './utils'
+import {
+  buildOnboardingBody,
+  getWarningDialog,
+  onboardingFlowReducer,
+} from './utils'
 
 const PROFILE = { name: 'Alex', dateOfBirth: new Date(1990, 4, 15) }
 
@@ -83,5 +87,83 @@ describe('buildOnboardingBody', () => {
     expect(() =>
       buildOnboardingBody(PROFILE, null, allergies({ answer: null })),
     ).toThrow()
+  })
+})
+
+describe('getWarningDialog', () => {
+  const NO = { answer: ALLERGY_ANSWER.NO, allergens: [], otherLabel: '' }
+
+  it('warns before saving the answer no', () => {
+    expect(getWarningDialog(NO)).toEqual(WARNING_DIALOGS[ALLERGY_ANSWER.NO])
+  })
+
+  it('warns before saving the answer unknown', () => {
+    expect(getWarningDialog({ ...NO, answer: ALLERGY_ANSWER.UNKNOWN })).toEqual(
+      WARNING_DIALOGS[ALLERGY_ANSWER.UNKNOWN],
+    )
+  })
+
+  it.each([
+    ['listed allergies', { ...NO, answer: ALLERGY_ANSWER.YES }],
+    ['an unanswered question', { ...NO, answer: null }],
+    ['nothing pending', null],
+  ])('does not warn for %s', (_name, values) => {
+    expect(getWarningDialog(values)).toBeNull()
+  })
+})
+
+describe('onboardingFlowReducer', () => {
+  const GOAL = { mode: 'MANUAL', goalType: 'CUSTOM', dailyKcal: 2000 } as const
+  const START = { step: 'profile', profile: null } as const
+
+  it('moves from the profile to the goal step with the profile', () => {
+    expect(
+      onboardingFlowReducer(START, {
+        type: 'profileSubmitted',
+        profile: PROFILE,
+      }),
+    ).toEqual({ step: 'goal', profile: PROFILE })
+  })
+
+  it('moves from the goal to the allergy step with the chosen goal', () => {
+    expect(
+      onboardingFlowReducer(
+        { step: 'goal', profile: PROFILE },
+        { type: 'goalChosen', goal: GOAL },
+      ),
+    ).toEqual({ step: 'allergies', profile: PROFILE, goal: GOAL })
+  })
+
+  it('keeps no goal when the step was skipped', () => {
+    expect(
+      onboardingFlowReducer(
+        { step: 'goal', profile: PROFILE },
+        { type: 'goalChosen', goal: null },
+      ),
+    ).toEqual({ step: 'allergies', profile: PROFILE, goal: null })
+  })
+
+  it('ignores a goal that arrives outside the goal step', () => {
+    expect(
+      onboardingFlowReducer(START, { type: 'goalChosen', goal: GOAL }),
+    ).toBe(START)
+  })
+
+  it('goes back one step at a time and keeps the profile', () => {
+    const allergies = {
+      step: 'allergies',
+      profile: PROFILE,
+      goal: GOAL,
+    } as const
+
+    const goal = onboardingFlowReducer(allergies, { type: 'back' })
+    const profile = onboardingFlowReducer(goal, { type: 'back' })
+
+    expect(goal).toEqual({ step: 'goal', profile: PROFILE })
+    expect(profile).toEqual({ step: 'profile', profile: PROFILE })
+  })
+
+  it('stays on the first step when going back from it', () => {
+    expect(onboardingFlowReducer(START, { type: 'back' })).toBe(START)
   })
 })

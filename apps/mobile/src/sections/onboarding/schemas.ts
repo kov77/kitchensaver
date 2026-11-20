@@ -5,18 +5,13 @@ import { NAME_MAX_LENGTH } from '@/core/constants'
 import { toIsoDate } from '@/utils/dates'
 
 import {
-  ALLERGEN_LABELS,
+  ALLERGEN_OPTIONS,
   ALLERGY_ANSWER,
   ONBOARDING_ERRORS,
   OTHER_ALLERGEN_CODE,
 } from './constants'
 
 type DateBounds = { minimumDate: Date; maximumDate: Date }
-
-const allergenCodes = Object.keys(ALLERGEN_LABELS) as [
-  AllergenCode,
-  ...AllergenCode[],
-]
 
 export function createProfileSchema({ minimumDate, maximumDate }: DateBounds) {
   return zod.object({
@@ -53,7 +48,11 @@ export function createProfileSchema({ minimumDate, maximumDate }: DateBounds) {
 export const allergySchema = zod
   .object({
     answer: zod.enum(Object.values(ALLERGY_ANSWER)).nullable(),
-    allergens: zod.array(zod.enum(allergenCodes)),
+    allergens: zod.array(
+      zod.custom<AllergenCode>((input) =>
+        ALLERGEN_OPTIONS.some(({ value }) => value === input),
+      ),
+    ),
     otherLabel: zod
       .string()
       .trim()
