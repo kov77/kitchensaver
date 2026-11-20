@@ -1,10 +1,12 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, userEvent } from '@testing-library/react-native'
+import { QueryClient } from '@tanstack/react-query'
+import { screen, userEvent } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
 import type { PersonListItem } from '@/api/types'
 import { ERROR_MESSAGES } from '@/core/constants'
 import { shouldRetryRequest } from '@/utils/errors'
+import { apiResult } from '@/test-utils/apiResult'
+import { renderWithQuery } from '@/test-utils/renderWithQuery'
 
 import { PEOPLE_TEXT } from './constants'
 import { PeopleScreen } from './PeopleScreen'
@@ -43,23 +45,15 @@ const NEW_PERSON: PersonListItem = {
 }
 
 function respondWith(status: number, data?: unknown) {
-  jest.mocked(apiClient.GET).mockResolvedValue({
-    data,
-    response: new Response(null, { status }),
-  } as never)
+  jest.mocked(apiClient.GET).mockResolvedValue(apiResult(status, data))
 }
 
 async function renderPeople() {
-  await render(
-    <QueryClientProvider
-      client={
-        new QueryClient({
-          defaultOptions: { queries: { retry: shouldRetryRequest } },
-        })
-      }
-    >
-      <PeopleScreen />
-    </QueryClientProvider>,
+  await renderWithQuery(
+    <PeopleScreen />,
+    new QueryClient({
+      defaultOptions: { queries: { retry: shouldRetryRequest } },
+    }),
   )
 }
 
