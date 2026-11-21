@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 
 import { apiClient } from '@/api/apiClient'
 
-import { ERROR_MESSAGES } from './constants'
 import { useAppAccess } from './useAppAccess'
 
 let mockSessionStatus: 'loading' | 'signedOut' | 'signedIn'
@@ -98,7 +97,9 @@ describe('useAppAccess', () => {
     const { result } = await renderHook(() => useAppAccess(), { wrapper })
 
     await waitFor(() => expect(result.current.access).toBe('unavailable'))
-    expect(result.current.errorMessage).toBe(ERROR_MESSAGES.NETWORK)
+    expect(result.current.errorMessage).toBe(
+      'No connection. Check your internet and try again.',
+    )
 
     serverState({ isConsentComplete: true, people: [{ id: 'person' }] })
     await act(async () => result.current.retry())

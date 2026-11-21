@@ -1,4 +1,4 @@
-import { ALLERGY_ANSWER, WARNING_DIALOGS } from './constants'
+import { ALLERGY_ANSWER } from './constants'
 import type { AllergyValues } from './schemas'
 import {
   buildOnboardingBody,
@@ -94,12 +94,18 @@ describe('getWarningDialog', () => {
   const NO = { answer: ALLERGY_ANSWER.NO, allergens: [], otherLabel: '' }
 
   it('warns before saving the answer no', () => {
-    expect(getWarningDialog(NO)).toEqual(WARNING_DIALOGS[ALLERGY_ANSWER.NO])
+    expect(getWarningDialog(NO)).toEqual({
+      titleKey: 'warning-dialogs-no-title',
+      messageKey: 'warning-dialogs-no-message',
+    })
   })
 
   it('warns before saving the answer unknown', () => {
     expect(getWarningDialog({ ...NO, answer: ALLERGY_ANSWER.UNKNOWN })).toEqual(
-      WARNING_DIALOGS[ALLERGY_ANSWER.UNKNOWN],
+      {
+        titleKey: 'warning-dialogs-unknown-title',
+        messageKey: 'warning-dialogs-unknown-message',
+      },
     )
   })
 

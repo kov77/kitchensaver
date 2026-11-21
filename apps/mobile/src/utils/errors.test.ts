@@ -1,5 +1,3 @@
-import { ERROR_MESSAGES } from '@/core/constants'
-
 import {
   ApiRequestError,
   getErrorMessage,
@@ -9,36 +7,38 @@ import {
 
 describe('getErrorMessage', () => {
   it.each([
-    [401, ERROR_MESSAGES.SESSION_EXPIRED],
-    [403, ERROR_MESSAGES.FORBIDDEN],
-    [404, ERROR_MESSAGES.NOT_FOUND],
-    [429, ERROR_MESSAGES.TOO_MANY_REQUESTS],
-    [500, ERROR_MESSAGES.SERVER],
-    [503, ERROR_MESSAGES.SERVER],
-    [400, ERROR_MESSAGES.UNKNOWN],
-    [409, ERROR_MESSAGES.CONFLICT],
-    [422, ERROR_MESSAGES.UNPROCESSABLE],
+    [401, 'Your session has expired. Please log in again.'],
+    [403, 'You do not have access to this.'],
+    [404, 'We could not find what you were looking for.'],
+    [429, 'Too many requests. Please wait a moment and try again.'],
+    [500, 'The server had a problem. Please try again.'],
+    [503, 'The server had a problem. Please try again.'],
+    [400, 'Something went wrong. Please try again.'],
+    [409, 'This could not be saved right now. Please try again.'],
+    [422, 'Please check the information and try again.'],
   ])('maps status %s to a plain message', (status, message) => {
     expect(getErrorMessage(new ApiRequestError(status))).toBe(message)
   })
 
   it('recognizes a lost connection', () => {
     expect(getErrorMessage(new TypeError('Network request failed'))).toBe(
-      ERROR_MESSAGES.NETWORK,
+      'No connection. Check your internet and try again.',
     )
   })
 
   it('does not call a programming error a network problem', () => {
     expect(
       getErrorMessage(new TypeError('Cannot read properties of undefined')),
-    ).toBe(ERROR_MESSAGES.UNKNOWN)
+    ).toBe('Something went wrong. Please try again.')
   })
 
   it('never exposes the technical message of an unknown error', () => {
     const technical = 'SQLSTATE 42P01 relation people does not exist'
 
     expect(getErrorMessage(new Error(technical))).not.toContain(technical)
-    expect(getErrorMessage('a thrown string')).toBe(ERROR_MESSAGES.UNKNOWN)
+    expect(getErrorMessage('a thrown string')).toBe(
+      'Something went wrong. Please try again.',
+    )
   })
 })
 

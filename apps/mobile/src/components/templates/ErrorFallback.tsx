@@ -1,21 +1,22 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/atoms/Button'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
 
 import { AppScreen } from './AppScreen'
-import { ERROR_FALLBACK_TEXT } from './constants'
 
 type ErrorFallbackProps = {
   onRetry: () => void
 }
 
 export function ErrorFallback({ onRetry }: ErrorFallbackProps) {
+  const { t } = useTranslation('common')
   return (
     <AppScreen>
       <ScreenHeader
-        title={ERROR_FALLBACK_TEXT.title}
-        subtitle={ERROR_FALLBACK_TEXT.subtitle}
+        title={t('error-fallback-title')}
+        subtitle={t('error-fallback-subtitle')}
       />
-      <Button title={ERROR_FALLBACK_TEXT.retry} onPress={onRetry} />
+      <Button title={t('error-fallback-retry')} onPress={onRetry} />
     </AppScreen>
   )
 }

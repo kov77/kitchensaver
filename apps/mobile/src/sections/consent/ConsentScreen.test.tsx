@@ -3,7 +3,6 @@ import { screen, userEvent } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
 import { ME_QUERY_KEY } from '@/api/constants'
-import { ERROR_MESSAGES } from '@/core/constants'
 import { apiResult } from '@/test-utils/apiResult'
 import {
   createTestQueryClient,
@@ -11,7 +10,6 @@ import {
 } from '@/test-utils/renderWithQuery'
 
 import { ConsentScreen } from './ConsentScreen'
-import { CONSENT_TEXT, LEGAL_DOCUMENTS } from './constants'
 
 const mockSignOut = jest.fn()
 
@@ -46,26 +44,24 @@ let queryClient: QueryClient
 
 async function renderConsent() {
   await renderWithQuery(<ConsentScreen />, queryClient)
-  await screen.findByRole('button', { name: CONSENT_TEXT.submit })
+  await screen.findByRole('button', { name: 'Continue' })
 }
 
 async function checkAll() {
   const user = userEvent.setup()
+  await user.press(screen.getByRole('checkbox', { name: 'I am 18 or older' }))
   await user.press(
-    screen.getByRole('checkbox', { name: CONSENT_TEXT.adultLabel }),
+    screen.getByRole('checkbox', { name: 'I accept the Terms of Service' }),
   )
   await user.press(
-    screen.getByRole('checkbox', { name: CONSENT_TEXT.termsLabel }),
-  )
-  await user.press(
-    screen.getByRole('checkbox', { name: CONSENT_TEXT.privacyLabel }),
+    screen.getByRole('checkbox', { name: 'I have read the Privacy Policy' }),
   )
 }
 
 function pressContinue() {
   return userEvent
     .setup()
-    .press(screen.getByRole('button', { name: CONSENT_TEXT.submit }))
+    .press(screen.getByRole('button', { name: 'Continue' }))
 }
 
 beforeEach(() => {
@@ -78,13 +74,13 @@ describe('ConsentScreen', () => {
   it('shows both legal texts and three unchecked confirmations', async () => {
     await renderConsent()
 
-    for (const { title } of LEGAL_DOCUMENTS) {
+    for (const title of ['Terms of Service', 'Privacy Policy']) {
       expect(screen.getByText(title)).toBeTruthy()
     }
     for (const label of [
-      CONSENT_TEXT.adultLabel,
-      CONSENT_TEXT.termsLabel,
-      CONSENT_TEXT.privacyLabel,
+      'I am 18 or older',
+      'I accept the Terms of Service',
+      'I have read the Privacy Policy',
     ]) {
       expect(screen.getByRole('checkbox', { name: label })).not.toBeChecked()
     }
@@ -94,12 +90,12 @@ describe('ConsentScreen', () => {
     await renderConsent()
     await userEvent
       .setup()
-      .press(screen.getByRole('checkbox', { name: CONSENT_TEXT.adultLabel }))
+      .press(screen.getByRole('checkbox', { name: 'I am 18 or older' }))
 
     await pressContinue()
 
     expect(
-      await screen.findAllByText(CONSENT_TEXT.confirmationRequired),
+      await screen.findAllByText('Please confirm to continue.'),
     ).toHaveLength(2)
     expect(apiClient.POST).not.toHaveBeenCalled()
   })
@@ -133,7 +129,7 @@ describe('ConsentScreen', () => {
 
     await pressContinue()
 
-    await screen.findByRole('button', { name: CONSENT_TEXT.submit })
+    await screen.findByRole('button', { name: 'Continue' })
     expect(
       queryClient.getQueryData<typeof PENDING_ME>(ME_QUERY_KEY)?.onboarding
         .complete,
@@ -145,7 +141,7 @@ describe('ConsentScreen', () => {
     await renderConsent()
     await checkAll()
     const user = userEvent.setup()
-    const button = screen.getByRole('button', { name: CONSENT_TEXT.submit })
+    const button = screen.getByRole('button', { name: 'Continue' })
 
     await user.press(button)
     await user.press(button)
@@ -160,9 +156,11 @@ describe('ConsentScreen', () => {
 
     await pressContinue()
 
-    expect(await screen.findByText(ERROR_MESSAGES.UNPROCESSABLE)).toBeTruthy()
     expect(
-      screen.getByRole('checkbox', { name: CONSENT_TEXT.termsLabel }),
+      await screen.findByText('Please check the information and try again.'),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('checkbox', { name: 'I accept the Terms of Service' }),
     ).toBeChecked()
   })
 
@@ -171,7 +169,7 @@ describe('ConsentScreen', () => {
 
     await userEvent
       .setup()
-      .press(screen.getByRole('button', { name: CONSENT_TEXT.logOut }))
+      .press(screen.getByRole('button', { name: 'Log out' }))
 
     expect(mockSignOut).toHaveBeenCalledTimes(1)
   })

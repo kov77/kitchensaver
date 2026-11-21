@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/atoms/Button'
 import { Text } from '@/components/atoms/Text'
@@ -9,12 +10,8 @@ import type { EstimatedGoalType, GoalEstimate } from '@/core/types'
 import { parseDecimal } from '@/utils/numbers'
 
 import { styles } from './EstimateReview.styles'
-import {
-  ASSUMPTION_TEXT,
-  GOAL_EDITOR_TEXT,
-  UNKNOWN_ASSUMPTION_TEXT,
-} from './constants'
 import { targetSchema, type TargetValues } from './schemas'
+import { getAssumptionKey } from './utils'
 
 type EstimateReviewProps = {
   estimate: GoalEstimate
@@ -33,6 +30,7 @@ export function EstimateReview({
   onSubmit,
   onChangeDetails,
 }: EstimateReviewProps) {
+  const { t } = useTranslation('goal')
   const { estimatedMaintenanceKcal, methodology, assumptions } = estimate
   const { control, handleSubmit } = useForm<TargetValues>({
     resolver: zodResolver(targetSchema),
@@ -51,35 +49,35 @@ export function EstimateReview({
     <>
       <View style={styles.card}>
         <Text variant="label" accessibilityRole="header">
-          {GOAL_EDITOR_TEXT.estimateTitle}
+          {t('editor-estimate-title')}
         </Text>
         <Text variant="title">
-          {`${estimatedMaintenanceKcal.toLocaleString('en-US')} ${GOAL_EDITOR_TEXT.maintenanceSuffix}`}
+          {`${estimatedMaintenanceKcal.toLocaleString('en-US')} ${t('editor-maintenance-suffix')}`}
         </Text>
         <Text variant="subtitle" color="textMuted">
-          {GOAL_EDITOR_TEXT.disclaimer}
+          {t('editor-disclaimer')}
         </Text>
         <Text variant="label" color="textMuted">
-          {GOAL_EDITOR_TEXT.assumptionsLabel}
+          {t('editor-assumptions-label')}
         </Text>
         <Text variant="subtitle" color="textMuted">
           {methodology}
         </Text>
         {assumptions.map((assumption) => (
           <Text key={assumption} variant="subtitle" color="textMuted">
-            {`• ${ASSUMPTION_TEXT[assumption] ?? UNKNOWN_ASSUMPTION_TEXT}`}
+            {`• ${t(getAssumptionKey(assumption))}`}
           </Text>
         ))}
       </View>
       {goalType !== 'MAINTAIN' ? (
         <Text variant="subtitle" color="textMuted">
-          {GOAL_EDITOR_TEXT.targetHint}
+          {t('editor-target-hint')}
         </Text>
       ) : null}
       <FormTextField
         control={control}
         name="dailyKcal"
-        label={GOAL_EDITOR_TEXT.targetLabel}
+        label={t('editor-target-label')}
         keyboardType="number-pad"
       />
       <Button
@@ -88,7 +86,7 @@ export function EstimateReview({
         onPress={() => void submit()}
       />
       <Button
-        title={GOAL_EDITOR_TEXT.changeDetails}
+        title={t('editor-change-details')}
         variant="secondary"
         onPress={onChangeDetails}
       />

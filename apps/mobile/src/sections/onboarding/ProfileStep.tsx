@@ -1,9 +1,8 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/atoms/Button'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
 import { ProfileForm } from '@/components/organisms/ProfileForm'
 import type { ProfileValues } from '@/components/organisms/profile/schemas'
-
-import { ONBOARDING_TEXT } from './constants'
 
 type ProfileStepProps = {
   initialValues: ProfileValues
@@ -16,22 +15,19 @@ export function ProfileStep({
   onNext,
   onLogOut,
 }: ProfileStepProps) {
+  const { t } = useTranslation('onboarding')
   return (
     <>
       <ScreenHeader
-        title={ONBOARDING_TEXT.profileTitle}
-        subtitle={ONBOARDING_TEXT.profileSubtitle}
+        title={t('profile-title')}
+        subtitle={t('profile-subtitle')}
       />
       <ProfileForm
         initialValues={initialValues}
-        submitLabel={ONBOARDING_TEXT.next}
+        submitLabel={t('next')}
         onSubmit={onNext}
       />
-      <Button
-        title={ONBOARDING_TEXT.logOut}
-        variant="secondary"
-        onPress={onLogOut}
-      />
+      <Button title={t('log-out')} variant="secondary" onPress={onLogOut} />
     </>
   )
 }

@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useTranslation } from 'react-i18next'
 
 import { usePerson } from '@/api/queries/usePerson'
 import { Button } from '@/components/atoms/Button'
@@ -8,14 +9,14 @@ import { FormMessage } from '@/components/molecules/FormMessage'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
 import { AppScreen } from '@/components/templates/AppScreen'
 import { getErrorMessage } from '@/utils/errors'
-import { describeReadiness } from '@/utils/person'
+import { usePersonSummary } from '@/core/usePersonSummary'
 
 import { AllergyCard } from './AllergyCard'
-import { PERSON_TEXT } from './constants'
 import { GoalCard } from './GoalCard'
 import { ProfileCard } from './ProfileCard'
 
 export function PersonScreen() {
+  const { t } = useTranslation('person')
   const { personId } = useLocalSearchParams<{ personId: string }>()
   const router = useRouter()
   const {
@@ -25,6 +26,7 @@ export function PersonScreen() {
     isPending,
     refetch,
   } = usePerson(personId)
+  const { describeReadiness } = usePersonSummary()
   const readinessHint = person ? describeReadiness(person.planReadiness) : null
 
   return (
@@ -34,7 +36,7 @@ export function PersonScreen() {
         <>
           <FormMessage message={getErrorMessage(error)} />
           <Button
-            title={PERSON_TEXT.retry}
+            title={t('retry')}
             variant="secondary"
             isLoading={isFetching}
             onPress={() => void refetch()}
@@ -45,7 +47,7 @@ export function PersonScreen() {
         <>
           <ScreenHeader
             title={person.name}
-            subtitle={`${person.age} ${PERSON_TEXT.yearsOld}`}
+            subtitle={`${person.age} ${t('years-old')}`}
           />
           {readinessHint ? (
             <Text variant="link" color="warning">
@@ -69,7 +71,7 @@ export function PersonScreen() {
         </>
       ) : null}
       <Button
-        title={PERSON_TEXT.back}
+        title={t('back')}
         variant="secondary"
         onPress={() => router.back()}
       />

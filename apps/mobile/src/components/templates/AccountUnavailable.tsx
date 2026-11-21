@@ -1,9 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/atoms/Button'
 import { FormMessage } from '@/components/molecules/FormMessage'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
 
 import { AppScreen } from './AppScreen'
-import { ACCOUNT_UNAVAILABLE_TEXT } from './constants'
 
 type AccountUnavailableProps = {
   message: string
@@ -18,17 +18,18 @@ export function AccountUnavailable({
   onRetry,
   onLogOut,
 }: AccountUnavailableProps) {
+  const { t } = useTranslation('common')
   return (
     <AppScreen>
-      <ScreenHeader title={ACCOUNT_UNAVAILABLE_TEXT.title} />
+      <ScreenHeader title={t('account-unavailable-title')} />
       <FormMessage message={message} />
       <Button
-        title={ACCOUNT_UNAVAILABLE_TEXT.retry}
+        title={t('account-unavailable-retry')}
         isLoading={isRetrying}
         onPress={onRetry}
       />
       <Button
-        title={ACCOUNT_UNAVAILABLE_TEXT.logOut}
+        title={t('account-unavailable-log-out')}
         variant="secondary"
         onPress={onLogOut}
       />

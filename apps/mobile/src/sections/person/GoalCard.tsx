@@ -1,10 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import type { PersonDetail } from '@/api/types'
 import { Button } from '@/components/atoms/Button'
 import { Text } from '@/components/atoms/Text'
 import { SectionCard } from '@/components/molecules/SectionCard'
-import { describeGoal } from '@/utils/person'
-
-import { PERSON_TEXT } from './constants'
+import { usePersonSummary } from '@/core/usePersonSummary'
 
 type GoalCardProps = {
   goal: PersonDetail['goal']
@@ -12,11 +11,13 @@ type GoalCardProps = {
 }
 
 export function GoalCard({ goal, onChangeGoal }: GoalCardProps) {
+  const { t } = useTranslation('person')
+  const { describeGoal } = usePersonSummary()
   return (
-    <SectionCard title={PERSON_TEXT.goalTitle}>
+    <SectionCard title={t('goal-title')}>
       <Text variant="body">{describeGoal(goal)}</Text>
       <Button
-        title={goal ? PERSON_TEXT.changeGoal : PERSON_TEXT.setGoal}
+        title={goal ? t('change-goal') : t('set-goal')}
         variant="secondary"
         onPress={onChangeGoal}
       />

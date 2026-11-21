@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/atoms/Button'
 import { FormDateField } from '@/components/molecules/FormDateField'
@@ -9,7 +10,6 @@ import { FormTextField } from '@/components/molecules/FormTextField'
 import { MAX_PROFILE_AGE, MIN_PROFILE_AGE } from '@/core/constants'
 import { subtractYears } from '@/utils/dates'
 
-import { PROFILE_TEXT } from './profile/constants'
 import { createProfileSchema, type ProfileValues } from './profile/schemas'
 
 type ProfileFormProps = {
@@ -27,6 +27,7 @@ export function ProfileForm({
   errorMessage = null,
   onSubmit,
 }: ProfileFormProps) {
+  const { t } = useTranslation('profile')
   const bounds = useMemo(() => {
     const today = new Date()
     return {
@@ -48,16 +49,16 @@ export function ProfileForm({
       <FormTextField
         control={control}
         name="name"
-        label={PROFILE_TEXT.nameLabel}
+        label={t('name-label')}
         autoCapitalize="words"
         autoComplete="given-name"
-        placeholder={PROFILE_TEXT.namePlaceholder}
+        placeholder={t('name-placeholder')}
       />
       <FormDateField
         control={control}
         name="dateOfBirth"
-        label={PROFILE_TEXT.dateOfBirthLabel}
-        placeholder={PROFILE_TEXT.dateOfBirthPlaceholder}
+        label={t('date-of-birth-label')}
+        placeholder={t('date-of-birth-placeholder')}
         {...bounds}
       />
       {errorMessage ? <FormMessage message={errorMessage} /> : null}

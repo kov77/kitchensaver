@@ -1,6 +1,7 @@
 import type { AllergenCode, PlanReadinessReason } from '@/api/types'
+import type { CommonKey } from '@/translations/types'
 
-import type { GoalType } from './types'
+import type { ActivityLevel, FormulaSex, GoalType } from './types'
 
 export const RESPONSE_STATUS_CODE = {
   UNAUTHORIZED: 401,
@@ -21,18 +22,6 @@ export const MAX_VISIBLE_TOASTS = 3
 
 export const NETWORK_ERROR_PATTERN = /network request failed|failed to fetch/i
 
-export const ERROR_MESSAGES = {
-  SESSION_EXPIRED: 'Your session has expired. Please log in again.',
-  NETWORK: 'No connection. Check your internet and try again.',
-  FORBIDDEN: 'You do not have access to this.',
-  NOT_FOUND: 'We could not find what you were looking for.',
-  CONFLICT: 'This could not be saved right now. Please try again.',
-  UNPROCESSABLE: 'Please check the information and try again.',
-  TOO_MANY_REQUESTS: 'Too many requests. Please wait a moment and try again.',
-  SERVER: 'The server had a problem. Please try again.',
-  UNKNOWN: 'Something went wrong. Please try again.',
-} as const
-
 export const DISPLAY_DATE_LOCALE = 'en-GB'
 export const DISPLAY_DATE_FORMAT = { dateStyle: 'long' } as const
 
@@ -46,38 +35,44 @@ export const GOAL_LIMITS = {
   weightKg: { min: 20, max: 400 },
 } as const
 
-export const GOAL_TYPE_LABELS: Record<GoalType, string> = {
-  LOSE: 'Lose weight',
-  MAINTAIN: 'Maintain weight',
-  GAIN: 'Gain weight',
-  CUSTOM: 'Custom goal',
+export const ALLERGEN_LABEL_KEYS: Record<AllergenCode, CommonKey> = {
+  MILK: 'common:allergens-MILK',
+  EGG: 'common:allergens-EGG',
+  FISH: 'common:allergens-FISH',
+  CRUSTACEAN_SHELLFISH: 'common:allergens-CRUSTACEAN_SHELLFISH',
+  MOLLUSC: 'common:allergens-MOLLUSC',
+  TREE_NUT: 'common:allergens-TREE_NUT',
+  PEANUT: 'common:allergens-PEANUT',
+  WHEAT: 'common:allergens-WHEAT',
+  SOY: 'common:allergens-SOY',
+  SESAME: 'common:allergens-SESAME',
+  MUSTARD: 'common:allergens-MUSTARD',
+  SULPHITES: 'common:allergens-SULPHITES',
+  OTHER: 'common:allergens-OTHER',
 }
 
-export const PERSON_SUMMARY_TEXT = {
-  noGoal: 'No goal yet',
-  kcalPerDay: 'kcal/day',
-  notReady: 'Not ready to plan',
-} as const
-
-export const READINESS_HINTS: Record<PlanReadinessReason, string> = {
-  MISSING_GOAL: 'add a daily calorie goal',
-  GOAL_REVIEW_REQUIRED: 'review the goal',
-  GOAL_NOT_VALID_FOR_AGE: 'the goal does not fit this age',
-  ALLERGY_STATUS_MISSING: 'answer the allergy question',
+export const GOAL_TYPE_LABEL_KEYS: Record<GoalType, CommonKey> = {
+  LOSE: 'common:goal-types-LOSE',
+  MAINTAIN: 'common:goal-types-MAINTAIN',
+  GAIN: 'common:goal-types-GAIN',
+  CUSTOM: 'common:goal-types-CUSTOM',
 }
 
-export const ALLERGEN_LABELS: Record<AllergenCode, string> = {
-  MILK: 'Milk',
-  EGG: 'Eggs',
-  FISH: 'Fish',
-  CRUSTACEAN_SHELLFISH: 'Crustaceans',
-  MOLLUSC: 'Molluscs',
-  TREE_NUT: 'Tree nuts',
-  PEANUT: 'Peanuts',
-  WHEAT: 'Wheat',
-  SOY: 'Soy',
-  SESAME: 'Sesame',
-  MUSTARD: 'Mustard',
-  SULPHITES: 'Sulphites',
-  OTHER: 'Other',
+export const ACTIVITY_LEVEL_LABEL_KEYS: Record<ActivityLevel, CommonKey> = {
+  INACTIVE: 'common:activity-levels-INACTIVE',
+  LOW_ACTIVE: 'common:activity-levels-LOW_ACTIVE',
+  ACTIVE: 'common:activity-levels-ACTIVE',
+  VERY_ACTIVE: 'common:activity-levels-VERY_ACTIVE',
+}
+
+export const SEX_LABEL_KEYS: Record<FormulaSex, CommonKey> = {
+  MALE: 'common:sexes-MALE',
+  FEMALE: 'common:sexes-FEMALE',
+}
+
+export const READINESS_HINT_KEYS: Record<PlanReadinessReason, CommonKey> = {
+  MISSING_GOAL: 'common:readiness-hints-MISSING_GOAL',
+  GOAL_REVIEW_REQUIRED: 'common:readiness-hints-GOAL_REVIEW_REQUIRED',
+  GOAL_NOT_VALID_FOR_AGE: 'common:readiness-hints-GOAL_NOT_VALID_FOR_AGE',
+  ALLERGY_STATUS_MISSING: 'common:readiness-hints-ALLERGY_STATUS_MISSING',
 }

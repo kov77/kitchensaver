@@ -2,15 +2,9 @@ import { screen, userEvent } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
 import type { Allergy, PersonDetail } from '@/api/types'
-import {
-  PROFILE_ERRORS,
-  PROFILE_TEXT,
-} from '@/components/organisms/profile/constants'
-import { ERROR_MESSAGES, PERSON_SUMMARY_TEXT } from '@/core/constants'
 import { apiResult } from '@/test-utils/apiResult'
 import { renderWithQuery } from '@/test-utils/renderWithQuery'
 
-import { ALLERGY_STATUS_TEXT, PERSON_TEXT } from './constants'
 import { PersonScreen } from './PersonScreen'
 
 const mockBack = jest.fn()
@@ -82,7 +76,7 @@ describe('PersonScreen', () => {
     await renderPerson()
 
     expect(await screen.findByRole('header', { name: 'Max' })).toBeTruthy()
-    expect(screen.getByText(`34 ${PERSON_TEXT.yearsOld}`)).toBeTruthy()
+    expect(screen.getByText(`34 years old`)).toBeTruthy()
     expect(screen.getByText('4 March 1992')).toBeTruthy()
     expect(screen.getByText('Lose weight · 2,100 kcal/day')).toBeTruthy()
   })
@@ -107,14 +101,10 @@ describe('PersonScreen', () => {
     await renderPerson()
 
     expect(
-      await screen.findByText(
-        `${PERSON_SUMMARY_TEXT.notReady}: add a daily calorie goal`,
-      ),
+      await screen.findByText(`Not ready to plan: add a daily calorie goal`),
     ).toBeTruthy()
-    expect(screen.getByText(PERSON_SUMMARY_TEXT.noGoal)).toBeTruthy()
-    expect(
-      screen.getByRole('button', { name: PERSON_TEXT.setGoal }),
-    ).toBeTruthy()
+    expect(screen.getByText('No goal yet')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Set goal' })).toBeTruthy()
   })
 
   it('opens the goal screen for this person', async () => {
@@ -122,9 +112,7 @@ describe('PersonScreen', () => {
 
     await userEvent
       .setup()
-      .press(
-        await screen.findByRole('button', { name: PERSON_TEXT.changeGoal }),
-      )
+      .press(await screen.findByRole('button', { name: 'Change goal' }))
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/goal/[personId]',
@@ -136,9 +124,7 @@ describe('PersonScreen', () => {
     await renderPerson()
     await screen.findByRole('header', { name: 'Max' })
 
-    await userEvent
-      .setup()
-      .press(screen.getByRole('button', { name: PERSON_TEXT.back }))
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Back' }))
 
     expect(mockBack).toHaveBeenCalledTimes(1)
   })
@@ -147,12 +133,14 @@ describe('PersonScreen', () => {
     respondWith({ person: apiResult(500) })
     await renderPerson()
 
-    expect(await screen.findByText(ERROR_MESSAGES.SERVER)).toBeTruthy()
+    expect(
+      await screen.findByText('The server had a problem. Please try again.'),
+    ).toBeTruthy()
 
     respondWith()
     await userEvent
       .setup()
-      .press(screen.getByRole('button', { name: PERSON_TEXT.retry }))
+      .press(screen.getByRole('button', { name: 'Try again' }))
 
     expect(await screen.findByRole('header', { name: 'Max' })).toBeTruthy()
   })
@@ -160,9 +148,12 @@ describe('PersonScreen', () => {
 
 describe('PersonScreen allergies', () => {
   it.each([
-    ['NONE', ALLERGY_STATUS_TEXT.NONE],
-    ['UNKNOWN', ALLERGY_STATUS_TEXT.UNKNOWN],
-    [null, ALLERGY_STATUS_TEXT.NOT_ANSWERED],
+    ['NONE', 'No known allergies.'],
+    [
+      'UNKNOWN',
+      'Not known. Plans cannot guarantee that they are free of any allergen.',
+    ],
+    [null, 'Not answered yet.'],
   ] as const)('explains the allergy status %s', async (status, text) => {
     respondWith({
       person: apiResult(200, { ...PERSON, allergyStatus: status }),
@@ -198,8 +189,10 @@ describe('PersonScreen allergies', () => {
     })
     await renderPerson()
 
-    expect(await screen.findByText(PERSON_TEXT.allergyLoadFailed)).toBeTruthy()
-    expect(screen.getByRole('button', { name: PERSON_TEXT.retry })).toBeTruthy()
+    expect(
+      await screen.findByText('We could not load the allergies.'),
+    ).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy()
   })
 
   it('does not show a list as empty when the allergies fail to load', async () => {
@@ -212,16 +205,16 @@ describe('PersonScreen allergies', () => {
     })
     await renderPerson()
 
-    expect(await screen.findByText(PERSON_TEXT.allergyLoadFailed)).toBeTruthy()
+    expect(
+      await screen.findByText('We could not load the allergies.'),
+    ).toBeTruthy()
   })
 })
 
 describe('PersonScreen profile editing', () => {
   async function startEditing() {
     const user = userEvent.setup()
-    await user.press(
-      await screen.findByRole('button', { name: PERSON_TEXT.edit }),
-    )
+    await user.press(await screen.findByRole('button', { name: 'Edit' }))
     return user
   }
 
@@ -232,26 +225,26 @@ describe('PersonScreen profile editing', () => {
     await renderPerson()
     const user = await startEditing()
 
-    await user.clear(screen.getByLabelText(PROFILE_TEXT.nameLabel))
-    await user.type(screen.getByLabelText(PROFILE_TEXT.nameLabel), 'Maxim')
-    await user.press(screen.getByRole('button', { name: PERSON_TEXT.save }))
+    await user.clear(screen.getByLabelText('Name'))
+    await user.type(screen.getByLabelText('Name'), 'Maxim')
+    await user.press(screen.getByRole('button', { name: 'Save' }))
 
     expect(apiClient.PATCH).toHaveBeenCalledWith('/api/v1/people/{id}', {
       params: { path: { id: 'person-1' } },
       body: { name: 'Maxim', dateOfBirth: '1992-03-04' },
     })
     expect(await screen.findByRole('header', { name: 'Maxim' })).toBeTruthy()
-    expect(screen.queryByRole('button', { name: PERSON_TEXT.save })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Save' })).toBeNull()
   })
 
   it('does not send an empty name', async () => {
     await renderPerson()
     const user = await startEditing()
 
-    await user.clear(screen.getByLabelText(PROFILE_TEXT.nameLabel))
-    await user.press(screen.getByRole('button', { name: PERSON_TEXT.save }))
+    await user.clear(screen.getByLabelText('Name'))
+    await user.press(screen.getByRole('button', { name: 'Save' }))
 
-    expect(await screen.findByText(PROFILE_ERRORS.nameRequired)).toBeTruthy()
+    expect(await screen.findByText('Enter a name.')).toBeTruthy()
     expect(apiClient.PATCH).not.toHaveBeenCalled()
   })
 
@@ -260,25 +253,24 @@ describe('PersonScreen profile editing', () => {
     await renderPerson()
     const user = await startEditing()
 
-    await user.press(screen.getByRole('button', { name: PERSON_TEXT.save }))
+    await user.press(screen.getByRole('button', { name: 'Save' }))
 
-    expect(await screen.findByText(ERROR_MESSAGES.UNPROCESSABLE)).toBeTruthy()
-    expect(screen.getByRole('button', { name: PERSON_TEXT.save })).toBeTruthy()
+    expect(
+      await screen.findByText('Please check the information and try again.'),
+    ).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy()
   })
 
   it('discards the changes on cancel', async () => {
     await renderPerson()
     const user = await startEditing()
 
-    await user.clear(screen.getByLabelText(PROFILE_TEXT.nameLabel))
-    await user.type(
-      screen.getByLabelText(PROFILE_TEXT.nameLabel),
-      'Someone else',
-    )
-    await user.press(screen.getByRole('button', { name: PERSON_TEXT.cancel }))
+    await user.clear(screen.getByLabelText('Name'))
+    await user.type(screen.getByLabelText('Name'), 'Someone else')
+    await user.press(screen.getByRole('button', { name: 'Cancel' }))
 
     expect(apiClient.PATCH).not.toHaveBeenCalled()
-    expect(screen.queryByLabelText(PROFILE_TEXT.nameLabel)).toBeNull()
+    expect(screen.queryByLabelText('Name')).toBeNull()
     expect(screen.getAllByText('Max')).toHaveLength(2)
     expect(screen.queryByText('Someone else')).toBeNull()
   })

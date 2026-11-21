@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import { usePeople } from '@/api/queries/usePeople'
 import { Button } from '@/components/atoms/Button'
@@ -11,11 +12,11 @@ import { AppScreen } from '@/components/templates/AppScreen'
 import { useSession } from '@/core/auth/SessionProvider'
 import { getErrorMessage } from '@/utils/errors'
 
-import { PEOPLE_TEXT } from './constants'
 import { styles } from './PeopleScreen.styles'
 import { PersonCard } from './PersonCard'
 
 export function PeopleScreen() {
+  const { t } = useTranslation('people')
   const { signOut } = useSession()
   const router = useRouter()
   const {
@@ -28,13 +29,13 @@ export function PeopleScreen() {
 
   return (
     <AppScreen>
-      <ScreenHeader title={PEOPLE_TEXT.title} subtitle={PEOPLE_TEXT.subtitle} />
+      <ScreenHeader title={t('title')} subtitle={t('subtitle')} />
       {isPending ? <Spinner /> : null}
       {error && !people ? (
         <>
           <FormMessage message={getErrorMessage(error)} />
           <Button
-            title={PEOPLE_TEXT.retry}
+            title={t('retry')}
             variant="secondary"
             isLoading={isFetching}
             onPress={() => void refetch()}
@@ -43,7 +44,7 @@ export function PeopleScreen() {
       ) : null}
       {people?.length === 0 ? (
         <Text variant="body" color="textMuted">
-          {PEOPLE_TEXT.empty}
+          {t('empty')}
         </Text>
       ) : null}
       {people ? (
@@ -63,7 +64,7 @@ export function PeopleScreen() {
         </View>
       ) : null}
       <Button
-        title={PEOPLE_TEXT.logOut}
+        title={t('log-out')}
         variant="secondary"
         onPress={() => void signOut()}
       />

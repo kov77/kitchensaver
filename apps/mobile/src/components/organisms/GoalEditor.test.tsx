@@ -1,19 +1,10 @@
 import { screen, userEvent } from '@testing-library/react-native'
 
 import { ApiRequestError } from '@/utils/errors'
-import { ERROR_MESSAGES } from '@/core/constants'
 import type { GoalEstimate } from '@/core/types'
 import { renderWithQuery } from '@/test-utils/renderWithQuery'
 
 import { GoalEditor } from './GoalEditor'
-import {
-  ACTIVITY_LABELS,
-  ASSUMPTION_TEXT,
-  GOAL_EDITOR_ERRORS,
-  GOAL_EDITOR_TEXT,
-  SEX_LABELS,
-  UNKNOWN_ASSUMPTION_TEXT,
-} from './goal/constants'
 
 const ESTIMATE: GoalEstimate = {
   estimatedMaintenanceKcal: 2275,
@@ -46,13 +37,13 @@ async function fillEstimateInputs({
   weight = '63',
 } = {}) {
   const user = userEvent.setup()
-  await press('radio', GOAL_EDITOR_TEXT.modeEstimate)
+  await press('radio', 'Help me estimate')
   await press('radio', goalType)
-  await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.heightLabel), height)
-  await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.weightLabel), weight)
-  await press('radio', ACTIVITY_LABELS.LOW_ACTIVE)
-  await press('radio', SEX_LABELS.FEMALE)
-  await press('button', GOAL_EDITOR_TEXT.calculate)
+  await user.type(screen.getByLabelText('Height (cm)'), height)
+  await user.type(screen.getByLabelText('Weight (kg)'), weight)
+  await press('radio', 'Low active')
+  await press('radio', 'Female')
+  await press('button', 'Calculate estimate')
 }
 
 beforeEach(() => {
@@ -63,14 +54,16 @@ beforeEach(() => {
 describe('GoalEditor manual mode', () => {
   beforeEach(async () => {
     await renderEditor()
-    await press('radio', GOAL_EDITOR_TEXT.modeManual)
+    await press('radio', 'I already know my daily calories')
   })
 
   it('needs a goal type and calories before saving', async () => {
     await press('button', 'Save goal')
 
-    expect(await screen.findByText(GOAL_EDITOR_ERRORS.choose)).toBeTruthy()
-    expect(screen.getByText(GOAL_EDITOR_ERRORS.kcal)).toBeTruthy()
+    expect(await screen.findByText('Choose an option.')).toBeTruthy()
+    expect(
+      screen.getByText('Enter whole calories between 500 and 10,000.'),
+    ).toBeTruthy()
     expect(onSave).not.toHaveBeenCalled()
   })
 
@@ -79,11 +72,13 @@ describe('GoalEditor manual mode', () => {
     async (kcal) => {
       const user = userEvent.setup()
       await press('radio', 'Maintain weight')
-      await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.kcalLabel), kcal)
+      await user.type(screen.getByLabelText('Daily calories (kcal)'), kcal)
 
       await press('button', 'Save goal')
 
-      expect(await screen.findByText(GOAL_EDITOR_ERRORS.kcal)).toBeTruthy()
+      expect(
+        await screen.findByText('Enter whole calories between 500 and 10,000.'),
+      ).toBeTruthy()
       expect(onSave).not.toHaveBeenCalled()
     },
   )
@@ -91,7 +86,7 @@ describe('GoalEditor manual mode', () => {
   it('saves a manual goal with the chosen type and calories', async () => {
     const user = userEvent.setup()
     await press('radio', 'Custom goal')
-    await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.kcalLabel), '2000')
+    await user.type(screen.getByLabelText('Daily calories (kcal)'), '2000')
 
     await press('button', 'Save goal')
 
@@ -123,8 +118,12 @@ describe('GoalEditor estimate mode', () => {
 
     await fillEstimateInputs({ height: '50', weight: '500' })
 
-    expect(await screen.findByText(GOAL_EDITOR_ERRORS.height)).toBeTruthy()
-    expect(screen.getByText(GOAL_EDITOR_ERRORS.weight)).toBeTruthy()
+    expect(
+      await screen.findByText('Enter a height between 90 and 250 cm.'),
+    ).toBeTruthy()
+    expect(
+      screen.getByText('Enter a weight between 20 and 400 kg.'),
+    ).toBeTruthy()
     expect(onEstimate).not.toHaveBeenCalled()
   })
 
@@ -134,12 +133,20 @@ describe('GoalEditor estimate mode', () => {
     await fillEstimateInputs()
 
     expect(await screen.findByText(/2,275/)).toBeTruthy()
-    expect(screen.getByText(GOAL_EDITOR_TEXT.disclaimer)).toBeTruthy()
+    expect(
+      screen.getByText(
+        'This is an estimate for information only. It is not medical advice.',
+      ),
+    ).toBeTruthy()
     expect(screen.getByText(ESTIMATE.methodology)).toBeTruthy()
     expect(
-      screen.getByText(`• ${ASSUMPTION_TEXT.MAINTENANCE_ENERGY_NOT_A_TARGET}`),
+      screen.getByText(
+        `• This is the energy to keep your weight, not a weight loss or weight gain target.`,
+      ),
     ).toBeTruthy()
-    expect(screen.getByText(`• ${UNKNOWN_ASSUMPTION_TEXT}`)).toBeTruthy()
+    expect(
+      screen.getByText(`• Other assumptions of the method apply.`),
+    ).toBeTruthy()
     expect(screen.queryByText(/MAINTENANCE_ENERGY|SOME_FUTURE_CODE/)).toBeNull()
   })
 
@@ -149,7 +156,8 @@ describe('GoalEditor estimate mode', () => {
     await fillEstimateInputs({ goalType: 'Maintain weight' })
 
     expect(
-      (await screen.findByLabelText(GOAL_EDITOR_TEXT.targetLabel)).props.value,
+      (await screen.findByLabelText('Your daily calorie goal (kcal)')).props
+        .value,
     ).toBe('2275')
   })
 
@@ -159,9 +167,14 @@ describe('GoalEditor estimate mode', () => {
     await fillEstimateInputs({ goalType: 'Lose weight' })
 
     expect(
-      (await screen.findByLabelText(GOAL_EDITOR_TEXT.targetLabel)).props.value,
+      (await screen.findByLabelText('Your daily calorie goal (kcal)')).props
+        .value,
     ).toBe('')
-    expect(screen.getByText(GOAL_EDITOR_TEXT.targetHint)).toBeTruthy()
+    expect(
+      screen.getByText(
+        'The estimate is for keeping your weight. Enter the target you want.',
+      ),
+    ).toBeTruthy()
   })
 
   it('saves the inputs together with the calories the user confirmed', async () => {
@@ -169,7 +182,7 @@ describe('GoalEditor estimate mode', () => {
     await renderEditor()
     await fillEstimateInputs({ goalType: 'Lose weight' })
     await user.type(
-      await screen.findByLabelText(GOAL_EDITOR_TEXT.targetLabel),
+      await screen.findByLabelText('Your daily calorie goal (kcal)'),
       '1900',
     )
 
@@ -189,11 +202,13 @@ describe('GoalEditor estimate mode', () => {
   it('does not save a weight loss goal until calories are entered', async () => {
     await renderEditor()
     await fillEstimateInputs({ goalType: 'Lose weight' })
-    await screen.findByLabelText(GOAL_EDITOR_TEXT.targetLabel)
+    await screen.findByLabelText('Your daily calorie goal (kcal)')
 
     await press('button', 'Save goal')
 
-    expect(await screen.findByText(GOAL_EDITOR_ERRORS.kcal)).toBeTruthy()
+    expect(
+      await screen.findByText('Enter whole calories between 500 and 10,000.'),
+    ).toBeTruthy()
     expect(onSave).not.toHaveBeenCalled()
   })
 
@@ -203,9 +218,11 @@ describe('GoalEditor estimate mode', () => {
 
     await fillEstimateInputs()
 
-    expect(await screen.findByText(ERROR_MESSAGES.SERVER)).toBeTruthy()
     expect(
-      screen.getByRole('button', { name: GOAL_EDITOR_TEXT.calculate }),
+      await screen.findByText('The server had a problem. Please try again.'),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('button', { name: 'Calculate estimate' }),
     ).toBeTruthy()
     expect(onSave).not.toHaveBeenCalled()
   })
@@ -213,14 +230,16 @@ describe('GoalEditor estimate mode', () => {
   it('goes back to the details with the values kept', async () => {
     await renderEditor()
     await fillEstimateInputs()
-    await screen.findByText(GOAL_EDITOR_TEXT.disclaimer)
+    await screen.findByText(
+      'This is an estimate for information only. It is not medical advice.',
+    )
 
-    await press('button', GOAL_EDITOR_TEXT.changeDetails)
+    await press('button', 'Change details')
 
-    expect(
-      (await screen.findByLabelText(GOAL_EDITOR_TEXT.heightLabel)).props.value,
-    ).toBe('165')
-    expect(screen.getByRole('radio', { name: SEX_LABELS.FEMALE })).toBeChecked()
+    expect((await screen.findByLabelText('Height (cm)')).props.value).toBe(
+      '165',
+    )
+    expect(screen.getByRole('radio', { name: 'Female' })).toBeChecked()
   })
 
   it('shows an error from the save request', async () => {

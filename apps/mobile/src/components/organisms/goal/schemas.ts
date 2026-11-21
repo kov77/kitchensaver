@@ -1,14 +1,14 @@
 import * as zod from 'zod'
 
 import { GOAL_LIMITS } from '@/core/constants'
+import { lazyMessage } from '@/utils/messages'
 import { isNumberInRange } from '@/utils/numbers'
 
 import {
-  ACTIVITY_OPTIONS,
+  ACTIVITY_LEVELS,
   ESTIMATED_GOAL_TYPES,
-  GOAL_EDITOR_ERRORS,
+  FORMULA_SEXES,
   GOAL_TYPES,
-  SEX_OPTIONS,
 } from './constants'
 
 const kcalSchema = zod
@@ -16,7 +16,7 @@ const kcalSchema = zod
   .refine(
     (text) =>
       isNumberInRange(text, GOAL_LIMITS.dailyKcal, { mustBeInteger: true }),
-    GOAL_EDITOR_ERRORS.kcal,
+    lazyMessage('goal:errors-kcal'),
   )
 
 const choice = <Value extends string>(values: readonly Value[]) =>
@@ -24,7 +24,7 @@ const choice = <Value extends string>(values: readonly Value[]) =>
     .custom<Value | null>(
       (input) => input === null || values.some((value) => value === input),
     )
-    .refine((value) => value !== null, GOAL_EDITOR_ERRORS.choose)
+    .refine((value) => value !== null, lazyMessage('goal:errors-choose'))
 
 export const manualGoalSchema = zod.object({
   goalType: choice(GOAL_TYPES),
@@ -37,16 +37,16 @@ export const estimateInputsSchema = zod.object({
     .string()
     .refine(
       (text) => isNumberInRange(text, GOAL_LIMITS.heightCm),
-      GOAL_EDITOR_ERRORS.height,
+      lazyMessage('goal:errors-height'),
     ),
   weightKg: zod
     .string()
     .refine(
       (text) => isNumberInRange(text, GOAL_LIMITS.weightKg),
-      GOAL_EDITOR_ERRORS.weight,
+      lazyMessage('goal:errors-weight'),
     ),
-  activityLevel: choice(ACTIVITY_OPTIONS.map(({ value }) => value)),
-  formulaSex: choice(SEX_OPTIONS.map(({ value }) => value)),
+  activityLevel: choice(ACTIVITY_LEVELS),
+  formulaSex: choice(FORMULA_SEXES),
 })
 
 export const targetSchema = zod.object({ dailyKcal: kcalSchema })

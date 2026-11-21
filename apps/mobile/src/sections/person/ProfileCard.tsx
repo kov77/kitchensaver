@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import { useUpdatePerson } from '@/api/queries/useUpdatePerson'
 import type { PersonDetail } from '@/api/types'
@@ -7,11 +8,9 @@ import { Button } from '@/components/atoms/Button'
 import { Text } from '@/components/atoms/Text'
 import { SectionCard } from '@/components/molecules/SectionCard'
 import { ProfileForm } from '@/components/organisms/ProfileForm'
-import { PROFILE_TEXT } from '@/components/organisms/profile/constants'
 import { formatDisplayDate, parseIsoDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
 
-import { PERSON_TEXT } from './constants'
 import { styles } from './PersonScreen.styles'
 
 type ProfileCardProps = {
@@ -21,6 +20,7 @@ type ProfileCardProps = {
 export function ProfileCard({
   person: { id, name, dateOfBirth },
 }: ProfileCardProps) {
+  const { t } = useTranslation(['person', 'profile'])
   const [isEditing, setIsEditing] = useState(false)
   const { mutate: updatePerson, error, isPending, reset } = useUpdatePerson(id)
   const birthDate = parseIsoDate(dateOfBirth)
@@ -31,12 +31,12 @@ export function ProfileCard({
   }
 
   return (
-    <SectionCard title={PERSON_TEXT.profileTitle}>
+    <SectionCard title={t('profile-title')}>
       {isEditing ? (
         <>
           <ProfileForm
             initialValues={{ name, dateOfBirth: birthDate }}
-            submitLabel={PERSON_TEXT.save}
+            submitLabel={t('save')}
             isSubmitting={isPending}
             errorMessage={error ? getErrorMessage(error) : null}
             onSubmit={(values) =>
@@ -44,7 +44,7 @@ export function ProfileCard({
             }
           />
           <Button
-            title={PERSON_TEXT.cancel}
+            title={t('cancel')}
             variant="secondary"
             onPress={stopEditing}
           />
@@ -53,18 +53,18 @@ export function ProfileCard({
         <>
           <View style={styles.field}>
             <Text variant="subtitle" color="textMuted">
-              {PROFILE_TEXT.nameLabel}
+              {t('profile:name-label')}
             </Text>
             <Text variant="body">{name}</Text>
           </View>
           <View style={styles.field}>
             <Text variant="subtitle" color="textMuted">
-              {PROFILE_TEXT.dateOfBirthLabel}
+              {t('profile:date-of-birth-label')}
             </Text>
             <Text variant="body">{formatDisplayDate(birthDate)}</Text>
           </View>
           <Button
-            title={PERSON_TEXT.edit}
+            title={t('edit')}
             variant="secondary"
             onPress={() => setIsEditing(true)}
           />

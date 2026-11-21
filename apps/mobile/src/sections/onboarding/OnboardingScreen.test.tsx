@@ -4,24 +4,12 @@ import { randomUUID } from 'expo-crypto'
 
 import { getPeopleListKey } from '@/api/queryKeys'
 import type { PersonListItem } from '@/api/types'
-import { GOAL_EDITOR_TEXT } from '@/components/organisms/goal/constants'
-import {
-  PROFILE_ERRORS,
-  PROFILE_TEXT,
-} from '@/components/organisms/profile/constants'
-import { ALLERGEN_LABELS, ERROR_MESSAGES } from '@/core/constants'
 import { apiResult } from '@/test-utils/apiResult'
 import {
   createTestQueryClient,
   renderWithQuery,
 } from '@/test-utils/renderWithQuery'
 
-import {
-  ONBOARDING_ERRORS,
-  ONBOARDING_TEXT,
-  WARNING_DIALOG_BUTTONS,
-  WARNING_DIALOGS,
-} from './constants'
 import { OnboardingScreen } from './OnboardingScreen'
 
 const mockSignOut = jest.fn()
@@ -77,10 +65,10 @@ async function renderOnboarding() {
 
 async function fillProfile(name = 'Alex') {
   const user = userEvent.setup()
-  await user.type(screen.getByLabelText(PROFILE_TEXT.nameLabel), name)
+  await user.type(screen.getByLabelText('Name'), name)
   await user.press(
     screen.getByRole('button', {
-      name: new RegExp(PROFILE_TEXT.dateOfBirthLabel),
+      name: new RegExp('Date of birth'),
     }),
   )
   fireEvent(
@@ -89,13 +77,13 @@ async function fillProfile(name = 'Alex') {
     { type: 'set' },
     new Date(1990, 4, 15),
   )
-  await user.press(screen.getByRole('button', { name: ONBOARDING_TEXT.next }))
+  await user.press(screen.getByRole('button', { name: 'Continue' }))
 }
 
 async function skipGoal() {
   await userEvent
     .setup()
-    .press(await screen.findByRole('button', { name: ONBOARDING_TEXT.skip }))
+    .press(await screen.findByRole('button', { name: 'Skip for now' }))
 }
 
 function answer(label: string) {
@@ -103,9 +91,7 @@ function answer(label: string) {
 }
 
 function finish() {
-  return userEvent
-    .setup()
-    .press(screen.getByRole('button', { name: ONBOARDING_TEXT.finish }))
+  return userEvent.setup().press(screen.getByRole('button', { name: 'Finish' }))
 }
 
 beforeEach(() => {
@@ -123,11 +109,11 @@ describe('OnboardingScreen profile step', () => {
 
     await userEvent
       .setup()
-      .press(screen.getByRole('button', { name: ONBOARDING_TEXT.next }))
+      .press(screen.getByRole('button', { name: 'Continue' }))
 
-    expect(await screen.findByText(PROFILE_ERRORS.nameRequired)).toBeTruthy()
-    expect(screen.getByText(PROFILE_ERRORS.dateRequired)).toBeTruthy()
-    expect(screen.queryByText(ONBOARDING_TEXT.allergyQuestion)).toBeNull()
+    expect(await screen.findByText('Enter a name.')).toBeTruthy()
+    expect(screen.getByText('Select the date of birth.')).toBeTruthy()
+    expect(screen.queryByText('Do you have any food allergies?')).toBeNull()
   })
 
   it('moves to the optional goal step with valid answers', async () => {
@@ -135,8 +121,8 @@ describe('OnboardingScreen profile step', () => {
 
     await fillProfile()
 
-    expect(await screen.findByText(ONBOARDING_TEXT.goalTitle)).toBeTruthy()
-    expect(screen.queryByText(ONBOARDING_TEXT.allergyQuestion)).toBeNull()
+    expect(await screen.findByText('Daily calorie goal')).toBeTruthy()
+    expect(screen.queryByText('Do you have any food allergies?')).toBeNull()
   })
 
   it('lets the user log out', async () => {
@@ -144,7 +130,7 @@ describe('OnboardingScreen profile step', () => {
 
     await userEvent
       .setup()
-      .press(screen.getByRole('button', { name: ONBOARDING_TEXT.logOut }))
+      .press(screen.getByRole('button', { name: 'Log out' }))
 
     expect(mockSignOut).toHaveBeenCalledTimes(1)
   })
@@ -154,17 +140,17 @@ describe('OnboardingScreen goal step', () => {
   beforeEach(async () => {
     await renderOnboarding()
     await fillProfile()
-    await screen.findByText(ONBOARDING_TEXT.goalTitle)
+    await screen.findByText('Daily calorie goal')
   })
 
   it('can be skipped, and then no goal is sent', async () => {
     mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
     await skipGoal()
-    await answer(ONBOARDING_TEXT.answerUnknown)
+    await answer("I don't know")
     await finish()
     await userEvent.setup().press(
       await screen.findByRole('button', {
-        name: WARNING_DIALOG_BUTTONS.confirm,
+        name: 'I understand, continue',
       }),
     )
 
@@ -175,16 +161,16 @@ describe('OnboardingScreen goal step', () => {
     mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
     const user = userEvent.setup()
     await user.press(
-      screen.getByRole('radio', { name: GOAL_EDITOR_TEXT.modeManual }),
+      screen.getByRole('radio', { name: 'I already know my daily calories' }),
     )
     await user.press(screen.getByRole('radio', { name: 'Maintain weight' }))
-    await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.kcalLabel), '2200')
-    await user.press(screen.getByRole('button', { name: ONBOARDING_TEXT.next }))
-    await answer(ONBOARDING_TEXT.answerUnknown)
+    await user.type(screen.getByLabelText('Daily calories (kcal)'), '2200')
+    await user.press(screen.getByRole('button', { name: 'Continue' }))
+    await answer("I don't know")
     await finish()
     await user.press(
       await screen.findByRole('button', {
-        name: WARNING_DIALOG_BUTTONS.confirm,
+        name: 'I understand, continue',
       }),
     )
 
@@ -202,19 +188,17 @@ describe('OnboardingScreen goal step', () => {
       }),
     )
     const user = userEvent.setup()
-    await user.press(
-      screen.getByRole('radio', { name: GOAL_EDITOR_TEXT.modeEstimate }),
-    )
+    await user.press(screen.getByRole('radio', { name: 'Help me estimate' }))
     await user.press(screen.getByRole('radio', { name: 'Maintain weight' }))
-    await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.heightLabel), '165')
-    await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.weightLabel), '63')
+    await user.type(screen.getByLabelText('Height (cm)'), '165')
+    await user.type(screen.getByLabelText('Weight (kg)'), '63')
     await user.press(screen.getByRole('radio', { name: 'Low active' }))
     await user.press(screen.getByRole('radio', { name: 'Female' }))
-    await user.press(
-      screen.getByRole('button', { name: GOAL_EDITOR_TEXT.calculate }),
-    )
+    await user.press(screen.getByRole('button', { name: 'Calculate estimate' }))
 
-    await screen.findByText(GOAL_EDITOR_TEXT.disclaimer)
+    await screen.findByText(
+      'This is an estimate for information only. It is not medical advice.',
+    )
     expect(mockPost).toHaveBeenCalledWith(PREVIEW_PATH, {
       body: {
         dateOfBirth: '1990-05-15',
@@ -228,13 +212,9 @@ describe('OnboardingScreen goal step', () => {
   })
 
   it('goes back to the profile with the values kept', async () => {
-    await userEvent
-      .setup()
-      .press(screen.getByRole('button', { name: ONBOARDING_TEXT.back }))
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Back' }))
 
-    expect(
-      (await screen.findByLabelText(PROFILE_TEXT.nameLabel)).props.value,
-    ).toBe('Alex')
+    expect((await screen.findByLabelText('Name')).props.value).toBe('Alex')
   })
 })
 
@@ -243,50 +223,44 @@ describe('OnboardingScreen allergy step', () => {
     await renderOnboarding()
     await fillProfile()
     await skipGoal()
-    await screen.findByText(ONBOARDING_TEXT.allergyQuestion)
+    await screen.findByText('Do you have any food allergies?')
   })
 
   it('does not save until the allergy question is answered', async () => {
     await finish()
 
     expect(
-      await screen.findByText(ONBOARDING_ERRORS.answerRequired),
+      await screen.findByText('Choose an answer to continue.'),
     ).toBeTruthy()
     expect(mockPost).not.toHaveBeenCalled()
   })
 
   it('needs at least one allergen when the answer is yes', async () => {
-    await answer(ONBOARDING_TEXT.answerYes)
+    await answer('Yes')
 
     await finish()
 
-    expect(
-      await screen.findByText(ONBOARDING_ERRORS.allergenRequired),
-    ).toBeTruthy()
+    expect(await screen.findByText('Select at least one allergy.')).toBeTruthy()
     expect(mockPost).not.toHaveBeenCalled()
   })
 
   it('needs a description when the allergen is other', async () => {
     const user = userEvent.setup()
-    await answer(ONBOARDING_TEXT.answerYes)
-    await user.press(
-      screen.getByRole('checkbox', { name: ALLERGEN_LABELS.OTHER }),
-    )
+    await answer('Yes')
+    await user.press(screen.getByRole('checkbox', { name: 'Other' }))
 
     await finish()
 
-    expect(
-      await screen.findByText(ONBOARDING_ERRORS.otherRequired),
-    ).toBeTruthy()
+    expect(await screen.findByText('Describe the allergy.')).toBeTruthy()
     expect(mockPost).not.toHaveBeenCalled()
   })
 
   it('saves the listed allergens with an idempotency key', async () => {
     mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
-    await answer(ONBOARDING_TEXT.answerYes)
+    await answer('Yes')
     await userEvent
       .setup()
-      .press(screen.getByRole('checkbox', { name: ALLERGEN_LABELS.PEANUT }))
+      .press(screen.getByRole('checkbox', { name: 'Peanuts' }))
 
     await finish()
 
@@ -304,24 +278,24 @@ describe('OnboardingScreen allergy step', () => {
   })
 
   it.each([
-    [ONBOARDING_TEXT.answerNo, 'NONE', WARNING_DIALOGS.no],
-    [ONBOARDING_TEXT.answerUnknown, 'UNKNOWN', WARNING_DIALOGS.unknown],
+    ['No', 'NONE', 'Please double-check'],
+    ["I don't know", 'UNKNOWN', 'Plans may not be safe for you'],
   ] as const)(
     'warns before saving the answer %s and saves only after confirmation',
-    async (label, status, dialog) => {
+    async (label, status, dialogTitle) => {
       mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
       await answer(label)
 
       await finish()
 
-      expect(await screen.findByText(dialog.title)).toBeTruthy()
+      expect(await screen.findByText(dialogTitle)).toBeTruthy()
       expect(mockPost).not.toHaveBeenCalled()
 
-      await userEvent
-        .setup()
-        .press(
-          screen.getByRole('button', { name: WARNING_DIALOG_BUTTONS.confirm }),
-        )
+      await userEvent.setup().press(
+        screen.getByRole('button', {
+          name: 'I understand, continue',
+        }),
+      )
 
       expect(mockPost).toHaveBeenCalledWith(
         '/api/v1/people/onboarding',
@@ -335,30 +309,30 @@ describe('OnboardingScreen allergy step', () => {
   )
 
   it('saves nothing when the user goes back from the warning', async () => {
-    await answer(ONBOARDING_TEXT.answerNo)
+    await answer('No')
     await finish()
-    await screen.findByText(WARNING_DIALOGS.no.title)
+    await screen.findByText('Please double-check')
 
-    await userEvent
-      .setup()
-      .press(
-        screen.getByRole('button', { name: WARNING_DIALOG_BUTTONS.cancel }),
-      )
+    await userEvent.setup().press(
+      screen.getByRole('button', {
+        name: 'Go back',
+      }),
+    )
 
     expect(mockPost).not.toHaveBeenCalled()
   })
 
   it('adds the new person to the cached list so the app can open', async () => {
     mockPost.mockResolvedValue(apiResult(201, { person: PERSON }))
-    await answer(ONBOARDING_TEXT.answerUnknown)
+    await answer("I don't know")
     await finish()
     await userEvent.setup().press(
       await screen.findByRole('button', {
-        name: WARNING_DIALOG_BUTTONS.confirm,
+        name: 'I understand, continue',
       }),
     )
 
-    await screen.findByRole('button', { name: ONBOARDING_TEXT.finish })
+    await screen.findByRole('button', { name: 'Finish' })
     expect(
       queryClient.getQueryData<PersonListItem[]>(getPeopleListKey('all')),
     ).toEqual([PERSON])
@@ -366,13 +340,13 @@ describe('OnboardingScreen allergy step', () => {
 
   it('keeps the same key when the same data is sent again after a failure', async () => {
     mockPost.mockResolvedValue(apiResult(500))
-    await answer(ONBOARDING_TEXT.answerYes)
+    await answer('Yes')
     await userEvent
       .setup()
-      .press(screen.getByRole('checkbox', { name: ALLERGEN_LABELS.MILK }))
+      .press(screen.getByRole('checkbox', { name: 'Milk' }))
 
     await finish()
-    await screen.findByText(ERROR_MESSAGES.SERVER)
+    await screen.findByText('The server had a problem. Please try again.')
     await finish()
 
     const keys = idempotencyKeys()
@@ -382,16 +356,12 @@ describe('OnboardingScreen allergy step', () => {
   it('uses a new key when the data changed after a failure', async () => {
     mockPost.mockResolvedValue(apiResult(500))
     const user = userEvent.setup()
-    await answer(ONBOARDING_TEXT.answerYes)
-    await user.press(
-      screen.getByRole('checkbox', { name: ALLERGEN_LABELS.MILK }),
-    )
+    await answer('Yes')
+    await user.press(screen.getByRole('checkbox', { name: 'Milk' }))
     await finish()
-    await screen.findByText(ERROR_MESSAGES.SERVER)
+    await screen.findByText('The server had a problem. Please try again.')
 
-    await user.press(
-      screen.getByRole('checkbox', { name: ALLERGEN_LABELS.EGG }),
-    )
+    await user.press(screen.getByRole('checkbox', { name: 'Eggs' }))
     await finish()
 
     const keys = idempotencyKeys()
@@ -400,41 +370,43 @@ describe('OnboardingScreen allergy step', () => {
 
   it('shows a plain message and keeps the answers when the server refuses', async () => {
     mockPost.mockResolvedValue(apiResult(409))
-    await answer(ONBOARDING_TEXT.answerYes)
+    await answer('Yes')
     await userEvent
       .setup()
-      .press(screen.getByRole('checkbox', { name: ALLERGEN_LABELS.MILK }))
+      .press(screen.getByRole('checkbox', { name: 'Milk' }))
 
     await finish()
 
-    expect(await screen.findByText(ERROR_MESSAGES.CONFLICT)).toBeTruthy()
     expect(
-      screen.getByRole('checkbox', { name: ALLERGEN_LABELS.MILK }),
-    ).toBeChecked()
+      await screen.findByText(
+        'This could not be saved right now. Please try again.',
+      ),
+    ).toBeTruthy()
+    expect(screen.getByRole('checkbox', { name: 'Milk' })).toBeChecked()
   })
 
   it('marks the cached profile list stale after a failure so a saved profile is found', async () => {
     const peopleKey = getPeopleListKey('all')
     queryClient.setQueryData(peopleKey, [])
     mockPost.mockResolvedValue(apiResult(409))
-    await answer(ONBOARDING_TEXT.answerUnknown)
+    await answer("I don't know")
     await finish()
     await userEvent.setup().press(
       await screen.findByRole('button', {
-        name: WARNING_DIALOG_BUTTONS.confirm,
+        name: 'I understand, continue',
       }),
     )
 
-    await screen.findByText(ERROR_MESSAGES.CONFLICT)
+    await screen.findByText(
+      'This could not be saved right now. Please try again.',
+    )
 
     expect(queryClient.getQueryState(peopleKey)?.isInvalidated).toBe(true)
   })
 
   it('goes back to the goal step', async () => {
-    await userEvent
-      .setup()
-      .press(screen.getByRole('button', { name: ONBOARDING_TEXT.back }))
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Back' }))
 
-    expect(await screen.findByText(ONBOARDING_TEXT.goalTitle)).toBeTruthy()
+    expect(await screen.findByText('Daily calorie goal')).toBeTruthy()
   })
 })

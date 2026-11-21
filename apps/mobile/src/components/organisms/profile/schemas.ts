@@ -1,9 +1,13 @@
+import i18next from 'i18next'
 import * as zod from 'zod'
 
-import { NAME_MAX_LENGTH } from '@/core/constants'
+import {
+  MAX_PROFILE_AGE,
+  MIN_PROFILE_AGE,
+  NAME_MAX_LENGTH,
+} from '@/core/constants'
 import { toIsoDate } from '@/utils/dates'
-
-import { PROFILE_ERRORS } from './constants'
+import { lazyMessage } from '@/utils/messages'
 
 type DateBounds = { minimumDate: Date; maximumDate: Date }
 
@@ -12,8 +16,11 @@ export function createProfileSchema({ minimumDate, maximumDate }: DateBounds) {
     name: zod
       .string()
       .trim()
-      .min(1, PROFILE_ERRORS.nameRequired)
-      .max(NAME_MAX_LENGTH, PROFILE_ERRORS.nameTooLong),
+      .min(1, lazyMessage('profile:errors-name-required'))
+      .max(
+        NAME_MAX_LENGTH,
+        lazyMessage('profile:errors-name-too-long', { max: NAME_MAX_LENGTH }),
+      ),
     dateOfBirth: zod
       .date()
       .nullable()
@@ -21,7 +28,7 @@ export function createProfileSchema({ minimumDate, maximumDate }: DateBounds) {
         if (date === null) {
           context.addIssue({
             code: 'custom',
-            message: PROFILE_ERRORS.dateRequired,
+            message: i18next.t('profile:errors-date-required'),
           })
           return
         }
@@ -32,7 +39,10 @@ export function createProfileSchema({ minimumDate, maximumDate }: DateBounds) {
         ) {
           context.addIssue({
             code: 'custom',
-            message: PROFILE_ERRORS.dateOutOfRange,
+            message: i18next.t('profile:errors-date-out-of-range', {
+              min: MIN_PROFILE_AGE,
+              max: MAX_PROFILE_AGE,
+            }),
           })
         }
       }),

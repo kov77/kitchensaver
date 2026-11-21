@@ -2,7 +2,6 @@ import { MutationObserver } from '@tanstack/react-query'
 
 import { ApiRequestError, shouldRetryRequest } from '@/utils/errors'
 
-import { ERROR_MESSAGES } from './constants'
 import { queryClient } from './queryClient'
 import { dismissToast, getToasts } from './toast/toastStore'
 
@@ -50,7 +49,9 @@ describe('queryClient', () => {
   it('reports a failed query once through the global handler', async () => {
     await failingQuery(new ApiRequestError(503))
 
-    expect(toastMessages()).toEqual([ERROR_MESSAGES.SERVER])
+    expect(toastMessages()).toEqual([
+      'The server had a problem. Please try again.',
+    ])
   })
 
   it('signs out when a query is rejected with a 401', async () => {
@@ -72,7 +73,9 @@ describe('queryClient', () => {
 
     await observer.mutate(undefined).catch(() => undefined)
 
-    expect(toastMessages()).toEqual([ERROR_MESSAGES.SERVER])
+    expect(toastMessages()).toEqual([
+      'The server had a problem. Please try again.',
+    ])
   })
 
   it('leaves a mutation with its own error handler alone', async () => {

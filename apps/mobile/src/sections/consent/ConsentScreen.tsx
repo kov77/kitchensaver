@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { View } from 'react-native'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 
 import { useMe } from '@/api/queries/useMe'
 import { useRecordConsents } from '@/api/queries/useRecordConsents'
@@ -15,10 +16,11 @@ import { useSession } from '@/core/auth/SessionProvider'
 import { getErrorMessage } from '@/utils/errors'
 
 import { styles } from './ConsentScreen.styles'
-import { CONSENT_CHECKBOXES, CONSENT_TEXT, LEGAL_DOCUMENTS } from './constants'
+import { CONSENT_CHECKBOXES, LEGAL_DOCUMENTS } from './constants'
 import { consentSchema, type ConsentValues } from './schemas'
 
 export function ConsentScreen() {
+  const { t } = useTranslation('consent')
   const { signOut } = useSession()
   const { data: me } = useMe({ skipGlobalError: true })
   const { mutate: recordConsents, error, isPending } = useRecordConsents()
@@ -45,37 +47,34 @@ export function ConsentScreen() {
 
   return (
     <AppScreen>
-      <ScreenHeader
-        title={CONSENT_TEXT.title}
-        subtitle={CONSENT_TEXT.subtitle}
-      />
-      {LEGAL_DOCUMENTS.map(({ id, title, body }) => (
+      <ScreenHeader title={t('title')} subtitle={t('subtitle')} />
+      {LEGAL_DOCUMENTS.map(({ id, titleKey, bodyKey }) => (
         <View key={id} style={styles.document}>
           <Text variant="label" accessibilityRole="header">
-            {title}
+            {t(titleKey)}
           </Text>
           <Text variant="body" color="textMuted">
-            {body}
+            {t(bodyKey)}
           </Text>
         </View>
       ))}
       <Text variant="subtitle" color="textMuted">
-        {CONSENT_TEXT.selfConfirmationNote}
+        {t('self-confirmation-note')}
       </Text>
       <View style={styles.checks}>
-        {CONSENT_CHECKBOXES.map(({ name, label }) => (
+        {CONSENT_CHECKBOXES.map(({ name, labelKey }) => (
           <FormCheckbox
             key={name}
             control={control}
             name={name}
-            label={label}
+            label={t(labelKey)}
           />
         ))}
       </View>
       {error ? <FormMessage message={getErrorMessage(error)} /> : null}
       {me ? (
         <Button
-          title={CONSENT_TEXT.submit}
+          title={t('submit')}
           isLoading={isPending}
           onPress={() => void submit()}
         />
@@ -83,7 +82,7 @@ export function ConsentScreen() {
         <Spinner />
       )}
       <Button
-        title={CONSENT_TEXT.logOut}
+        title={t('log-out')}
         variant="secondary"
         onPress={() => void signOut()}
       />

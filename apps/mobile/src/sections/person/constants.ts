@@ -1,21 +1,10 @@
-export const PERSON_TEXT = {
-  yearsOld: 'years old',
-  back: 'Back',
-  retry: 'Try again',
-  profileTitle: 'Profile',
-  edit: 'Edit',
-  save: 'Save',
-  cancel: 'Cancel',
-  goalTitle: 'Daily calorie goal',
-  changeGoal: 'Change goal',
-  setGoal: 'Set goal',
-  allergyTitle: 'Food allergies',
-  allergyLoadFailed: 'We could not load the allergies.',
-} as const
+import type { CommonKey } from '@/translations/types'
 
-export const ALLERGY_STATUS_TEXT = {
-  NOT_ANSWERED: 'Not answered yet.',
-  NONE: 'No known allergies.',
-  UNKNOWN:
-    'Not known. Plans cannot guarantee that they are free of any allergen.',
-} as const
+export const ALLERGY_STATUS_LABEL_KEYS: Record<
+  'NOT_ANSWERED' | 'NONE' | 'UNKNOWN',
+  CommonKey
+> = {
+  NOT_ANSWERED: 'common:allergy-status-NOT_ANSWERED',
+  NONE: 'common:allergy-status-NONE',
+  UNKNOWN: 'common:allergy-status-UNKNOWN',
+}

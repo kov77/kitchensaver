@@ -3,11 +3,7 @@ import type { GoalDraft } from '@/core/types'
 import { toIsoDate } from '@/utils/dates'
 import { toSaveGoalBody } from '@/utils/goal'
 
-import {
-  ALLERGY_ANSWER,
-  OTHER_ALLERGEN_CODE,
-  WARNING_DIALOGS,
-} from './constants'
+import { ALLERGY_ANSWER, OTHER_ALLERGEN_CODE } from './constants'
 import type { AllergyValues } from './schemas'
 import type { FlowAction, FlowState } from './types'
 
@@ -52,10 +48,16 @@ export function buildOnboardingBody(
 
 export function getWarningDialog(values: AllergyValues | null) {
   if (values?.answer === ALLERGY_ANSWER.NO) {
-    return WARNING_DIALOGS[ALLERGY_ANSWER.NO]
+    return {
+      titleKey: 'warning-dialogs-no-title',
+      messageKey: 'warning-dialogs-no-message',
+    } as const
   }
   if (values?.answer === ALLERGY_ANSWER.UNKNOWN) {
-    return WARNING_DIALOGS[ALLERGY_ANSWER.UNKNOWN]
+    return {
+      titleKey: 'warning-dialogs-unknown-title',
+      messageKey: 'warning-dialogs-unknown-message',
+    } as const
   }
   return null
 }

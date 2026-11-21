@@ -1,4 +1,5 @@
 import { View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import { useAllergies } from '@/api/queries/useAllergies'
 import type { PersonDetail } from '@/api/types'
@@ -6,9 +7,9 @@ import { Button } from '@/components/atoms/Button'
 import { Spinner } from '@/components/atoms/Spinner'
 import { Text } from '@/components/atoms/Text'
 import { SectionCard } from '@/components/molecules/SectionCard'
-import { ALLERGEN_LABELS } from '@/core/constants'
+import { ALLERGEN_LABEL_KEYS } from '@/core/constants'
 
-import { ALLERGY_STATUS_TEXT, PERSON_TEXT } from './constants'
+import { ALLERGY_STATUS_LABEL_KEYS } from './constants'
 import { styles } from './PersonScreen.styles'
 
 type AllergyCardProps = {
@@ -17,6 +18,7 @@ type AllergyCardProps = {
 }
 
 function AllergyList({ personId }: { personId: string }) {
+  const { t } = useTranslation(['person', 'common'])
   const {
     data: allergies,
     error,
@@ -30,10 +32,10 @@ function AllergyList({ personId }: { personId: string }) {
     return (
       <>
         <Text variant="body" color="warning">
-          {PERSON_TEXT.allergyLoadFailed}
+          {t('allergy-load-failed')}
         </Text>
         <Button
-          title={PERSON_TEXT.retry}
+          title={t('retry')}
           variant="secondary"
           isLoading={isFetching}
           onPress={() => void refetch()}
@@ -46,7 +48,7 @@ function AllergyList({ personId }: { personId: string }) {
     <View style={styles.list}>
       {allergies.map(({ id, allergenCode, customLabel }) => (
         <Text key={id} variant="body">
-          {customLabel ?? ALLERGEN_LABELS[allergenCode]}
+          {customLabel ?? t(ALLERGEN_LABEL_KEYS[allergenCode])}
         </Text>
       ))}
     </View>
@@ -54,13 +56,14 @@ function AllergyList({ personId }: { personId: string }) {
 }
 
 export function AllergyCard({ personId, allergyStatus }: AllergyCardProps) {
+  const { t } = useTranslation(['person', 'common'])
   return (
-    <SectionCard title={PERSON_TEXT.allergyTitle}>
+    <SectionCard title={t('allergy-title')}>
       {allergyStatus === 'HAS_ALLERGIES' ? (
         <AllergyList personId={personId} />
       ) : (
         <Text variant="body">
-          {ALLERGY_STATUS_TEXT[allergyStatus ?? 'NOT_ANSWERED']}
+          {t(ALLERGY_STATUS_LABEL_KEYS[allergyStatus ?? 'NOT_ANSWERED'])}
         </Text>
       )}
     </SectionCard>

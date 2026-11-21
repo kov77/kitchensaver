@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { ChoiceField } from '@/components/molecules/ChoiceField'
 import { FormMessage } from '@/components/molecules/FormMessage'
@@ -9,7 +10,7 @@ import { getErrorMessage } from '@/utils/errors'
 import { EstimateInputsForm } from './goal/EstimateInputsForm'
 import { EstimateReview } from './goal/EstimateReview'
 import { ManualGoalForm } from './goal/ManualGoalForm'
-import { GOAL_EDITOR_TEXT, GOAL_MODE } from './goal/constants'
+import { GOAL_MODE } from './goal/constants'
 
 type GoalMode = (typeof GOAL_MODE)[keyof typeof GOAL_MODE]
 
@@ -21,11 +22,6 @@ type GoalEditorProps = {
   onSave: (goal: GoalDraft) => void
 }
 
-const MODE_OPTIONS = [
-  { value: GOAL_MODE.MANUAL, label: GOAL_EDITOR_TEXT.modeManual },
-  { value: GOAL_MODE.ESTIMATED, label: GOAL_EDITOR_TEXT.modeEstimate },
-] as const
-
 export function GoalEditor({
   submitLabel,
   isSaving,
@@ -33,7 +29,12 @@ export function GoalEditor({
   onEstimate,
   onSave,
 }: GoalEditorProps) {
+  const { t } = useTranslation('goal')
   const [mode, setMode] = useState<GoalMode | null>(null)
+  const modeOptions = [
+    { value: GOAL_MODE.MANUAL, label: t('editor-mode-manual') },
+    { value: GOAL_MODE.ESTIMATED, label: t('editor-mode-estimate') },
+  ]
   const [isChangingDetails, setIsChangingDetails] = useState(false)
   const {
     mutate: estimate,
@@ -51,8 +52,8 @@ export function GoalEditor({
   return (
     <>
       <ChoiceField
-        label={GOAL_EDITOR_TEXT.modeLabel}
-        options={MODE_OPTIONS}
+        label={t('editor-mode-label')}
+        options={modeOptions}
         value={mode}
         onChange={setMode}
       />

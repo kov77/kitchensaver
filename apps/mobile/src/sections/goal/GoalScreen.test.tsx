@@ -2,15 +2,12 @@ import { QueryClient } from '@tanstack/react-query'
 import { screen, userEvent } from '@testing-library/react-native'
 
 import { getPeopleListKey } from '@/api/queryKeys'
-import { GOAL_EDITOR_TEXT } from '@/components/organisms/goal/constants'
-import { ERROR_MESSAGES } from '@/core/constants'
 import { apiResult } from '@/test-utils/apiResult'
 import {
   createTestQueryClient,
   renderWithQuery,
 } from '@/test-utils/renderWithQuery'
 
-import { GOAL_TEXT } from './constants'
 import { GoalScreen } from './GoalScreen'
 
 const mockBack = jest.fn()
@@ -38,16 +35,16 @@ async function renderGoal() {
 async function fillManualGoal() {
   const user = userEvent.setup()
   await user.press(
-    screen.getByRole('radio', { name: GOAL_EDITOR_TEXT.modeManual }),
+    screen.getByRole('radio', { name: 'I already know my daily calories' }),
   )
   await user.press(screen.getByRole('radio', { name: 'Maintain weight' }))
-  await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.kcalLabel), '2200')
+  await user.type(screen.getByLabelText('Daily calories (kcal)'), '2200')
 }
 
 function pressSave() {
   return userEvent
     .setup()
-    .press(screen.getByRole('button', { name: GOAL_TEXT.save }))
+    .press(screen.getByRole('button', { name: 'Save goal' }))
 }
 
 beforeEach(() => {
@@ -67,7 +64,7 @@ describe('GoalScreen', () => {
       params: { path: { id: 'person-7' } },
       body: { mode: 'MANUAL', goalType: 'MAINTAIN', dailyKcal: 2200 },
     })
-    await screen.findByRole('button', { name: GOAL_TEXT.save })
+    await screen.findByRole('button', { name: 'Save goal' })
     expect(mockBack).toHaveBeenCalledTimes(1)
   })
 
@@ -80,7 +77,7 @@ describe('GoalScreen', () => {
 
     await pressSave()
 
-    await screen.findByRole('button', { name: GOAL_TEXT.save })
+    await screen.findByRole('button', { name: 'Save goal' })
     expect(queryClient.getQueryState(peopleKey)?.isInvalidated).toBe(true)
   })
 
@@ -91,7 +88,9 @@ describe('GoalScreen', () => {
 
     await pressSave()
 
-    expect(await screen.findByText(ERROR_MESSAGES.SERVER)).toBeTruthy()
+    expect(
+      await screen.findByText('The server had a problem. Please try again.'),
+    ).toBeTruthy()
     expect(mockBack).not.toHaveBeenCalled()
   })
 
@@ -105,20 +104,20 @@ describe('GoalScreen', () => {
     )
     const user = userEvent.setup()
     await renderGoal()
-    await user.press(
-      screen.getByRole('radio', { name: GOAL_EDITOR_TEXT.modeEstimate }),
-    )
+    await user.press(screen.getByRole('radio', { name: 'Help me estimate' }))
     await user.press(screen.getByRole('radio', { name: 'Maintain weight' }))
-    await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.heightLabel), '165')
-    await user.type(screen.getByLabelText(GOAL_EDITOR_TEXT.weightLabel), '63')
+    await user.type(screen.getByLabelText('Height (cm)'), '165')
+    await user.type(screen.getByLabelText('Weight (kg)'), '63')
     await user.press(screen.getByRole('radio', { name: 'Low active' }))
     await user.press(screen.getByRole('radio', { name: 'Female' }))
 
-    await user.press(
-      screen.getByRole('button', { name: GOAL_EDITOR_TEXT.calculate }),
-    )
+    await user.press(screen.getByRole('button', { name: 'Calculate estimate' }))
 
-    expect(await screen.findByText(GOAL_EDITOR_TEXT.disclaimer)).toBeTruthy()
+    expect(
+      await screen.findByText(
+        'This is an estimate for information only. It is not medical advice.',
+      ),
+    ).toBeTruthy()
     expect(mockPost).toHaveBeenCalledWith(
       '/api/v1/people/{id}/goals/estimate',
       {
@@ -139,7 +138,7 @@ describe('GoalScreen', () => {
 
     await userEvent
       .setup()
-      .press(screen.getByRole('button', { name: GOAL_TEXT.cancel }))
+      .press(screen.getByRole('button', { name: 'Cancel' }))
 
     expect(mockBack).toHaveBeenCalledTimes(1)
     expect(mockPut).not.toHaveBeenCalled()
