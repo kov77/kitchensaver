@@ -76,6 +76,7 @@ export function PersonScreen() {
           />
           <AllergyCard
             personId={person.id}
+            personName={person.name}
             allergyStatus={person.allergyStatus}
           />
           <DeletePerson

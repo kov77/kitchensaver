@@ -7,6 +7,12 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   list: {
-    gap: spacing.xs,
+    gap: spacing.md,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
   },
 })
