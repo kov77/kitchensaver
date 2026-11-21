@@ -1,0 +1,15 @@
+{
+  "title": "Antes de empezar",
+  "subtitle": "KitchenSaver es una aplicación para adultos de 18 años o más. Lee y confirma los puntos siguientes.",
+  "self-confirmation-note": "Es una autoconfirmación, no una comprobación de edad.",
+  "adult-label": "Tengo 18 años o más",
+  "terms-label": "Acepto los Términos del servicio",
+  "privacy-label": "He leído la Política de privacidad",
+  "confirmation-required": "Confirma para continuar.",
+  "submit": "Continuar",
+  "log-out": "Cerrar sesión",
+  "legal-terms-title": "Términos del servicio",
+  "legal-terms-body": "Texto provisional. Los Términos del servicio definitivos aparecerán aquí antes del lanzamiento.",
+  "legal-privacy-title": "Política de privacidad",
+  "legal-privacy-body": "Texto provisional. La Política de privacidad definitiva aparecerá aquí antes del lanzamiento."
+}
