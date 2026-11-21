@@ -10,3 +10,7 @@ export function unwrapResponse<Data>({
     throw new ApiRequestError(response.status)
   return data
 }
+
+export function assertResponseOk({ response }: { response: Response }) {
+  if (!response.ok) throw new ApiRequestError(response.status)
+}

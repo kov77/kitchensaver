@@ -1,6 +1,6 @@
 import { ApiRequestError } from '@/utils/errors'
 
-import { unwrapResponse } from './unwrapResponse'
+import { assertResponseOk, unwrapResponse } from './unwrapResponse'
 
 describe('unwrapResponse', () => {
   it('returns the data of a successful response', () => {
@@ -43,5 +43,19 @@ describe('unwrapResponse', () => {
     expect(() =>
       unwrapResponse({ response: new Response(null, { status: 500 }) }),
     ).toThrow(ApiRequestError)
+  })
+})
+
+describe('assertResponseOk', () => {
+  it('accepts an empty successful response', () => {
+    expect(() =>
+      assertResponseOk({ response: new Response(null, { status: 204 }) }),
+    ).not.toThrow()
+  })
+
+  it.each([401, 404, 409, 500])('throws for status %s', (status) => {
+    expect(() =>
+      assertResponseOk({ response: new Response(null, { status }) }),
+    ).toThrow(new ApiRequestError(status))
   })
 })
