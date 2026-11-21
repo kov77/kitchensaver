@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/atoms/Button'
 import { FooterLink } from '@/components/molecules/FooterLink'
@@ -11,10 +12,11 @@ import { AppScreen } from '@/components/templates/AppScreen'
 import type { AuthFailure } from '@/core/auth/types'
 import { useSession } from '@/core/auth/SessionProvider'
 
-import { AUTH_FAILURE_MESSAGES, SIGN_IN_TEXT } from './constants'
+import { AUTH_FAILURE_KEYS } from './constants'
 import { signInSchema, type SignInValues } from './schemas'
 
 export function SignInScreen() {
+  const { t } = useTranslation(['auth', 'common'])
   const { signIn } = useSession()
   const [failure, setFailure] = useState<AuthFailure | null>(null)
   const {
@@ -35,24 +37,24 @@ export function SignInScreen() {
   return (
     <AppScreen>
       <ScreenHeader
-        title={SIGN_IN_TEXT.title}
-        subtitle={SIGN_IN_TEXT.subtitle}
+        title={t('sign-in-title')}
+        subtitle={t('sign-in-subtitle')}
       />
       <FormTextField
         control={control}
         name="email"
-        label={SIGN_IN_TEXT.emailLabel}
+        label={t('sign-in-email-label')}
         autoCapitalize="none"
         autoComplete="email"
         autoCorrect={false}
         keyboardType="email-address"
-        placeholder={SIGN_IN_TEXT.emailPlaceholder}
+        placeholder={t('sign-in-email-placeholder')}
         textContentType="emailAddress"
       />
       <FormTextField
         control={control}
         name="password"
-        label={SIGN_IN_TEXT.passwordLabel}
+        label={t('sign-in-password-label')}
         isPassword
         autoCapitalize="none"
         autoComplete="current-password"
@@ -60,17 +62,15 @@ export function SignInScreen() {
         textContentType="password"
         onSubmitEditing={() => void submit()}
       />
-      {failure ? (
-        <FormMessage message={AUTH_FAILURE_MESSAGES[failure]} />
-      ) : null}
+      {failure ? <FormMessage message={t(AUTH_FAILURE_KEYS[failure])} /> : null}
       <Button
-        title={SIGN_IN_TEXT.submit}
+        title={t('sign-in-submit')}
         isLoading={isSubmitting}
         onPress={() => void submit()}
       />
       <FooterLink
-        prompt={SIGN_IN_TEXT.footerPrompt}
-        linkLabel={SIGN_IN_TEXT.footerLink}
+        prompt={t('sign-in-footer-prompt')}
+        linkLabel={t('sign-in-footer-link')}
         href="/sign-up"
       />
     </AppScreen>

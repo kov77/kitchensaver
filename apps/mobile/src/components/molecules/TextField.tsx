@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Pressable, View, type TextInputProps } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import { Input } from '@/components/atoms/Input'
 import { Text } from '@/components/atoms/Text'
 import { spacing } from '@/theme/spacing'
 
-import { PASSWORD_TOGGLE_LABELS, PASSWORD_TOGGLE_TEXT } from './constants'
 import { styles } from './TextField.styles'
 
 type TextFieldProps = TextInputProps & {
@@ -20,8 +20,14 @@ export function TextField({
   isPassword = false,
   ...inputProps
 }: TextFieldProps) {
+  const { t } = useTranslation('common')
   const [isHidden, setIsHidden] = useState(true)
-  const toggleKey = isHidden ? 'show' : 'hide'
+  const toggleLabel = isHidden
+    ? t('password-toggle-labels-show')
+    : t('password-toggle-labels-hide')
+  const toggleText = isHidden
+    ? t('password-toggle-show')
+    : t('password-toggle-hide')
 
   return (
     <View style={styles.container}>
@@ -35,13 +41,13 @@ export function TextField({
           isPassword ? (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={PASSWORD_TOGGLE_LABELS[toggleKey]}
+              accessibilityLabel={toggleLabel}
               hitSlop={spacing.sm}
               onPress={() => setIsHidden((previous) => !previous)}
               style={styles.toggle}
             >
               <Text variant="label" color="brandPrimary">
-                {PASSWORD_TOGGLE_TEXT[toggleKey]}
+                {toggleText}
               </Text>
             </Pressable>
           ) : null

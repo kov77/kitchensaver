@@ -1,12 +1,13 @@
 import { useReducer } from 'react'
 
 import { useCreateOnboarding } from '@/api/queries/useCreateOnboarding'
+import { EMPTY_PROFILE } from '@/components/organisms/profile/constants'
 import { AppScreen } from '@/components/templates/AppScreen'
 import { useSession } from '@/core/auth/SessionProvider'
 import { getErrorMessage } from '@/utils/errors'
 
 import { AllergyStep } from './AllergyStep'
-import { EMPTY_PROFILE, INITIAL_FLOW_STATE } from './constants'
+import { INITIAL_FLOW_STATE } from './constants'
 import { GoalStep } from './GoalStep'
 import { ProfileStep } from './ProfileStep'
 import type { AllergyValues } from './schemas'

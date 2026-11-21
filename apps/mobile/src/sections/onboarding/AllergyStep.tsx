@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/atoms/Button'
 import { Chip } from '@/components/atoms/Chip'
@@ -11,14 +12,14 @@ import { FormChoiceField } from '@/components/molecules/FormChoiceField'
 import { FormMessage } from '@/components/molecules/FormMessage'
 import { FormTextField } from '@/components/molecules/FormTextField'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
+import { ALLERGEN_LABEL_KEYS } from '@/core/constants'
+import { toOptions } from '@/utils/options'
 
 import {
-  ALLERGEN_OPTIONS,
+  ALLERGEN_CODES,
   ALLERGY_ANSWER,
-  ALLERGY_ANSWERS,
-  ONBOARDING_TEXT,
+  ALLERGY_ANSWER_LABEL_KEYS,
   OTHER_ALLERGEN_CODE,
-  WARNING_DIALOG_BUTTONS,
 } from './constants'
 import { styles } from './Onboarding.styles'
 import { allergySchema, type AllergyValues } from './schemas'
@@ -37,6 +38,7 @@ export function AllergyStep({
   onBack,
   onSubmit,
 }: AllergyStepProps) {
+  const { t } = useTranslation(['onboarding', 'common'])
   const [pendingValues, setPendingValues] = useState<AllergyValues | null>(null)
   const {
     control,
@@ -68,30 +70,32 @@ export function AllergyStep({
 
   return (
     <>
-      <ScreenHeader title={ONBOARDING_TEXT.allergyTitle} />
+      <ScreenHeader title={t('allergy-title')} />
       <FormChoiceField
         control={control}
         name="answer"
-        label={ONBOARDING_TEXT.allergyQuestion}
+        label={t('allergy-question')}
         labelColor="text"
-        options={ALLERGY_ANSWERS}
+        options={toOptions(Object.values(ALLERGY_ANSWER), (answer) =>
+          t(ALLERGY_ANSWER_LABEL_KEYS[answer]),
+        )}
       />
       {answer === ALLERGY_ANSWER.YES ? (
         <View style={styles.group}>
           <Text variant="label" accessibilityRole="header">
-            {ONBOARDING_TEXT.allergensLabel}
+            {t('allergens-label')}
           </Text>
           <Controller
             control={control}
             name="allergens"
             render={({ field: { onChange, value } }) => (
               <View style={styles.chips}>
-                {ALLERGEN_OPTIONS.map(({ value: code, label }) => {
+                {ALLERGEN_CODES.map((code) => {
                   const isSelected = value.includes(code)
                   return (
                     <Chip
                       key={code}
-                      label={label}
+                      label={t(ALLERGEN_LABEL_KEYS[code])}
                       isSelected={isSelected}
                       onPress={() =>
                         onChange(
@@ -122,27 +126,23 @@ export function AllergyStep({
         <FormTextField
           control={control}
           name="otherLabel"
-          label={ONBOARDING_TEXT.otherLabel}
-          placeholder={ONBOARDING_TEXT.otherPlaceholder}
+          label={t('other-label')}
+          placeholder={t('other-placeholder')}
         />
       ) : null}
       {errorMessage ? <FormMessage message={errorMessage} /> : null}
       <Button
-        title={ONBOARDING_TEXT.finish}
+        title={t('finish')}
         isLoading={isSubmitting}
         onPress={() => void submit()}
       />
-      <Button
-        title={ONBOARDING_TEXT.back}
-        variant="secondary"
-        onPress={onBack}
-      />
+      <Button title={t('back')} variant="secondary" onPress={onBack} />
       <ConfirmDialog
         isVisible={dialog !== null}
-        title={dialog?.title ?? ''}
-        message={dialog?.message ?? ''}
-        confirmLabel={WARNING_DIALOG_BUTTONS.confirm}
-        cancelLabel={WARNING_DIALOG_BUTTONS.cancel}
+        title={dialog ? t(dialog.titleKey) : ''}
+        message={dialog ? t(dialog.messageKey) : ''}
+        confirmLabel={t('warning-dialog-buttons-confirm')}
+        cancelLabel={t('warning-dialog-buttons-cancel')}
         onConfirm={confirmWarning}
         onCancel={() => setPendingValues(null)}
       />

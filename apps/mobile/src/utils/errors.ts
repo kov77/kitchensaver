@@ -1,5 +1,6 @@
+import i18next from 'i18next'
+
 import {
-  ERROR_MESSAGES,
   MAX_REQUEST_RETRIES,
   NETWORK_ERROR_PATTERN,
   RESPONSE_STATUS_CODE,
@@ -23,28 +24,31 @@ export function getErrorMessage(error: unknown) {
     return getStatusMessage(error.status)
   }
   if (error instanceof TypeError && NETWORK_ERROR_PATTERN.test(error.message)) {
-    return ERROR_MESSAGES.NETWORK
+    return i18next.t('errors-network')
   }
-  return ERROR_MESSAGES.UNKNOWN
+  return i18next.t('errors-unknown')
 }
 
 function getStatusMessage(status: number) {
   if (status === RESPONSE_STATUS_CODE.UNAUTHORIZED) {
-    return ERROR_MESSAGES.SESSION_EXPIRED
+    return i18next.t('errors-session-expired')
   }
-  if (status === RESPONSE_STATUS_CODE.FORBIDDEN) return ERROR_MESSAGES.FORBIDDEN
-  if (status === RESPONSE_STATUS_CODE.NOT_FOUND) return ERROR_MESSAGES.NOT_FOUND
-  if (status === RESPONSE_STATUS_CODE.CONFLICT) return ERROR_MESSAGES.CONFLICT
+  if (status === RESPONSE_STATUS_CODE.FORBIDDEN)
+    return i18next.t('errors-forbidden')
+  if (status === RESPONSE_STATUS_CODE.NOT_FOUND)
+    return i18next.t('errors-not-found')
+  if (status === RESPONSE_STATUS_CODE.CONFLICT)
+    return i18next.t('errors-conflict')
   if (status === RESPONSE_STATUS_CODE.UNPROCESSABLE) {
-    return ERROR_MESSAGES.UNPROCESSABLE
+    return i18next.t('errors-unprocessable')
   }
   if (status === RESPONSE_STATUS_CODE.TOO_MANY_REQUESTS) {
-    return ERROR_MESSAGES.TOO_MANY_REQUESTS
+    return i18next.t('errors-too-many-requests')
   }
   if (status >= RESPONSE_STATUS_CODE.SERVER_ERROR_MIN) {
-    return ERROR_MESSAGES.SERVER
+    return i18next.t('errors-server')
   }
-  return ERROR_MESSAGES.UNKNOWN
+  return i18next.t('errors-unknown')
 }
 
 export function shouldRetryRequest(failureCount: number, error: Error) {

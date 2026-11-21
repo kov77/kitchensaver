@@ -1,7 +1,10 @@
 import { ActivityIndicator, type ActivityIndicatorProps } from 'react-native'
-
-import { SPINNER_LABEL } from './constants'
+import { useTranslation } from 'react-i18next'
 
 export function Spinner(props: ActivityIndicatorProps) {
-  return <ActivityIndicator accessibilityLabel={SPINNER_LABEL} {...props} />
+  const { t } = useTranslation('common')
+
+  return (
+    <ActivityIndicator accessibilityLabel={t('spinner-label')} {...props} />
+  )
 }

@@ -29,3 +29,7 @@ export type AllergenCode = Extract<
   OnboardingAllergies,
   { status: 'HAS_ALLERGIES' }
 >['items'][number]['allergenCode']
+
+export type PersonDetail = Schemas['PersonDetailDto']
+
+export type Allergy = Schemas['AllergyDto']

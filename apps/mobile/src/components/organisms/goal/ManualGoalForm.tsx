@@ -1,13 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/atoms/Button'
 import { FormChoiceField } from '@/components/molecules/FormChoiceField'
 import { FormTextField } from '@/components/molecules/FormTextField'
+import { GOAL_TYPE_LABEL_KEYS } from '@/core/constants'
 import type { GoalDraft } from '@/core/types'
+import { toOptions } from '@/utils/options'
 import { parseDecimal } from '@/utils/numbers'
 
-import { GOAL_EDITOR_TEXT, GOAL_TYPE_OPTIONS } from './constants'
+import { GOAL_TYPES } from './constants'
 import { manualGoalSchema, type ManualGoalValues } from './schemas'
 
 type ManualGoalFormProps = {
@@ -21,6 +24,7 @@ export function ManualGoalForm({
   isSaving,
   onSubmit,
 }: ManualGoalFormProps) {
+  const { t } = useTranslation(['goal', 'common'])
   const { control, handleSubmit } = useForm<ManualGoalValues>({
     resolver: zodResolver(manualGoalSchema),
     defaultValues: { goalType: null, dailyKcal: '' },
@@ -37,15 +41,17 @@ export function ManualGoalForm({
       <FormChoiceField
         control={control}
         name="goalType"
-        label={GOAL_EDITOR_TEXT.goalTypeLabel}
-        options={GOAL_TYPE_OPTIONS}
+        label={t('editor-goal-type-label')}
+        options={toOptions(GOAL_TYPES, (goalType) =>
+          t(GOAL_TYPE_LABEL_KEYS[goalType]),
+        )}
       />
       <FormTextField
         control={control}
         name="dailyKcal"
-        label={GOAL_EDITOR_TEXT.kcalLabel}
+        label={t('editor-kcal-label')}
         keyboardType="number-pad"
-        placeholder={GOAL_EDITOR_TEXT.kcalPlaceholder}
+        placeholder={t('editor-kcal-placeholder')}
       />
       <Button
         title={submitLabel}

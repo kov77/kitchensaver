@@ -1,0 +1,14 @@
+{
+  "years-old": "ans",
+  "back": "Retour",
+  "retry": "Réessayer",
+  "profile-title": "Profil",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "goal-title": "Objectif calorique quotidien",
+  "change-goal": "Modifier l’objectif",
+  "set-goal": "Définir l’objectif",
+  "allergy-title": "Allergies alimentaires",
+  "allergy-load-failed": "Nous n’avons pas pu charger les allergies."
+}

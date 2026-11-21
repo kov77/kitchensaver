@@ -1,10 +1,13 @@
 import * as zod from 'zod'
 
-import { CONSENT_TEXT } from './constants'
+import { lazyMessage } from '@/utils/messages'
 
 const confirmedSchema = zod
   .boolean()
-  .refine((isChecked) => isChecked, CONSENT_TEXT.confirmationRequired)
+  .refine(
+    (isChecked) => isChecked,
+    lazyMessage('consent:confirmation-required'),
+  )
 
 export const consentSchema = zod.object({
   adultConfirmed: confirmedSchema,

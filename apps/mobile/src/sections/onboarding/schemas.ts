@@ -1,69 +1,40 @@
+import i18next from 'i18next'
 import * as zod from 'zod'
 
 import type { AllergenCode } from '@/api/types'
 import { NAME_MAX_LENGTH } from '@/core/constants'
-import { toIsoDate } from '@/utils/dates'
+import { lazyMessage } from '@/utils/messages'
 
 import {
-  ALLERGEN_OPTIONS,
+  ALLERGEN_CODES,
   ALLERGY_ANSWER,
-  ONBOARDING_ERRORS,
   OTHER_ALLERGEN_CODE,
 } from './constants'
-
-type DateBounds = { minimumDate: Date; maximumDate: Date }
-
-export function createProfileSchema({ minimumDate, maximumDate }: DateBounds) {
-  return zod.object({
-    name: zod
-      .string()
-      .trim()
-      .min(1, ONBOARDING_ERRORS.nameRequired)
-      .max(NAME_MAX_LENGTH, ONBOARDING_ERRORS.nameTooLong),
-    dateOfBirth: zod
-      .date()
-      .nullable()
-      .superRefine((date, context) => {
-        if (date === null) {
-          context.addIssue({
-            code: 'custom',
-            message: ONBOARDING_ERRORS.dateRequired,
-          })
-          return
-        }
-        const isoDate = toIsoDate(date)
-        if (
-          isoDate < toIsoDate(minimumDate) ||
-          isoDate > toIsoDate(maximumDate)
-        ) {
-          context.addIssue({
-            code: 'custom',
-            message: ONBOARDING_ERRORS.dateOutOfRange,
-          })
-        }
-      }),
-  })
-}
 
 export const allergySchema = zod
   .object({
     answer: zod.enum(Object.values(ALLERGY_ANSWER)).nullable(),
     allergens: zod.array(
       zod.custom<AllergenCode>((input) =>
-        ALLERGEN_OPTIONS.some(({ value }) => value === input),
+        ALLERGEN_CODES.some((code) => code === input),
       ),
     ),
     otherLabel: zod
       .string()
       .trim()
-      .max(NAME_MAX_LENGTH, ONBOARDING_ERRORS.otherTooLong),
+      .max(
+        NAME_MAX_LENGTH,
+        lazyMessage('onboarding:errors-other-too-long', {
+          max: NAME_MAX_LENGTH,
+        }),
+      ),
   })
   .superRefine(({ answer, allergens, otherLabel }, context) => {
     if (answer === null) {
       context.addIssue({
         code: 'custom',
         path: ['answer'],
-        message: ONBOARDING_ERRORS.answerRequired,
+        message: i18next.t('onboarding:errors-answer-required'),
       })
       return
     }
@@ -72,7 +43,7 @@ export const allergySchema = zod
       context.addIssue({
         code: 'custom',
         path: ['allergens'],
-        message: ONBOARDING_ERRORS.allergenRequired,
+        message: i18next.t('onboarding:errors-allergen-required'),
       })
       return
     }
@@ -80,10 +51,9 @@ export const allergySchema = zod
       context.addIssue({
         code: 'custom',
         path: ['otherLabel'],
-        message: ONBOARDING_ERRORS.otherRequired,
+        message: i18next.t('onboarding:errors-other-required'),
       })
     }
   })
 
-export type ProfileValues = zod.infer<ReturnType<typeof createProfileSchema>>
 export type AllergyValues = zod.infer<typeof allergySchema>

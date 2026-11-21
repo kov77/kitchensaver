@@ -1,0 +1,10 @@
+{
+  "name-label": "Name",
+  "name-placeholder": "Your first name",
+  "date-of-birth-label": "Date of birth",
+  "date-of-birth-placeholder": "Select date",
+  "errors-name-required": "Enter a name.",
+  "errors-name-too-long": "Use at most {{max}} characters.",
+  "errors-date-required": "Select the date of birth.",
+  "errors-date-out-of-range": "The age must be between {{min}} and {{max}}."
+}

@@ -1,12 +1,13 @@
 import { Pressable, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import type { PersonListItem } from '@/api/types'
 import { Avatar } from '@/components/atoms/Avatar'
 import { Text } from '@/components/atoms/Text'
+import { usePersonSummary } from '@/core/usePersonSummary'
 
-import { PEOPLE_TEXT } from './constants'
 import { styles } from './PersonCard.styles'
-import { describeGoal, describeReadiness, getInitial } from './utils'
+import { getInitial } from './utils'
 
 type PersonCardProps = {
   person: PersonListItem
@@ -17,6 +18,8 @@ export function PersonCard({
   person: { name, age, goal, planReadiness },
   onPress,
 }: PersonCardProps) {
+  const { t } = useTranslation('people')
+  const { describeGoal, describeReadiness } = usePersonSummary()
   const readinessHint = describeReadiness(planReadiness)
 
   return (
@@ -29,7 +32,7 @@ export function PersonCard({
       ]
         .filter(Boolean)
         .join(' ')}
-      accessibilityHint={PEOPLE_TEXT.cardHint}
+      accessibilityHint={t('card-hint')}
       onPress={onPress}
       style={styles.card}
     >

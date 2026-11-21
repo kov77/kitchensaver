@@ -1,4 +1,9 @@
-import { formatDisplayDate, subtractYears, toIsoDate } from './dates'
+import {
+  formatDisplayDate,
+  parseIsoDate,
+  subtractYears,
+  toIsoDate,
+} from './dates'
 
 describe('toIsoDate', () => {
   it('uses the local calendar date, not the UTC one', () => {
@@ -34,5 +39,19 @@ describe('subtractYears', () => {
     expect(toIsoDate(subtractYears(new Date(2028, 1, 29), 120))).toBe(
       '1908-02-29',
     )
+  })
+})
+
+describe('parseIsoDate', () => {
+  it('reads the calendar date in local time', () => {
+    const date = parseIsoDate('1990-03-04')
+
+    expect(date.getFullYear()).toBe(1990)
+    expect(date.getMonth()).toBe(2)
+    expect(date.getDate()).toBe(4)
+  })
+
+  it('round-trips with toIsoDate', () => {
+    expect(toIsoDate(parseIsoDate('2000-02-29'))).toBe('2000-02-29')
   })
 })

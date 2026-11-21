@@ -1,3 +1,5 @@
+import type { PersonGoal, PersonListItem } from '@/api/types'
+
 export type AppAccess =
   | 'loading'
   | 'unavailable'
@@ -31,3 +33,7 @@ export type GoalEstimate = {
 export type GoalDraft =
   | { mode: 'MANUAL'; goalType: GoalType; dailyKcal: number }
   | ({ mode: 'ESTIMATED'; dailyKcal: number } & EstimateInput)
+
+export type GoalSummary = PersonGoal
+
+export type PlanReadiness = PersonListItem['planReadiness']

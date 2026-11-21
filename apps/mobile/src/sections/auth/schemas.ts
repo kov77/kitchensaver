@@ -1,27 +1,37 @@
 import * as zod from 'zod'
 
-import {
-  FIELD_ERROR_MESSAGES,
-  PASSWORD_MAX_LENGTH,
-  PASSWORD_MIN_LENGTH,
-} from './constants'
+import { lazyMessage } from '@/utils/messages'
+
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from './constants'
 
 const emailSchema = zod
   .string()
   .trim()
-  .pipe(zod.email(FIELD_ERROR_MESSAGES.invalidEmail))
+  .pipe(zod.email(lazyMessage('auth:field-errors-invalid-email')))
 
 export const signInSchema = zod.object({
   email: emailSchema,
-  password: zod.string().min(1, FIELD_ERROR_MESSAGES.passwordRequired),
+  password: zod
+    .string()
+    .min(1, lazyMessage('auth:field-errors-password-required')),
 })
 
 export const signUpSchema = zod.object({
   email: emailSchema,
   password: zod
     .string()
-    .min(PASSWORD_MIN_LENGTH, FIELD_ERROR_MESSAGES.passwordTooShort)
-    .max(PASSWORD_MAX_LENGTH, FIELD_ERROR_MESSAGES.passwordTooLong),
+    .min(
+      PASSWORD_MIN_LENGTH,
+      lazyMessage('auth:field-errors-password-too-short', {
+        min: PASSWORD_MIN_LENGTH,
+      }),
+    )
+    .max(
+      PASSWORD_MAX_LENGTH,
+      lazyMessage('auth:field-errors-password-too-long', {
+        max: PASSWORD_MAX_LENGTH,
+      }),
+    ),
 })
 
 export type SignInValues = zod.infer<typeof signInSchema>

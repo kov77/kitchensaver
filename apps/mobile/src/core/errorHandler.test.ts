@@ -1,6 +1,5 @@
 import { ApiRequestError } from '@/utils/errors'
 
-import { ERROR_MESSAGES } from './constants'
 import { handleError } from './errorHandler'
 import { dismissToast, getToasts } from './toast/toastStore'
 
@@ -30,7 +29,9 @@ describe('handleError', () => {
   it('shows a plain message for a server error', () => {
     handleError(new ApiRequestError(500))
 
-    expect(toastMessages()).toEqual([ERROR_MESSAGES.SERVER])
+    expect(toastMessages()).toEqual([
+      'The server had a problem. Please try again.',
+    ])
     expect(mockSignOut).not.toHaveBeenCalled()
   })
 
@@ -38,7 +39,9 @@ describe('handleError', () => {
     handleError(new ApiRequestError(401))
 
     expect(mockSignOut).toHaveBeenCalledWith({ scope: 'local' })
-    expect(toastMessages()).toEqual([ERROR_MESSAGES.SESSION_EXPIRED])
+    expect(toastMessages()).toEqual([
+      'Your session has expired. Please log in again.',
+    ])
   })
 
   it('does not sign out for other client errors', () => {
@@ -64,6 +67,6 @@ describe('handleError', () => {
   it('never shows the technical message of an unexpected error', () => {
     handleError(new Error('SQLSTATE 42P01 relation people does not exist'))
 
-    expect(toastMessages()).toEqual([ERROR_MESSAGES.UNKNOWN])
+    expect(toastMessages()).toEqual(['Something went wrong. Please try again.'])
   })
 })

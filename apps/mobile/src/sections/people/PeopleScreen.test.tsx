@@ -3,12 +3,10 @@ import { screen, userEvent } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
 import type { PersonListItem } from '@/api/types'
-import { ERROR_MESSAGES } from '@/core/constants'
 import { shouldRetryRequest } from '@/utils/errors'
 import { apiResult } from '@/test-utils/apiResult'
 import { renderWithQuery } from '@/test-utils/renderWithQuery'
 
-import { PEOPLE_TEXT } from './constants'
 import { PeopleScreen } from './PeopleScreen'
 
 const mockSignOut = jest.fn()
@@ -67,7 +65,7 @@ describe('PeopleScreen', () => {
 
     await renderPeople()
 
-    await screen.findByText(PEOPLE_TEXT.empty)
+    await screen.findByText('There are no active profiles yet.')
     expect(apiClient.GET).toHaveBeenCalledWith('/api/v1/people', {
       params: { query: { status: 'active' } },
     })
@@ -89,7 +87,7 @@ describe('PeopleScreen', () => {
     await renderPeople()
 
     expect(await screen.findByText('alena · 29')).toBeTruthy()
-    expect(screen.getByText(PEOPLE_TEXT.noGoal)).toBeTruthy()
+    expect(screen.getByText('No goal yet')).toBeTruthy()
     expect(
       screen.getByText('Not ready to plan: add a daily calorie goal'),
     ).toBeTruthy()
@@ -104,7 +102,7 @@ describe('PeopleScreen', () => {
       .press(await screen.findByRole('button', { name: /^alena, 29/ }))
 
     expect(mockPush).toHaveBeenCalledWith({
-      pathname: '/goal/[personId]',
+      pathname: '/person/[personId]',
       params: { personId: 'person-2' },
     })
   })
@@ -126,7 +124,9 @@ describe('PeopleScreen', () => {
 
     await renderPeople()
 
-    expect(await screen.findByText(PEOPLE_TEXT.empty)).toBeTruthy()
+    expect(
+      await screen.findByText('There are no active profiles yet.'),
+    ).toBeTruthy()
   })
 
   it('shows a plain message when the API rejects the token', async () => {
@@ -134,21 +134,25 @@ describe('PeopleScreen', () => {
 
     await renderPeople()
 
-    expect(await screen.findByText(ERROR_MESSAGES.SESSION_EXPIRED)).toBeTruthy()
+    expect(
+      await screen.findByText('Your session has expired. Please log in again.'),
+    ).toBeTruthy()
   })
 
   it('lets the user try again after an error', async () => {
     respondWith(404)
     await renderPeople()
-    await screen.findByText(ERROR_MESSAGES.NOT_FOUND)
+    await screen.findByText('We could not find what you were looking for.')
     respondWith(200, [READY_PERSON])
 
     await userEvent
       .setup()
-      .press(screen.getByRole('button', { name: PEOPLE_TEXT.retry }))
+      .press(screen.getByRole('button', { name: 'Try again' }))
 
     expect(await screen.findByText('Max · 34')).toBeTruthy()
-    expect(screen.queryByText(ERROR_MESSAGES.NOT_FOUND)).toBeNull()
+    expect(
+      screen.queryByText('We could not find what you were looking for.'),
+    ).toBeNull()
   })
 
   it('lets the user log out', async () => {
@@ -157,7 +161,7 @@ describe('PeopleScreen', () => {
 
     await userEvent
       .setup()
-      .press(screen.getByRole('button', { name: PEOPLE_TEXT.logOut }))
+      .press(screen.getByRole('button', { name: 'Log out' }))
 
     expect(mockSignOut).toHaveBeenCalledTimes(1)
   })

@@ -1,31 +1,23 @@
-export const CONSENT_TEXT = {
-  title: 'Before you start',
-  subtitle:
-    'KitchenSaver is an app for adults aged 18 and over. Please read and confirm the points below.',
-  selfConfirmationNote: 'This is a self-confirmation, not an age check.',
-  adultLabel: 'I am 18 or older',
-  termsLabel: 'I accept the Terms of Service',
-  privacyLabel: 'I have read the Privacy Policy',
-  confirmationRequired: 'Please confirm to continue.',
-  submit: 'Continue',
-  logOut: 'Log out',
-} as const
+import type { ParseKeys } from 'i18next'
 
-export const LEGAL_DOCUMENTS = [
-  {
-    id: 'terms',
-    title: 'Terms of Service',
-    body: 'Placeholder text. The final Terms of Service will appear here before launch.',
-  },
+export const LEGAL_DOCUMENTS: readonly {
+  id: string
+  titleKey: ParseKeys<'consent'>
+  bodyKey: ParseKeys<'consent'>
+}[] = [
+  { id: 'terms', titleKey: 'legal-terms-title', bodyKey: 'legal-terms-body' },
   {
     id: 'privacy',
-    title: 'Privacy Policy',
-    body: 'Placeholder text. The final Privacy Policy will appear here before launch.',
+    titleKey: 'legal-privacy-title',
+    bodyKey: 'legal-privacy-body',
   },
-] as const
+]
 
-export const CONSENT_CHECKBOXES = [
-  { name: 'adultConfirmed', label: CONSENT_TEXT.adultLabel },
-  { name: 'acceptTerms', label: CONSENT_TEXT.termsLabel },
-  { name: 'acknowledgePrivacy', label: CONSENT_TEXT.privacyLabel },
-] as const
+export const CONSENT_CHECKBOXES: readonly {
+  name: 'adultConfirmed' | 'acceptTerms' | 'acknowledgePrivacy'
+  labelKey: ParseKeys<'consent'>
+}[] = [
+  { name: 'adultConfirmed', labelKey: 'adult-label' },
+  { name: 'acceptTerms', labelKey: 'terms-label' },
+  { name: 'acknowledgePrivacy', labelKey: 'privacy-label' },
+]

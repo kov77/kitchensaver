@@ -1,11 +1,10 @@
+import { useTranslation } from 'react-i18next'
 import { requestGoalPreview } from '@/api/goalRequests'
 import { Button } from '@/components/atoms/Button'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
 import { GoalEditor } from '@/components/organisms/GoalEditor'
 import type { EstimateInput, GoalDraft } from '@/core/types'
 import { toIsoDate } from '@/utils/dates'
-
-import { ONBOARDING_TEXT } from './constants'
 
 type GoalStepProps = {
   dateOfBirth: Date
@@ -14,32 +13,26 @@ type GoalStepProps = {
 }
 
 export function GoalStep({ dateOfBirth, onNext, onBack }: GoalStepProps) {
+  const { t } = useTranslation('onboarding')
   const estimate = (input: EstimateInput) =>
     requestGoalPreview(toIsoDate(dateOfBirth), input)
 
   return (
     <>
-      <ScreenHeader
-        title={ONBOARDING_TEXT.goalTitle}
-        subtitle={ONBOARDING_TEXT.goalSubtitle}
-      />
+      <ScreenHeader title={t('goal-title')} subtitle={t('goal-subtitle')} />
       <GoalEditor
-        submitLabel={ONBOARDING_TEXT.next}
+        submitLabel={t('next')}
         isSaving={false}
         saveErrorMessage={null}
         onEstimate={estimate}
         onSave={onNext}
       />
       <Button
-        title={ONBOARDING_TEXT.skip}
+        title={t('skip')}
         variant="secondary"
         onPress={() => onNext(null)}
       />
-      <Button
-        title={ONBOARDING_TEXT.back}
-        variant="secondary"
-        onPress={onBack}
-      />
+      <Button title={t('back')} variant="secondary" onPress={onBack} />
     </>
   )
 }
