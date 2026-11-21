@@ -1,3 +1,5 @@
+import type { AllergenCode, PlanReadinessReason } from '@/api/types'
+
 import type { GoalType } from './types'
 
 export const RESPONSE_STATUS_CODE = {
@@ -49,4 +51,33 @@ export const GOAL_TYPE_LABELS: Record<GoalType, string> = {
   MAINTAIN: 'Maintain weight',
   GAIN: 'Gain weight',
   CUSTOM: 'Custom goal',
+}
+
+export const PERSON_SUMMARY_TEXT = {
+  noGoal: 'No goal yet',
+  kcalPerDay: 'kcal/day',
+  notReady: 'Not ready to plan',
+} as const
+
+export const READINESS_HINTS: Record<PlanReadinessReason, string> = {
+  MISSING_GOAL: 'add a daily calorie goal',
+  GOAL_REVIEW_REQUIRED: 'review the goal',
+  GOAL_NOT_VALID_FOR_AGE: 'the goal does not fit this age',
+  ALLERGY_STATUS_MISSING: 'answer the allergy question',
+}
+
+export const ALLERGEN_LABELS: Record<AllergenCode, string> = {
+  MILK: 'Milk',
+  EGG: 'Eggs',
+  FISH: 'Fish',
+  CRUSTACEAN_SHELLFISH: 'Crustaceans',
+  MOLLUSC: 'Molluscs',
+  TREE_NUT: 'Tree nuts',
+  PEANUT: 'Peanuts',
+  WHEAT: 'Wheat',
+  SOY: 'Soy',
+  SESAME: 'Sesame',
+  MUSTARD: 'Mustard',
+  SULPHITES: 'Sulphites',
+  OTHER: 'Other',
 }

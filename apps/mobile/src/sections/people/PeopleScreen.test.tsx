@@ -3,7 +3,7 @@ import { screen, userEvent } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
 import type { PersonListItem } from '@/api/types'
-import { ERROR_MESSAGES } from '@/core/constants'
+import { ERROR_MESSAGES, PERSON_SUMMARY_TEXT } from '@/core/constants'
 import { shouldRetryRequest } from '@/utils/errors'
 import { apiResult } from '@/test-utils/apiResult'
 import { renderWithQuery } from '@/test-utils/renderWithQuery'
@@ -89,7 +89,7 @@ describe('PeopleScreen', () => {
     await renderPeople()
 
     expect(await screen.findByText('alena · 29')).toBeTruthy()
-    expect(screen.getByText(PEOPLE_TEXT.noGoal)).toBeTruthy()
+    expect(screen.getByText(PERSON_SUMMARY_TEXT.noGoal)).toBeTruthy()
     expect(
       screen.getByText('Not ready to plan: add a daily calorie goal'),
     ).toBeTruthy()
