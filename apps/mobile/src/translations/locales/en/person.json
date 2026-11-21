@@ -10,5 +10,9 @@
   "change-goal": "Change goal",
   "set-goal": "Set goal",
   "allergy-title": "Food allergies",
-  "allergy-load-failed": "We could not load the allergies."
+  "allergy-load-failed": "We could not load the allergies.",
+  "delete-button": "Delete profile",
+  "delete-title": "Delete {{name}}?",
+  "delete-message": "This permanently deletes the profile with the date of birth, the goal and the allergies. This cannot be undone.",
+  "delete-confirm": "Delete permanently"
 }

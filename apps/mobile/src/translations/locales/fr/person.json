@@ -10,5 +10,9 @@
   "change-goal": "Modifier l’objectif",
   "set-goal": "Définir l’objectif",
   "allergy-title": "Allergies alimentaires",
-  "allergy-load-failed": "Nous n’avons pas pu charger les allergies."
+  "allergy-load-failed": "Nous n’avons pas pu charger les allergies.",
+  "delete-button": "Supprimer le profil",
+  "delete-title": "Supprimer {{name}} ?",
+  "delete-message": "Le profil, avec la date de naissance, l’objectif et les allergies, sera supprimé définitivement. Cette action est irréversible.",
+  "delete-confirm": "Supprimer définitivement"
 }

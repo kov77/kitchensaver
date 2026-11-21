@@ -10,5 +10,9 @@
   "change-goal": "Cambiar objetivo",
   "set-goal": "Fijar objetivo",
   "allergy-title": "Alergias alimentarias",
-  "allergy-load-failed": "No pudimos cargar las alergias."
+  "allergy-load-failed": "No pudimos cargar las alergias.",
+  "delete-button": "Eliminar perfil",
+  "delete-title": "¿Eliminar a {{name}}?",
+  "delete-message": "Se eliminarán de forma permanente el perfil con la fecha de nacimiento, el objetivo y las alergias. Esta acción no se puede deshacer.",
+  "delete-confirm": "Eliminar definitivamente"
 }

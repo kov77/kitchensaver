@@ -1,9 +1,13 @@
-import { screen, userEvent } from '@testing-library/react-native'
+import { screen, userEvent, waitFor } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
+import { getPeopleListKey, getPersonKey } from '@/api/queryKeys'
 import type { Allergy, PersonDetail } from '@/api/types'
 import { apiResult } from '@/test-utils/apiResult'
-import { renderWithQuery } from '@/test-utils/renderWithQuery'
+import {
+  createTestQueryClient,
+  renderWithQuery,
+} from '@/test-utils/renderWithQuery'
 
 import { PersonScreen } from './PersonScreen'
 
@@ -11,7 +15,7 @@ const mockBack = jest.fn()
 const mockPush = jest.fn()
 
 jest.mock('@/api/apiClient', () => ({
-  apiClient: { GET: jest.fn(), PATCH: jest.fn() },
+  apiClient: { GET: jest.fn(), PATCH: jest.fn(), DELETE: jest.fn() },
 }))
 
 jest.mock('expo-router', () => ({
@@ -273,5 +277,70 @@ describe('PersonScreen profile editing', () => {
     expect(screen.queryByLabelText('Name')).toBeNull()
     expect(screen.getAllByText('Max')).toHaveLength(2)
     expect(screen.queryByText('Someone else')).toBeNull()
+  })
+})
+
+describe('PersonScreen deleting the person', () => {
+  async function askToDelete() {
+    const user = userEvent.setup()
+    await user.press(
+      await screen.findByRole('button', { name: 'Delete profile' }),
+    )
+    return user
+  }
+
+  it('names the person and says that the data is erased for good', async () => {
+    await renderPerson()
+    await askToDelete()
+
+    expect(screen.getByText('Delete Max?')).toBeTruthy()
+    expect(
+      screen.getByText(/permanently deletes the profile.*cannot be undone/),
+    ).toBeTruthy()
+    expect(apiClient.DELETE).not.toHaveBeenCalled()
+  })
+
+  it('keeps the person when the confirmation is cancelled', async () => {
+    await renderPerson()
+    const user = await askToDelete()
+
+    await user.press(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(apiClient.DELETE).not.toHaveBeenCalled()
+    expect(mockBack).not.toHaveBeenCalled()
+  })
+
+  it('deletes the person, forgets the cached profile and goes back', async () => {
+    jest.mocked(apiClient.DELETE).mockResolvedValue(apiResult(204))
+    const queryClient = createTestQueryClient()
+    queryClient.setQueryData(getPeopleListKey('active'), [PERSON])
+    await renderWithQuery(<PersonScreen />, queryClient)
+    const user = await askToDelete()
+
+    await user.press(screen.getByRole('button', { name: 'Delete permanently' }))
+
+    await waitFor(() => expect(mockBack).toHaveBeenCalledTimes(1))
+    expect(apiClient.DELETE).toHaveBeenCalledWith('/api/v1/people/{id}', {
+      params: { path: { id: 'person-1' } },
+    })
+    expect(queryClient.getQueryData(getPersonKey('person-1'))).toBeUndefined()
+    expect(
+      queryClient.getQueryState(getPeopleListKey('active'))?.isInvalidated,
+    ).toBe(true)
+    expect(apiClient.GET).toHaveBeenCalledTimes(1)
+  })
+
+  it('stays on the screen and explains when the server refuses', async () => {
+    jest.mocked(apiClient.DELETE).mockResolvedValue(apiResult(500))
+    await renderPerson()
+    const user = await askToDelete()
+
+    await user.press(screen.getByRole('button', { name: 'Delete permanently' }))
+
+    expect(
+      await screen.findByText('The server had a problem. Please try again.'),
+    ).toBeTruthy()
+    expect(mockBack).not.toHaveBeenCalled()
+    expect(screen.getByRole('header', { name: 'Max' })).toBeTruthy()
   })
 })
