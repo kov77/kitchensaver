@@ -1,42 +1,43 @@
 import type { OnboardingBody } from '@/api/types'
+import {
+  ALLERGY_ANSWER,
+  ANSWER_ALLERGY_STATUS,
+} from '@/components/organisms/allergy/constants'
+import type { AllergyAnswerValues } from '@/components/organisms/allergy/schemas'
+import {
+  buildAllergyItems,
+  hasWarning,
+} from '@/components/organisms/allergy/utils'
 import type { GoalDraft } from '@/core/types'
 import { toIsoDate } from '@/utils/dates'
 import { toSaveGoalBody } from '@/utils/goal'
 
-import { ALLERGY_ANSWER, OTHER_ALLERGEN_CODE } from './constants'
-import type { AllergyValues } from './schemas'
 import type { FlowAction, FlowState } from './types'
 
 type ProfileSubmission = { name: string; dateOfBirth: Date }
 
-function buildAllergies({
-  answer,
-  allergens,
-  otherLabel,
-}: AllergyValues): OnboardingBody['allergies'] {
-  if (answer === ALLERGY_ANSWER.NO) {
-    return { status: 'NONE', warningAcknowledged: true }
+function buildAllergies(
+  values: AllergyAnswerValues,
+): OnboardingBody['allergies'] {
+  if (hasWarning(values.answer)) {
+    return {
+      status: ANSWER_ALLERGY_STATUS[values.answer],
+      warningAcknowledged: true,
+    }
   }
-  if (answer === ALLERGY_ANSWER.UNKNOWN) {
-    return { status: 'UNKNOWN', warningAcknowledged: true }
-  }
-  if (answer !== ALLERGY_ANSWER.YES) {
+  if (values.answer !== ALLERGY_ANSWER.YES) {
     throw new Error('The allergy question must be answered')
   }
   return {
     status: 'HAS_ALLERGIES',
-    items: allergens.map((allergenCode) =>
-      allergenCode === OTHER_ALLERGEN_CODE
-        ? { allergenCode, customLabel: otherLabel }
-        : { allergenCode },
-    ),
+    items: buildAllergyItems(values),
   }
 }
 
 export function buildOnboardingBody(
   { name, dateOfBirth }: ProfileSubmission,
   goal: GoalDraft | null,
-  allergies: AllergyValues,
+  allergies: AllergyAnswerValues,
 ): OnboardingBody {
   return {
     name,
@@ -44,22 +45,6 @@ export function buildOnboardingBody(
     ...(goal && { goal: toSaveGoalBody(goal) }),
     allergies: buildAllergies(allergies),
   }
-}
-
-export function getWarningDialog(values: AllergyValues | null) {
-  if (values?.answer === ALLERGY_ANSWER.NO) {
-    return {
-      titleKey: 'warning-dialogs-no-title',
-      messageKey: 'warning-dialogs-no-message',
-    } as const
-  }
-  if (values?.answer === ALLERGY_ANSWER.UNKNOWN) {
-    return {
-      titleKey: 'warning-dialogs-unknown-title',
-      messageKey: 'warning-dialogs-unknown-message',
-    } as const
-  }
-  return null
 }
 
 export function onboardingFlowReducer(

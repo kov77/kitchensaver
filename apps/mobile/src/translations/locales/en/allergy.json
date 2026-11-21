@@ -1,0 +1,19 @@
+{
+  "allergy-question": "Do you have any food allergies?",
+  "answer-yes": "Yes",
+  "answer-no": "No",
+  "answer-unknown": "I don't know",
+  "allergens-label": "Which allergies do you have?",
+  "other-label": "Describe the allergy",
+  "other-placeholder": "For example, kiwi",
+  "errors-answer-required": "Choose an answer to continue.",
+  "errors-allergen-required": "Select at least one allergy.",
+  "errors-other-required": "Describe the allergy.",
+  "errors-other-too-long": "Use at most {{max}} characters.",
+  "warning-dialogs-no-title": "Please double-check",
+  "warning-dialogs-no-message": "If you have an allergy and answer No, a plan may contain foods that are dangerous for you. Continue only if you are sure.",
+  "warning-dialogs-unknown-title": "Plans may not be safe for you",
+  "warning-dialogs-unknown-message": "If you do not know whether you have allergies, KitchenSaver cannot guarantee that a plan is free of any allergen. You use the plans at your own risk.",
+  "warning-dialog-buttons-confirm": "I understand, continue",
+  "warning-dialog-buttons-cancel": "Go back"
+}

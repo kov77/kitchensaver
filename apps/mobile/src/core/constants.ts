@@ -1,7 +1,7 @@
-import type { AllergenCode, PlanReadinessReason } from '@/api/types'
+import type { PlanReadinessReason } from '@/api/types'
 import type { CommonKey } from '@/translations/types'
 
-import type { ActivityLevel, FormulaSex, GoalType } from './types'
+import type { ActivityLevel, AllergenCode, FormulaSex, GoalType } from './types'
 
 export const RESPONSE_STATUS_CODE = {
   UNAUTHORIZED: 401,

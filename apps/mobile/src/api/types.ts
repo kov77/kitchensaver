@@ -33,3 +33,7 @@ export type AllergenCode = Extract<
 export type PersonDetail = Schemas['PersonDetailDto']
 
 export type Allergy = Schemas['AllergyDto']
+
+export type AnswerableAllergyStatus = NonNullable<
+  paths['/api/v1/people/{id}/allergy-status']['put']['requestBody']
+>['content']['application/json']['status']

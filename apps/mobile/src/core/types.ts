@@ -1,4 +1,9 @@
-import type { PersonGoal, PersonListItem } from '@/api/types'
+import type {
+  AllergenCode as ApiAllergenCode,
+  AnswerableAllergyStatus as ApiAnswerableAllergyStatus,
+  PersonGoal,
+  PersonListItem,
+} from '@/api/types'
 
 export type AppAccess =
   | 'loading'
@@ -37,3 +42,11 @@ export type GoalDraft =
 export type GoalSummary = PersonGoal
 
 export type PlanReadiness = PersonListItem['planReadiness']
+
+export type AllergenCode = ApiAllergenCode
+
+export type AnswerableAllergyStatus = ApiAnswerableAllergyStatus
+
+export type AllergyItem =
+  | { allergenCode: Exclude<AllergenCode, 'OTHER'> }
+  | { allergenCode: 'OTHER'; customLabel: string }
