@@ -1,16 +1,7 @@
 import type { AllergenCode } from '@/api/types'
-import {
-  MAX_PROFILE_AGE,
-  MIN_PROFILE_AGE,
-  NAME_MAX_LENGTH,
-} from '@/core/constants'
+import { ALLERGEN_LABELS, NAME_MAX_LENGTH } from '@/core/constants'
 
 import type { FlowState } from './types'
-
-export const EMPTY_PROFILE: { name: string; dateOfBirth: Date | null } = {
-  name: '',
-  dateOfBirth: null,
-}
 
 export const INITIAL_FLOW_STATE: FlowState = { step: 'profile', profile: null }
 
@@ -38,29 +29,9 @@ const ALLERGEN_CODES: readonly AllergenCode[] = [
   'OTHER',
 ]
 
-export const ALLERGEN_LABELS: Record<AllergenCode, string> = {
-  MILK: 'Milk',
-  EGG: 'Eggs',
-  FISH: 'Fish',
-  CRUSTACEAN_SHELLFISH: 'Crustaceans',
-  MOLLUSC: 'Molluscs',
-  TREE_NUT: 'Tree nuts',
-  PEANUT: 'Peanuts',
-  WHEAT: 'Wheat',
-  SOY: 'Soy',
-  SESAME: 'Sesame',
-  MUSTARD: 'Mustard',
-  SULPHITES: 'Sulphites',
-  OTHER: 'Other',
-}
-
 export const ONBOARDING_TEXT = {
   profileTitle: 'About you',
   profileSubtitle: 'Tell us who the meal plans are for.',
-  nameLabel: 'Name',
-  namePlaceholder: 'Your first name',
-  dateOfBirthLabel: 'Date of birth',
-  dateOfBirthPlaceholder: 'Select date',
   next: 'Continue',
   logOut: 'Log out',
   goalTitle: 'Daily calorie goal',
@@ -79,10 +50,6 @@ export const ONBOARDING_TEXT = {
 } as const
 
 export const ONBOARDING_ERRORS = {
-  nameRequired: 'Enter a name.',
-  nameTooLong: `Use at most ${NAME_MAX_LENGTH} characters.`,
-  dateRequired: 'Select the date of birth.',
-  dateOutOfRange: `The age must be between ${MIN_PROFILE_AGE} and ${MAX_PROFILE_AGE}.`,
   answerRequired: 'Choose an answer to continue.',
   allergenRequired: 'Select at least one allergy.',
   otherRequired: 'Describe the allergy.',

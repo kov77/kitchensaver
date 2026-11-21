@@ -2,7 +2,6 @@ import * as zod from 'zod'
 
 import type { AllergenCode } from '@/api/types'
 import { NAME_MAX_LENGTH } from '@/core/constants'
-import { toIsoDate } from '@/utils/dates'
 
 import {
   ALLERGEN_OPTIONS,
@@ -10,40 +9,6 @@ import {
   ONBOARDING_ERRORS,
   OTHER_ALLERGEN_CODE,
 } from './constants'
-
-type DateBounds = { minimumDate: Date; maximumDate: Date }
-
-export function createProfileSchema({ minimumDate, maximumDate }: DateBounds) {
-  return zod.object({
-    name: zod
-      .string()
-      .trim()
-      .min(1, ONBOARDING_ERRORS.nameRequired)
-      .max(NAME_MAX_LENGTH, ONBOARDING_ERRORS.nameTooLong),
-    dateOfBirth: zod
-      .date()
-      .nullable()
-      .superRefine((date, context) => {
-        if (date === null) {
-          context.addIssue({
-            code: 'custom',
-            message: ONBOARDING_ERRORS.dateRequired,
-          })
-          return
-        }
-        const isoDate = toIsoDate(date)
-        if (
-          isoDate < toIsoDate(minimumDate) ||
-          isoDate > toIsoDate(maximumDate)
-        ) {
-          context.addIssue({
-            code: 'custom',
-            message: ONBOARDING_ERRORS.dateOutOfRange,
-          })
-        }
-      }),
-  })
-}
 
 export const allergySchema = zod
   .object({
@@ -85,5 +50,4 @@ export const allergySchema = zod
     }
   })
 
-export type ProfileValues = zod.infer<ReturnType<typeof createProfileSchema>>
 export type AllergyValues = zod.infer<typeof allergySchema>

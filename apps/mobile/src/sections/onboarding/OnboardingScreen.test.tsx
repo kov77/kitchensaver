@@ -5,7 +5,11 @@ import { randomUUID } from 'expo-crypto'
 import { getPeopleListKey } from '@/api/queryKeys'
 import type { PersonListItem } from '@/api/types'
 import { GOAL_EDITOR_TEXT } from '@/components/organisms/goal/constants'
-import { ERROR_MESSAGES } from '@/core/constants'
+import {
+  PROFILE_ERRORS,
+  PROFILE_TEXT,
+} from '@/components/organisms/profile/constants'
+import { ALLERGEN_LABELS, ERROR_MESSAGES } from '@/core/constants'
 import { apiResult } from '@/test-utils/apiResult'
 import {
   createTestQueryClient,
@@ -13,7 +17,6 @@ import {
 } from '@/test-utils/renderWithQuery'
 
 import {
-  ALLERGEN_LABELS,
   ONBOARDING_ERRORS,
   ONBOARDING_TEXT,
   WARNING_DIALOG_BUTTONS,
@@ -74,10 +77,10 @@ async function renderOnboarding() {
 
 async function fillProfile(name = 'Alex') {
   const user = userEvent.setup()
-  await user.type(screen.getByLabelText(ONBOARDING_TEXT.nameLabel), name)
+  await user.type(screen.getByLabelText(PROFILE_TEXT.nameLabel), name)
   await user.press(
     screen.getByRole('button', {
-      name: new RegExp(ONBOARDING_TEXT.dateOfBirthLabel),
+      name: new RegExp(PROFILE_TEXT.dateOfBirthLabel),
     }),
   )
   fireEvent(
@@ -122,8 +125,8 @@ describe('OnboardingScreen profile step', () => {
       .setup()
       .press(screen.getByRole('button', { name: ONBOARDING_TEXT.next }))
 
-    expect(await screen.findByText(ONBOARDING_ERRORS.nameRequired)).toBeTruthy()
-    expect(screen.getByText(ONBOARDING_ERRORS.dateRequired)).toBeTruthy()
+    expect(await screen.findByText(PROFILE_ERRORS.nameRequired)).toBeTruthy()
+    expect(screen.getByText(PROFILE_ERRORS.dateRequired)).toBeTruthy()
     expect(screen.queryByText(ONBOARDING_TEXT.allergyQuestion)).toBeNull()
   })
 
@@ -230,7 +233,7 @@ describe('OnboardingScreen goal step', () => {
       .press(screen.getByRole('button', { name: ONBOARDING_TEXT.back }))
 
     expect(
-      (await screen.findByLabelText(ONBOARDING_TEXT.nameLabel)).props.value,
+      (await screen.findByLabelText(PROFILE_TEXT.nameLabel)).props.value,
     ).toBe('Alex')
   })
 })
