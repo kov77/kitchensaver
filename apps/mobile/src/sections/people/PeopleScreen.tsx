@@ -54,7 +54,7 @@ export function PeopleScreen() {
               person={person}
               onPress={() =>
                 router.push({
-                  pathname: '/goal/[personId]',
+                  pathname: '/person/[personId]',
                   params: { personId: person.id },
                 })
               }

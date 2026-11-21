@@ -23,6 +23,7 @@ export function RootNavigator({ access }: RootNavigatorProps) {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={access === 'ready'}>
         <Stack.Screen name="index" />
+        <Stack.Screen name="person/[personId]" />
         <Stack.Screen name="goal/[personId]" />
       </Stack.Protected>
       <Stack.Protected guard={access === 'consentRequired'}>

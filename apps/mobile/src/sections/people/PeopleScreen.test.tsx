@@ -104,7 +104,7 @@ describe('PeopleScreen', () => {
       .press(await screen.findByRole('button', { name: /^alena, 29/ }))
 
     expect(mockPush).toHaveBeenCalledWith({
-      pathname: '/goal/[personId]',
+      pathname: '/person/[personId]',
       params: { personId: 'person-2' },
     })
   })
