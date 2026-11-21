@@ -31,3 +31,8 @@ export function subtractYears(date: Date, years: number) {
   const day = Math.min(date.getDate(), getLastDayOfMonth(year, month))
   return new Date(year, month, day)
 }
+
+export function parseIsoDate(isoDate: string) {
+  const [year = 0, month = 0, day = 0] = isoDate.split('-').map(Number)
+  return new Date(year, month - MONTH_NUMBER_OFFSET, day)
+}
