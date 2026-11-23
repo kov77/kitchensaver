@@ -43,6 +43,8 @@ export type GoalSummary = PersonGoal
 
 export type PlanReadiness = PersonListItem['planReadiness']
 
+export type Rating = 1 | 2 | 3 | 4 | 5
+
 export type AllergenCode = Allergy['allergenCode']
 
 export type AnswerableAllergyStatus = Exclude<
