@@ -37,6 +37,8 @@ export function PersonScreen() {
   const { describeReadiness } = usePersonSummary()
   const readinessHint = person ? describeReadiness(person.planReadiness) : null
 
+  const leave = () => (router.canGoBack() ? router.back() : router.replace('/'))
+
   if (isDeleted) return null
 
   return (
@@ -83,17 +85,11 @@ export function PersonScreen() {
             name={person.name}
             isDeleting={isDeleting}
             error={deleteError}
-            onDelete={() =>
-              deletePerson(undefined, { onSuccess: () => router.back() })
-            }
+            onDelete={() => deletePerson(undefined, { onSuccess: leave })}
           />
         </>
       ) : null}
-      <Button
-        title={t('back')}
-        variant="secondary"
-        onPress={() => router.back()}
-      />
+      <Button title={t('back')} variant="secondary" onPress={leave} />
     </AppScreen>
   )
 }

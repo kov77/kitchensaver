@@ -13,6 +13,8 @@ import { PersonScreen } from './PersonScreen'
 
 const mockBack = jest.fn()
 const mockPush = jest.fn()
+const mockReplace = jest.fn()
+const mockCanGoBack = jest.fn()
 
 jest.mock('@/api/apiClient', () => ({
   apiClient: { GET: jest.fn(), PATCH: jest.fn(), DELETE: jest.fn() },
@@ -20,7 +22,12 @@ jest.mock('@/api/apiClient', () => ({
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ personId: 'person-1' }),
-  useRouter: () => ({ back: mockBack, push: mockPush }),
+  useRouter: () => ({
+    back: mockBack,
+    push: mockPush,
+    replace: mockReplace,
+    canGoBack: mockCanGoBack,
+  }),
 }))
 
 type ApiResult = ReturnType<typeof apiResult>
@@ -72,6 +79,7 @@ async function renderPerson() {
 
 beforeEach(() => {
   jest.clearAllMocks()
+  mockCanGoBack.mockReturnValue(true)
   respondWith()
 })
 
@@ -131,6 +139,17 @@ describe('PersonScreen', () => {
     await userEvent.setup().press(screen.getByRole('button', { name: 'Back' }))
 
     expect(mockBack).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens the people list when there is nowhere to go back to', async () => {
+    mockCanGoBack.mockReturnValue(false)
+    await renderPerson()
+    await screen.findByRole('header', { name: 'Max' })
+
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Back' }))
+
+    expect(mockReplace).toHaveBeenCalledWith('/')
+    expect(mockBack).not.toHaveBeenCalled()
   })
 
   it('shows a message and retries when the person cannot be loaded', async () => {
@@ -328,6 +347,18 @@ describe('PersonScreen deleting the person', () => {
       queryClient.getQueryState(getPeopleListKey('active'))?.isInvalidated,
     ).toBe(true)
     expect(apiClient.GET).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens the people list after deleting when there is no history', async () => {
+    mockCanGoBack.mockReturnValue(false)
+    jest.mocked(apiClient.DELETE).mockResolvedValue(apiResult(204))
+    await renderPerson()
+    const user = await askToDelete()
+
+    await user.press(screen.getByRole('button', { name: 'Delete permanently' }))
+
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/'))
+    expect(mockBack).not.toHaveBeenCalled()
   })
 
   it('stays on the screen and explains when the server refuses', async () => {
