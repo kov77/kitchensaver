@@ -12,3 +12,11 @@ export function getPersonKey(personId: string) {
 export function getAllergiesKey(personId: string) {
   return [...getPersonKey(personId), 'allergies'] as const
 }
+
+export function getExclusionsKey(personId: string) {
+  return [...getPersonKey(personId), 'exclusions'] as const
+}
+
+export function getPreferencesKey(personId: string) {
+  return [...getPersonKey(personId), 'preferences'] as const
+}

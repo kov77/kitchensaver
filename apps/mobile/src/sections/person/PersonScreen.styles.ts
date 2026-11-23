@@ -9,6 +9,9 @@ export const styles = StyleSheet.create({
   list: {
     gap: spacing.md,
   },
+  item: {
+    gap: spacing.sm,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

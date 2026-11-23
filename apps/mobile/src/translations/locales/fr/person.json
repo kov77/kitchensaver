@@ -23,5 +23,22 @@
   "allergy-remove-message": "Cette allergie ne sera plus prise en compte pour {{name}} et les plans de repas pourront contenir cet aliment.",
   "allergy-remove-last-message": "C’est la dernière allergie de {{name}}. Elle ne sera plus prise en compte, les plans de repas pourront contenir cet aliment et il faudra répondre de nouveau à la question sur les allergies.",
   "allergy-remove-confirm": "Retirer l’allergie",
-  "allergy-add-failed": "Certaines allergies n’ont peut-être pas été enregistrées. Vérifiez la liste et ajoutez celles qui manquent. {{reason}}"
+  "allergy-add-failed": "Certaines allergies n’ont peut-être pas été enregistrées. Vérifiez la liste et ajoutez celles qui manquent. {{reason}}",
+  "exclusions-title": "À ne jamais inclure",
+  "exclusions-empty": "Aucun aliment exclu.",
+  "exclusions-load-failed": "Nous n’avons pas pu charger les aliments exclus.",
+  "exclusion-add": "Ajouter un aliment",
+  "exclusion-remove": "Retirer",
+  "exclusion-remove-label": "Retirer {{food}}",
+  "exclusion-remove-title": "Ne plus exclure {{food}} ?",
+  "exclusion-remove-message": "Les plans de repas de {{name}} pourront de nouveau contenir {{food}}.",
+  "exclusion-remove-confirm": "Ne plus exclure",
+  "preferences-title": "Notes des aliments",
+  "preferences-empty": "Aucun aliment noté pour l’instant.",
+  "preferences-load-failed": "Nous n’avons pas pu charger les notes.",
+  "preference-add": "Noter un aliment",
+  "preference-remove": "Retirer",
+  "preference-remove-label": "Retirer la note de {{food}}",
+  "preference-rating-label": "Note de {{food}}",
+  "preference-rating-option": "{{food}} : {{rating}}"
 }

@@ -1,7 +1,12 @@
 import { screen, userEvent, waitFor } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
-import { getPeopleListKey, getPersonKey } from '@/api/queryKeys'
+import {
+  getExclusionsKey,
+  getPeopleListKey,
+  getPersonKey,
+  getPreferencesKey,
+} from '@/api/queryKeys'
 import type { Allergy, PersonDetail } from '@/api/types'
 import { apiResult } from '@/test-utils/apiResult'
 import {
@@ -62,15 +67,31 @@ const KIWI_ALLERGY: Allergy = {
   createdAt: '2026-11-01T10:00:00.000Z',
 }
 
+const requestedPaths: string[] = []
+
+const LIST_PATHS: Record<string, 'allergies' | 'exclusions' | 'preferences'> = {
+  '/api/v1/people/{id}/allergies': 'allergies',
+  '/api/v1/people/{id}/exclusions': 'exclusions',
+  '/api/v1/people/{id}/preferences': 'preferences',
+}
+
 function respondWith({
   person = apiResult(200, PERSON),
   allergies = apiResult(200, []),
-}: { person?: ApiResult; allergies?: ApiResult } = {}) {
-  jest
-    .mocked(apiClient.GET)
-    .mockImplementation(async (path: string) =>
-      path === '/api/v1/people/{id}/allergies' ? allergies : person,
-    )
+  exclusions = apiResult(200, []),
+  preferences = apiResult(200, []),
+}: {
+  person?: ApiResult
+  allergies?: ApiResult
+  exclusions?: ApiResult
+  preferences?: ApiResult
+} = {}) {
+  const lists = { allergies, exclusions, preferences }
+  jest.mocked(apiClient.GET).mockImplementation(async (path: string) => {
+    requestedPaths.push(path)
+    const list = LIST_PATHS[path]
+    return list ? lists[list] : person
+  })
 }
 
 async function renderPerson() {
@@ -79,6 +100,7 @@ async function renderPerson() {
 
 beforeEach(() => {
   jest.clearAllMocks()
+  requestedPaths.length = 0
   mockCanGoBack.mockReturnValue(true)
   respondWith()
 })
@@ -100,6 +122,32 @@ describe('PersonScreen', () => {
     expect(apiClient.GET).toHaveBeenCalledWith('/api/v1/people/{id}', {
       params: { path: { id: 'person-1' } },
     })
+  })
+
+  it('shows the excluded foods and the food ratings of the person', async () => {
+    respondWith({
+      exclusions: apiResult(200, [
+        { id: 'exclusion-1', ingredientName: 'Mushrooms', createdAt: 'now' },
+      ]),
+      preferences: apiResult(200, [
+        {
+          id: 'preference-1',
+          ingredientName: 'Kiwi',
+          rating: 4,
+          updatedAt: 'now',
+        },
+      ]),
+    })
+    await renderPerson()
+
+    expect(await screen.findByText('Mushrooms')).toBeTruthy()
+    expect(await screen.findByText('Kiwi')).toBeTruthy()
+    expect(requestedPaths).toEqual(
+      expect.arrayContaining([
+        '/api/v1/people/{id}/exclusions',
+        '/api/v1/people/{id}/preferences',
+      ]),
+    )
   })
 
   it('tells what is missing before the person can be planned for', async () => {
@@ -344,9 +392,17 @@ describe('PersonScreen deleting the person', () => {
     })
     expect(queryClient.getQueryData(getPersonKey('person-1'))).toBeUndefined()
     expect(
+      queryClient.getQueryData(getExclusionsKey('person-1')),
+    ).toBeUndefined()
+    expect(
+      queryClient.getQueryData(getPreferencesKey('person-1')),
+    ).toBeUndefined()
+    expect(
       queryClient.getQueryState(getPeopleListKey('active'))?.isInvalidated,
     ).toBe(true)
-    expect(apiClient.GET).toHaveBeenCalledTimes(1)
+    expect(
+      requestedPaths.filter((path) => path === '/api/v1/people/{id}'),
+    ).toHaveLength(1)
   })
 
   it('opens the people list after deleting when there is no history', async () => {

@@ -14,7 +14,9 @@ import { getErrorMessage } from '@/utils/errors'
 
 import { AllergyCard } from './AllergyCard'
 import { DeletePerson } from './DeletePerson'
+import { ExclusionsCard } from './ExclusionsCard'
 import { GoalCard } from './GoalCard'
+import { PreferencesCard } from './PreferencesCard'
 import { ProfileCard } from './ProfileCard'
 
 export function PersonScreen() {
@@ -81,6 +83,8 @@ export function PersonScreen() {
             personName={person.name}
             allergyStatus={person.allergyStatus}
           />
+          <ExclusionsCard personId={person.id} personName={person.name} />
+          <PreferencesCard personId={person.id} />
           <DeletePerson
             name={person.name}
             isDeleting={isDeleting}

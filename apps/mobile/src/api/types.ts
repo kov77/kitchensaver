@@ -26,3 +26,7 @@ export type OnboardingBody =
 export type PersonDetail = Schemas['PersonDetailDto']
 
 export type Allergy = Schemas['AllergyDto']
+
+export type Exclusion = Schemas['ExclusionDto']
+
+export type Preference = Schemas['PreferenceDto']

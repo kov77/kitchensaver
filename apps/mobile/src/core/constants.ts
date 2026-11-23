@@ -1,7 +1,13 @@
 import type { PlanReadinessReason } from '@/api/types'
 import type { CommonKey } from '@/translations/types'
 
-import type { ActivityLevel, AllergenCode, FormulaSex, GoalType } from './types'
+import type {
+  ActivityLevel,
+  AllergenCode,
+  FormulaSex,
+  GoalType,
+  Rating,
+} from './types'
 
 export const RESPONSE_STATUS_CODE = {
   UNAUTHORIZED: 401,
@@ -28,6 +34,8 @@ export const DISPLAY_DATE_FORMAT = { dateStyle: 'long' } as const
 export const MIN_PROFILE_AGE = 18
 export const MAX_PROFILE_AGE = 120
 export const NAME_MAX_LENGTH = 80
+
+export const RATINGS: readonly Rating[] = [1, 2, 3, 4, 5]
 
 export const GOAL_LIMITS = {
   dailyKcal: { min: 500, max: 10_000 },
@@ -80,6 +88,8 @@ export const READINESS_HINT_KEYS: Record<PlanReadinessReason, CommonKey> = {
 export const ERROR_CODE_MESSAGE_KEYS = new Map<string, CommonKey>([
   ['ALLERGY_ALREADY_EXISTS', 'common:errors-codes-ALLERGY_ALREADY_EXISTS'],
   ['ALLERGIES_EXIST', 'common:errors-codes-ALLERGIES_EXIST'],
+  ['EXCLUSION_ALREADY_EXISTS', 'common:errors-codes-FOOD_ALREADY_EXISTS'],
+  ['PREFERENCE_ALREADY_EXISTS', 'common:errors-codes-FOOD_ALREADY_EXISTS'],
   [
     'RESTRICTION_LIMIT_REACHED',
     'common:errors-codes-RESTRICTION_LIMIT_REACHED',

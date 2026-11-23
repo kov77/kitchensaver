@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import type { Allergy } from '@/api/types'
-import { Button } from '@/components/atoms/Button'
+import { FormPanel } from '@/components/molecules/FormPanel'
 import { AddAllergiesForm } from '@/components/organisms/AddAllergiesForm'
 import type { AllergenSelection } from '@/components/organisms/allergy/schemas'
 import { buildAllergyItems } from '@/components/organisms/allergy/utils'
@@ -36,25 +36,20 @@ export function AddAllergiesPanel({
     addAllergies.mutate(items, { onSuccess: stopAdding })
   }
 
-  if (!isAdding) {
-    return (
-      <Button
-        title={t('allergy-add')}
-        variant="secondary"
-        onPress={startAdding}
-      />
-    )
-  }
-
   return (
-    <>
+    <FormPanel
+      isOpen={isAdding}
+      openLabel={t('allergy-add')}
+      cancelLabel={t('cancel')}
+      onOpen={startAdding}
+      onCancel={stopAdding}
+    >
       <AddAllergiesForm
         listedCodes={allergies.map(({ allergenCode }) => allergenCode)}
         submitLabel={t('save')}
         isSubmitting={addAllergies.isPending}
         onSubmit={add}
       />
-      <Button title={t('cancel')} variant="secondary" onPress={stopAdding} />
-    </>
+    </FormPanel>
   )
 }

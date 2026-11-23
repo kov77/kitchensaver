@@ -56,5 +56,6 @@
   "errors-codes-ALLERGY_ALREADY_EXISTS": "This allergy is already on the list.",
   "errors-codes-ALLERGIES_EXIST": "This person already has allergies on the list. Refresh the screen and try again.",
   "errors-codes-RESTRICTION_LIMIT_REACHED": "The list is full. Remove an item before adding another.",
-  "errors-codes-PROFILE_LIMIT_REACHED": "You have reached the limit of profiles. Delete a profile to add another."
+  "errors-codes-PROFILE_LIMIT_REACHED": "You have reached the limit of profiles. Delete a profile to add another.",
+  "errors-codes-FOOD_ALREADY_EXISTS": "This food is already on the list."
 }
