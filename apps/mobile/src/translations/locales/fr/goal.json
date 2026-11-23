@@ -23,5 +23,6 @@
   "screen-title": "Objectif calorique quotidien",
   "screen-subtitle": "Choisissez comment le définir. Vous pourrez le modifier plus tard.",
   "screen-save": "Enregistrer l’objectif",
-  "screen-cancel": "Annuler"
+  "screen-cancel": "Annuler",
+  "screen-parameters-unavailable": "Les mesures enregistrées n’ont pas pu être chargées, le formulaire est donc vide."
 }

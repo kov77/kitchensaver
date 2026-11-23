@@ -1,7 +1,8 @@
-import { QueryClient } from '@tanstack/react-query'
+import { onlineManager, QueryClient } from '@tanstack/react-query'
 import { screen, userEvent } from '@testing-library/react-native'
 
 import { getPeopleListKey } from '@/api/queryKeys'
+import { apiError } from '@/test-utils/apiError'
 import { apiResult } from '@/test-utils/apiResult'
 import {
   createTestQueryClient,
@@ -11,11 +12,13 @@ import {
 import { GoalScreen } from './GoalScreen'
 
 const mockBack = jest.fn()
+const mockGet = jest.fn()
 const mockPost = jest.fn()
 const mockPut = jest.fn()
 
 jest.mock('@/api/apiClient', () => ({
   apiClient: {
+    GET: (path: string, options: object) => mockGet(path, options),
     POST: (path: string, options: object) => mockPost(path, options),
     PUT: (path: string, options: object) => mockPut(path, options),
   },
@@ -28,8 +31,17 @@ jest.mock('expo-router', () => ({
 
 let queryClient: QueryClient
 
+const SAVED_PARAMETERS = {
+  heightCm: 168,
+  weightKg: 64.5,
+  activityLevel: 'ACTIVE',
+  formulaSex: 'FEMALE',
+  updatedAt: '2026-11-01T10:00:00.000Z',
+}
+
 async function renderGoal() {
   await renderWithQuery(<GoalScreen />, queryClient)
+  await screen.findByRole('radio', { name: 'Help me estimate' })
 }
 
 async function fillManualGoal() {
@@ -47,9 +59,14 @@ function pressSave() {
     .press(screen.getByRole('button', { name: 'Save goal' }))
 }
 
+afterEach(() => {
+  onlineManager.setOnline(true)
+})
+
 beforeEach(() => {
   jest.clearAllMocks()
   queryClient = createTestQueryClient()
+  mockGet.mockResolvedValue(apiError(404, 'BODY_PARAMETERS_NOT_FOUND'))
 })
 
 describe('GoalScreen', () => {
@@ -142,5 +159,130 @@ describe('GoalScreen', () => {
 
     expect(mockBack).toHaveBeenCalledTimes(1)
     expect(mockPut).not.toHaveBeenCalled()
+  })
+})
+
+describe('GoalScreen saved measurements', () => {
+  async function openEstimate() {
+    await renderGoal()
+    await userEvent
+      .setup()
+      .press(screen.getByRole('radio', { name: 'Help me estimate' }))
+  }
+
+  it('asks for the saved measurements of the person in the route', async () => {
+    await renderGoal()
+
+    expect(mockGet).toHaveBeenCalledWith(
+      '/api/v1/people/{id}/body-parameters',
+      { params: { path: { id: 'person-7' } } },
+    )
+  })
+
+  it('waits for the saved measurements before showing the choice', async () => {
+    mockGet.mockReturnValue(new Promise(() => undefined))
+    await renderWithQuery(<GoalScreen />, queryClient)
+
+    expect(screen.getByLabelText('Loading')).toBeTruthy()
+    expect(screen.queryByRole('radio', { name: 'Help me estimate' })).toBeNull()
+  })
+
+  it('fills the estimate form with the saved measurements', async () => {
+    mockGet.mockResolvedValue(apiResult(200, SAVED_PARAMETERS))
+    await openEstimate()
+
+    expect(screen.getByLabelText('Height (cm)').props.value).toBe('168')
+    expect(screen.getByLabelText('Weight (kg)').props.value).toBe('64.5')
+    expect(
+      screen.getByRole('radio', { name: 'Active' }).props.accessibilityState,
+    ).toMatchObject({ checked: true })
+    expect(
+      screen.getByRole('radio', { name: 'Female' }).props.accessibilityState,
+    ).toMatchObject({ checked: true })
+  })
+
+  it('does not choose the goal for the person', async () => {
+    mockGet.mockResolvedValue(apiResult(200, SAVED_PARAMETERS))
+    await openEstimate()
+
+    expect(
+      screen.getByRole('radio', { name: 'Maintain weight' }).props
+        .accessibilityState,
+    ).toMatchObject({ checked: false })
+  })
+
+  it('leaves the form empty when nothing is saved', async () => {
+    await openEstimate()
+
+    expect(screen.getByLabelText('Height (cm)').props.value).toBe('')
+    expect(screen.getByLabelText('Weight (kg)').props.value).toBe('')
+  })
+
+  it('still lets the goal be set when the saved measurements cannot be loaded, and says so', async () => {
+    mockGet.mockResolvedValue(apiResult(500))
+    await openEstimate()
+
+    expect(screen.getByLabelText('Height (cm)').props.value).toBe('')
+    expect(
+      screen.getByRole('button', { name: 'Calculate estimate' }),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(
+        'Saved measurements could not be loaded, so the form starts empty.',
+      ),
+    ).toBeTruthy()
+  })
+
+  it('does not wait for the measurements when the device is offline', async () => {
+    onlineManager.setOnline(false)
+    await renderGoal()
+
+    expect(screen.queryByLabelText('Loading')).toBeNull()
+    expect(
+      screen.getByRole('radio', { name: 'I already know my daily calories' }),
+    ).toBeTruthy()
+  })
+
+  it('does not warn about measurements when nothing is saved', async () => {
+    await renderGoal()
+
+    expect(
+      screen.queryByText(
+        'Saved measurements could not be loaded, so the form starts empty.',
+      ),
+    ).toBeNull()
+  })
+
+  it('sends what the user sees, not what was saved, when the values are changed', async () => {
+    mockGet.mockResolvedValue(apiResult(200, SAVED_PARAMETERS))
+    mockPost.mockResolvedValue(
+      apiResult(200, {
+        estimatedMaintenanceKcal: 2200,
+        methodology: 'DRI',
+        assumptions: [],
+      }),
+    )
+    await openEstimate()
+    const user = userEvent.setup()
+
+    await user.clear(screen.getByLabelText('Weight (kg)'))
+    await user.type(screen.getByLabelText('Weight (kg)'), '60')
+    await user.press(screen.getByRole('radio', { name: 'Maintain weight' }))
+    await user.press(screen.getByRole('button', { name: 'Calculate estimate' }))
+
+    await screen.findByText('Your estimate')
+    expect(mockPost).toHaveBeenCalledWith(
+      '/api/v1/people/{id}/goals/estimate',
+      {
+        params: { path: { id: 'person-7' } },
+        body: {
+          goalType: 'MAINTAIN',
+          heightCm: 168,
+          weightKg: 60,
+          activityLevel: 'ACTIVE',
+          formulaSex: 'FEMALE',
+        },
+      },
+    )
   })
 })

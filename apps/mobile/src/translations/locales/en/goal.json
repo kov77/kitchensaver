@@ -23,5 +23,6 @@
   "screen-title": "Daily calorie goal",
   "screen-subtitle": "Choose how you want to set it. You can change it later.",
   "screen-save": "Save goal",
-  "screen-cancel": "Cancel"
+  "screen-cancel": "Cancel",
+  "screen-parameters-unavailable": "Saved measurements could not be loaded, so the form starts empty."
 }

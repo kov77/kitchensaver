@@ -23,5 +23,6 @@
   "screen-title": "Objetivo diario de calorías",
   "screen-subtitle": "Elige cómo quieres fijarlo. Podrás cambiarlo después.",
   "screen-save": "Guardar objetivo",
-  "screen-cancel": "Cancelar"
+  "screen-cancel": "Cancelar",
+  "screen-parameters-unavailable": "No pudimos cargar las medidas guardadas, así que el formulario empieza vacío."
 }
