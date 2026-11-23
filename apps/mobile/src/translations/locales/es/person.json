@@ -23,5 +23,22 @@
   "allergy-remove-message": "Esta alergia dejará de tenerse en cuenta para {{name}} y los planes de comidas podrán incluir este alimento.",
   "allergy-remove-last-message": "Esta es la última alergia de {{name}}. Dejará de tenerse en cuenta, los planes de comidas podrán incluir este alimento y habrá que volver a responder la pregunta sobre alergias.",
   "allergy-remove-confirm": "Quitar alergia",
-  "allergy-add-failed": "Es posible que algunas alergias no se hayan guardado. Revisa la lista y añade las que falten. {{reason}}"
+  "allergy-add-failed": "Es posible que algunas alergias no se hayan guardado. Revisa la lista y añade las que falten. {{reason}}",
+  "exclusions-title": "Nunca incluir",
+  "exclusions-empty": "No hay alimentos excluidos.",
+  "exclusions-load-failed": "No pudimos cargar los alimentos excluidos.",
+  "exclusion-add": "Añadir alimento",
+  "exclusion-remove": "Quitar",
+  "exclusion-remove-label": "Quitar {{food}}",
+  "exclusion-remove-title": "¿Dejar de excluir {{food}}?",
+  "exclusion-remove-message": "Los planes de comidas de {{name}} podrán volver a incluir {{food}}.",
+  "exclusion-remove-confirm": "Dejar de excluir",
+  "preferences-title": "Valoración de alimentos",
+  "preferences-empty": "Aún no hay alimentos valorados.",
+  "preferences-load-failed": "No pudimos cargar las valoraciones.",
+  "preference-add": "Valorar un alimento",
+  "preference-remove": "Quitar",
+  "preference-remove-label": "Quitar la valoración de {{food}}",
+  "preference-rating-label": "Valoración de {{food}}",
+  "preference-rating-option": "{{food}}: {{rating}}"
 }
