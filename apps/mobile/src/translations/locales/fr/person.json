@@ -40,5 +40,20 @@
   "preference-remove": "Retirer",
   "preference-remove-label": "Retirer la note de {{food}}",
   "preference-rating-label": "Note de {{food}}",
-  "preference-rating-option": "{{food}} : {{rating}}"
+  "preference-rating-option": "{{food}} : {{rating}}",
+  "body-title": "Mesures corporelles",
+  "body-explanation": "Enregistrées uniquement pour recalculer l’estimation calorique sans ressaisir les mesures. Les modifier ne change jamais l’objectif de lui-même. Vous pouvez les supprimer à tout moment.",
+  "body-none": "Aucune mesure enregistrée.",
+  "body-load-failed": "Nous n’avons pas pu charger les mesures.",
+  "body-add": "Ajouter des mesures",
+  "body-edit": "Modifier les mesures",
+  "body-height-line": "Taille : {{value}} cm",
+  "body-weight-line": "Poids : {{value}} kg",
+  "body-activity-line": "Niveau d’activité : {{value}}",
+  "body-sex-line": "Sexe utilisé dans la formule : {{value}}",
+  "body-delete": "Supprimer les mesures",
+  "body-delete-title": "Supprimer les mesures enregistrées ?",
+  "body-delete-message": "La taille, le poids, le niveau d’activité et le sexe utilisé dans la formule de {{name}} seront supprimés. L’objectif ne change pas.",
+  "body-delete-confirm": "Supprimer",
+  "body-updated-line": "Enregistré le {{date}}"
 }

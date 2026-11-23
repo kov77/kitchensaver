@@ -40,5 +40,20 @@
   "preference-remove": "Quitar",
   "preference-remove-label": "Quitar la valoración de {{food}}",
   "preference-rating-label": "Valoración de {{food}}",
-  "preference-rating-option": "{{food}}: {{rating}}"
+  "preference-rating-option": "{{food}}: {{rating}}",
+  "body-title": "Medidas corporales",
+  "body-explanation": "Se guardan solo para recalcular la estimación de calorías sin volver a escribir las medidas. Cambiarlas nunca modifica el objetivo por sí solo. Puedes eliminarlas en cualquier momento.",
+  "body-none": "No hay medidas guardadas.",
+  "body-load-failed": "No pudimos cargar las medidas.",
+  "body-add": "Añadir medidas",
+  "body-edit": "Editar medidas",
+  "body-height-line": "Altura: {{value}} cm",
+  "body-weight-line": "Peso: {{value}} kg",
+  "body-activity-line": "Nivel de actividad: {{value}}",
+  "body-sex-line": "Sexo usado en la fórmula: {{value}}",
+  "body-delete": "Eliminar medidas",
+  "body-delete-title": "¿Eliminar las medidas guardadas?",
+  "body-delete-message": "Se eliminarán la altura, el peso, el nivel de actividad y el sexo usado en la fórmula de {{name}}. El objetivo no cambia.",
+  "body-delete-confirm": "Eliminar",
+  "body-updated-line": "Guardado el {{date}}"
 }

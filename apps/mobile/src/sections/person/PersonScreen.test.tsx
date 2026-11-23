@@ -2,12 +2,14 @@ import { screen, userEvent, waitFor } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
 import {
+  getBodyParametersKey,
   getExclusionsKey,
   getPeopleListKey,
   getPersonKey,
   getPreferencesKey,
 } from '@/api/queryKeys'
 import type { Allergy, PersonDetail } from '@/api/types'
+import { apiError } from '@/test-utils/apiError'
 import { apiResult } from '@/test-utils/apiResult'
 import {
   createTestQueryClient,
@@ -69,10 +71,14 @@ const KIWI_ALLERGY: Allergy = {
 
 const requestedPaths: string[] = []
 
-const LIST_PATHS: Record<string, 'allergies' | 'exclusions' | 'preferences'> = {
+const LIST_PATHS: Record<
+  string,
+  'allergies' | 'exclusions' | 'preferences' | 'bodyParameters'
+> = {
   '/api/v1/people/{id}/allergies': 'allergies',
   '/api/v1/people/{id}/exclusions': 'exclusions',
   '/api/v1/people/{id}/preferences': 'preferences',
+  '/api/v1/people/{id}/body-parameters': 'bodyParameters',
 }
 
 function respondWith({
@@ -80,13 +86,15 @@ function respondWith({
   allergies = apiResult(200, []),
   exclusions = apiResult(200, []),
   preferences = apiResult(200, []),
+  bodyParameters = apiError(404, 'BODY_PARAMETERS_NOT_FOUND'),
 }: {
   person?: ApiResult
   allergies?: ApiResult
   exclusions?: ApiResult
   preferences?: ApiResult
+  bodyParameters?: ApiResult
 } = {}) {
-  const lists = { allergies, exclusions, preferences }
+  const lists = { allergies, exclusions, preferences, bodyParameters }
   jest.mocked(apiClient.GET).mockImplementation(async (path: string) => {
     requestedPaths.push(path)
     const list = LIST_PATHS[path]
@@ -391,6 +399,9 @@ describe('PersonScreen deleting the person', () => {
       params: { path: { id: 'person-1' } },
     })
     expect(queryClient.getQueryData(getPersonKey('person-1'))).toBeUndefined()
+    expect(
+      queryClient.getQueryData(getBodyParametersKey('person-1')),
+    ).toBeUndefined()
     expect(
       queryClient.getQueryData(getExclusionsKey('person-1')),
     ).toBeUndefined()

@@ -40,5 +40,20 @@
   "preference-remove": "Remove",
   "preference-remove-label": "Remove the rating of {{food}}",
   "preference-rating-label": "Rating of {{food}}",
-  "preference-rating-option": "{{food}}: {{rating}}"
+  "preference-rating-option": "{{food}}: {{rating}}",
+  "body-title": "Body measurements",
+  "body-explanation": "Saved only to recalculate the calorie estimate without typing the measurements again. Changing them never changes the goal on its own. You can delete them at any time.",
+  "body-none": "No measurements are saved.",
+  "body-load-failed": "We could not load the measurements.",
+  "body-add": "Add measurements",
+  "body-edit": "Edit measurements",
+  "body-height-line": "Height: {{value}} cm",
+  "body-weight-line": "Weight: {{value}} kg",
+  "body-activity-line": "Activity level: {{value}}",
+  "body-sex-line": "Sex used in the formula: {{value}}",
+  "body-delete": "Delete measurements",
+  "body-delete-title": "Delete the saved measurements?",
+  "body-delete-message": "The saved height, weight, activity level and sex used in the formula of {{name}} will be deleted. The goal does not change.",
+  "body-delete-confirm": "Delete",
+  "body-updated-line": "Saved on {{date}}"
 }

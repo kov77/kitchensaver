@@ -13,6 +13,7 @@ import { usePersonSummary } from '@/core/usePersonSummary'
 import { getErrorMessage } from '@/utils/errors'
 
 import { AllergyCard } from './AllergyCard'
+import { BodyParametersCard } from './BodyParametersCard'
 import { DeletePerson } from './DeletePerson'
 import { ExclusionsCard } from './ExclusionsCard'
 import { GoalCard } from './GoalCard'
@@ -78,6 +79,7 @@ export function PersonScreen() {
               })
             }
           />
+          <BodyParametersCard personId={person.id} personName={person.name} />
           <AllergyCard
             personId={person.id}
             personName={person.name}
