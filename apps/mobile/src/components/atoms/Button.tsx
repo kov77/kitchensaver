@@ -28,7 +28,7 @@ const VARIANT_STYLES = {
   danger: {
     button: styles.danger,
     title: styles.dangerTitle,
-    spinner: colors.warning,
+    spinner: colors.textOnBrand,
   },
 } as const
 
