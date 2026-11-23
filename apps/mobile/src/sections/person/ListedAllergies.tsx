@@ -1,10 +1,9 @@
 import { useTranslation } from 'react-i18next'
 
 import { useAllergies } from '@/api/queries/useAllergies'
-import { Button } from '@/components/atoms/Button'
-import { Spinner } from '@/components/atoms/Spinner'
-import { Text } from '@/components/atoms/Text'
 import { FormMessage } from '@/components/molecules/FormMessage'
+import { LoadFailure } from '@/components/molecules/LoadFailure'
+import { QueryContent } from '@/components/molecules/QueryContent'
 import { getErrorMessage } from '@/utils/errors'
 
 import { AddAllergiesPanel } from './AddAllergiesPanel'
@@ -23,47 +22,43 @@ export function ListedAllergies({
   addAllergies,
 }: ListedAllergiesProps) {
   const { t } = useTranslation('person')
-  const {
-    data: allergies,
-    error,
-    isFetching,
-    isPending,
-    refetch,
-  } = useAllergies(personId)
-
-  if (isPending && !error) return <Spinner />
-
-  if (!allergies || allergies.length === 0) {
-    return (
-      <>
-        <Text variant="body" color="warning">
-          {t('allergy-load-failed')}
-        </Text>
-        <Button
-          title={t('retry')}
-          variant="secondary"
-          isLoading={isFetching}
-          onPress={() => void refetch()}
-        />
-      </>
-    )
-  }
+  const allergiesQuery = useAllergies(personId)
 
   return (
-    <>
-      <AllergyList
-        personId={personId}
-        personName={personName}
-        allergies={allergies}
-      />
-      {addAllergies.error ? (
-        <FormMessage
-          message={t('allergy-add-failed', {
-            reason: getErrorMessage(addAllergies.error),
-          })}
-        />
-      ) : null}
-      <AddAllergiesPanel allergies={allergies} addAllergies={addAllergies} />
-    </>
+    <QueryContent
+      query={allergiesQuery}
+      failureMessage={t('allergy-load-failed')}
+      retryLabel={t('retry')}
+    >
+      {(allergies) =>
+        allergies.length === 0 ? (
+          <LoadFailure
+            message={t('allergy-load-failed')}
+            retryLabel={t('retry')}
+            isRetrying={allergiesQuery.isFetching}
+            onRetry={() => void allergiesQuery.refetch()}
+          />
+        ) : (
+          <>
+            <AllergyList
+              personId={personId}
+              personName={personName}
+              allergies={allergies}
+            />
+            {addAllergies.error ? (
+              <FormMessage
+                message={t('allergy-add-failed', {
+                  reason: getErrorMessage(addAllergies.error),
+                })}
+              />
+            ) : null}
+            <AddAllergiesPanel
+              allergies={allergies}
+              addAllergies={addAllergies}
+            />
+          </>
+        )
+      }
+    </QueryContent>
   )
 }

@@ -5,6 +5,7 @@ import { styles } from './Chip.styles'
 
 type ChipProps = {
   label: string
+  accessibilityLabel?: string
   isSelected: boolean
   onPress: () => void
   role?: 'checkbox' | 'radio'
@@ -12,6 +13,7 @@ type ChipProps = {
 
 export function Chip({
   label,
+  accessibilityLabel = label,
   isSelected,
   onPress,
   role = 'checkbox',
@@ -19,7 +21,7 @@ export function Chip({
   return (
     <Pressable
       accessibilityRole={role}
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ checked: isSelected }}
       onPress={onPress}
       style={[styles.chip, isSelected && styles.selected]}
