@@ -30,12 +30,7 @@ export function AddAllergiesForm({
     defaultValues: { allergens: [], otherLabel: '' },
   })
 
-  const submit = form.handleSubmit(({ allergens, otherLabel }) =>
-    onSubmit({
-      allergens: allergens.filter((code) => addableCodes.includes(code)),
-      otherLabel,
-    }),
-  )
+  const submit = form.handleSubmit((selection) => onSubmit(selection))
 
   return (
     <FormProvider {...form}>

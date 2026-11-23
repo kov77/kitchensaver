@@ -327,6 +327,38 @@ describe('AllergyCard with listed allergies', () => {
     )
   })
 
+  it('does not post the same other allergy again after a failed attempt', async () => {
+    jest
+      .mocked(apiClient.POST)
+      .mockResolvedValueOnce(apiResult(201, KIWI))
+      .mockResolvedValueOnce(apiResult(500))
+      .mockResolvedValueOnce(apiResult(201, MILK))
+    await renderListed([PEANUT])
+
+    await press('button', 'Add allergies')
+    await press('checkbox', 'Other')
+    await userEvent
+      .setup()
+      .type(screen.getByLabelText('Describe the allergy'), ' kiwi ')
+    await press('checkbox', 'Milk')
+    jest.mocked(apiClient.GET).mockResolvedValue(apiResult(200, [PEANUT, KIWI]))
+    await press('button', 'Save')
+
+    expect(await screen.findByText(ADD_FAILED_PATTERN)).toBeTruthy()
+
+    await press('button', 'Save')
+
+    await waitFor(() => expect(apiClient.POST).toHaveBeenCalledTimes(3))
+    expect(apiClient.POST).toHaveBeenNthCalledWith(
+      3,
+      '/api/v1/people/{id}/allergies',
+      {
+        params: { path: { id: 'person-1' } },
+        body: { allergenCode: 'MILK' },
+      },
+    )
+  })
+
   it('asks before removing an allergy and says what changes', async () => {
     await renderListed([PEANUT, KIWI])
 

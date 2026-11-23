@@ -5,10 +5,10 @@ import { Button } from '@/components/atoms/Button'
 import { AddAllergiesForm } from '@/components/organisms/AddAllergiesForm'
 import type { AllergenSelection } from '@/components/organisms/allergy/schemas'
 import { buildAllergyItems } from '@/components/organisms/allergy/utils'
-
 import { useOpen } from '@/utils/useOpen'
 
 import type { AddAllergies } from './types'
+import { getNewAllergyItems } from './utils'
 
 type AddAllergiesPanelProps = {
   allergies: Allergy[]
@@ -28,7 +28,7 @@ export function AddAllergiesPanel({
   }
 
   const add = (selection: AllergenSelection) => {
-    const items = buildAllergyItems(selection)
+    const items = getNewAllergyItems(buildAllergyItems(selection), allergies)
     if (items.length === 0) {
       stopAdding()
       return
