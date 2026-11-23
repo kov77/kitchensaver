@@ -4,6 +4,7 @@ import { apiClient } from '@/api/apiClient'
 import { usePerson } from '@/api/queries/usePerson'
 import { getPersonKey } from '@/api/queryKeys'
 import type { Allergy, PersonDetail } from '@/api/types'
+import { apiError } from '@/test-utils/apiError'
 import { apiResult } from '@/test-utils/apiResult'
 import {
   createTestQueryClient,
@@ -238,6 +239,38 @@ describe('AllergyCard answering the question', () => {
     await press('button', 'Save')
 
     expect(await screen.findByText('Please double-check')).toBeTruthy()
+  })
+
+  it('says that the allergy is already on the list', async () => {
+    jest
+      .mocked(apiClient.POST)
+      .mockResolvedValue(apiError(409, 'ALLERGY_ALREADY_EXISTS'))
+    await renderCard(null)
+
+    await press('button', 'Change answer')
+    await press('radio', 'Yes')
+    await press('checkbox', 'Peanuts')
+    await press('button', 'Save')
+
+    expect(
+      await screen.findByText('This allergy is already on the list.'),
+    ).toBeTruthy()
+  })
+
+  it('tells the person to refresh when allergies already exist', async () => {
+    jest
+      .mocked(apiClient.PUT)
+      .mockResolvedValue(apiError(409, 'ALLERGIES_EXIST'))
+    await renderCard('NONE')
+
+    await press('button', 'Change answer')
+    await press('radio', "I don't know")
+    await press('button', 'Save')
+    await press('button', 'I understand, continue')
+
+    expect(
+      await screen.findByText(/Refresh the screen and try again/),
+    ).toBeTruthy()
   })
 
   it('keeps the form and shows the error when the server refuses', async () => {

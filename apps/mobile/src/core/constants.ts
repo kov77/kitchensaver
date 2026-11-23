@@ -76,3 +76,14 @@ export const READINESS_HINT_KEYS: Record<PlanReadinessReason, CommonKey> = {
   GOAL_NOT_VALID_FOR_AGE: 'common:readiness-hints-GOAL_NOT_VALID_FOR_AGE',
   ALLERGY_STATUS_MISSING: 'common:readiness-hints-ALLERGY_STATUS_MISSING',
 }
+
+export const ERROR_CODE_MESSAGE_KEYS = new Map<string, CommonKey>([
+  ['ALLERGY_ALREADY_EXISTS', 'common:errors-codes-ALLERGY_ALREADY_EXISTS'],
+  ['ALLERGIES_EXIST', 'common:errors-codes-ALLERGIES_EXIST'],
+  [
+    'RESTRICTION_LIMIT_REACHED',
+    'common:errors-codes-RESTRICTION_LIMIT_REACHED',
+  ],
+  ['PROFILE_LIMIT_REACHED', 'common:errors-codes-PROFILE_LIMIT_REACHED'],
+  ['PROFILE_TOTAL_LIMIT_REACHED', 'common:errors-codes-PROFILE_LIMIT_REACHED'],
+])

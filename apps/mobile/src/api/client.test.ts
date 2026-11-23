@@ -1,4 +1,7 @@
+import { ApiRequestError } from '@/utils/errors'
+
 import { createApiClient } from './client'
+import { assertResponseOk, unwrapResponse } from './unwrapResponse'
 
 const BASE_URL = 'http://api.test'
 const ME_RESPONSE = {
@@ -69,5 +72,50 @@ describe('createApiClient', () => {
     await client.GET('/api/v1/me')
 
     expect(getAccessToken).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('errors from the real client', () => {
+  const client = () =>
+    createApiClient({ baseUrl: BASE_URL, getAccessToken: async () => null })
+  const errorBody = {
+    code: 'ALLERGY_ALREADY_EXISTS',
+    message: 'Technical message',
+    requestId: 'request-1',
+  }
+
+  it('keeps the error code of a failed request with data', async () => {
+    mockFetch(409, errorBody)
+
+    const result = await client().GET('/api/v1/me')
+
+    expect(() => unwrapResponse(result)).toThrow(ApiRequestError)
+    expect(() => unwrapResponse(result)).toThrow(
+      expect.objectContaining({ status: 409, code: 'ALLERGY_ALREADY_EXISTS' }),
+    )
+  })
+
+  it('accepts an empty successful response', async () => {
+    jest
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(async () => new Response(null, { status: 204 }))
+
+    const result = await client().DELETE('/api/v1/people/{id}', {
+      params: { path: { id: 'person-1' } },
+    })
+
+    expect(() => assertResponseOk(result)).not.toThrow()
+  })
+
+  it('keeps the error code of a failed empty-bodied request', async () => {
+    mockFetch(404, { ...errorBody, code: 'PERSON_NOT_FOUND' })
+
+    const result = await client().DELETE('/api/v1/people/{id}', {
+      params: { path: { id: 'person-1' } },
+    })
+
+    expect(() => assertResponseOk(result)).toThrow(
+      expect.objectContaining({ status: 404, code: 'PERSON_NOT_FOUND' }),
+    )
   })
 })
