@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+import type { AnswerableAllergyStatus } from '@/core/types'
+
 import { apiClient } from '../apiClient'
 import { PEOPLE_QUERY_KEY } from '../constants'
-import type { AnswerableAllergyStatus } from '../types'
 import { unwrapResponse } from '../unwrapResponse'
 
 export function useSetAllergyStatus(personId: string) {

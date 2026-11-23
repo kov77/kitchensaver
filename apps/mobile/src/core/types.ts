@@ -1,6 +1,6 @@
 import type {
-  AllergenCode as ApiAllergenCode,
-  AnswerableAllergyStatus as ApiAnswerableAllergyStatus,
+  Allergy,
+  PersonDetail,
   PersonGoal,
   PersonListItem,
 } from '@/api/types'
@@ -43,9 +43,12 @@ export type GoalSummary = PersonGoal
 
 export type PlanReadiness = PersonListItem['planReadiness']
 
-export type AllergenCode = ApiAllergenCode
+export type AllergenCode = Allergy['allergenCode']
 
-export type AnswerableAllergyStatus = ApiAnswerableAllergyStatus
+export type AnswerableAllergyStatus = Exclude<
+  NonNullable<PersonDetail['allergyStatus']>,
+  'HAS_ALLERGIES'
+>
 
 export type AllergyItem =
   | { allergenCode: Exclude<AllergenCode, 'OTHER'> }
