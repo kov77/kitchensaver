@@ -1,6 +1,7 @@
 import { useReducer } from 'react'
 
 import { useCreateOnboarding } from '@/api/queries/useCreateOnboarding'
+import type { AllergyAnswerValues } from '@/components/organisms/allergy/schemas'
 import { EMPTY_PROFILE } from '@/components/organisms/profile/constants'
 import { AppScreen } from '@/components/templates/AppScreen'
 import { useSession } from '@/core/auth/SessionProvider'
@@ -10,7 +11,6 @@ import { AllergyStep } from './AllergyStep'
 import { INITIAL_FLOW_STATE } from './constants'
 import { GoalStep } from './GoalStep'
 import { ProfileStep } from './ProfileStep'
-import type { AllergyValues } from './schemas'
 import { buildOnboardingBody, onboardingFlowReducer } from './utils'
 import { useAttemptKey } from './useAttemptKey'
 
@@ -20,7 +20,7 @@ export function OnboardingScreen() {
   const getAttemptKey = useAttemptKey()
   const [flow, dispatch] = useReducer(onboardingFlowReducer, INITIAL_FLOW_STATE)
 
-  const submit = (allergies: AllergyValues) => {
+  const submit = (allergies: AllergyAnswerValues) => {
     if (flow.step !== 'allergies') return
     const body = buildOnboardingBody(flow.profile, flow.goal, allergies)
     createOnboarding({

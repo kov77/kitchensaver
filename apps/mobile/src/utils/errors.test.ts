@@ -20,6 +20,37 @@ describe('getErrorMessage', () => {
     expect(getErrorMessage(new ApiRequestError(status))).toBe(message)
   })
 
+  it.each([
+    ['ALLERGY_ALREADY_EXISTS', 'This allergy is already on the list.'],
+    [
+      'ALLERGIES_EXIST',
+      'This person already has allergies on the list. Refresh the screen and try again.',
+    ],
+    [
+      'RESTRICTION_LIMIT_REACHED',
+      'The list is full. Remove an item before adding another.',
+    ],
+    [
+      'PROFILE_LIMIT_REACHED',
+      'You have reached the limit of profiles. Delete a profile to add another.',
+    ],
+    [
+      'PROFILE_TOTAL_LIMIT_REACHED',
+      'You have reached the limit of profiles. Delete a profile to add another.',
+    ],
+  ])('explains the error code %s', (code, message) => {
+    expect(getErrorMessage(new ApiRequestError(409, code))).toBe(message)
+  })
+
+  it.each(['SOMETHING_NEW', 'constructor', ''])(
+    'falls back to the status message for the code %j',
+    (code) => {
+      expect(getErrorMessage(new ApiRequestError(409, code))).toBe(
+        'This could not be saved right now. Please try again.',
+      )
+    },
+  )
+
   it('recognizes a lost connection', () => {
     expect(getErrorMessage(new TypeError('Network request failed'))).toBe(
       'No connection. Check your internet and try again.',

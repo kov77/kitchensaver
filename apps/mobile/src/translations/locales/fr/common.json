@@ -52,5 +52,9 @@
   "sexes-FEMALE": "Femme",
   "allergy-status-NOT_ANSWERED": "Pas encore de réponse.",
   "allergy-status-NONE": "Aucune allergie connue.",
-  "allergy-status-UNKNOWN": "Inconnu. Les plans ne peuvent pas garantir l’absence de tout allergène."
+  "allergy-status-UNKNOWN": "Inconnu. Les plans ne peuvent pas garantir l’absence de tout allergène.",
+  "errors-codes-ALLERGY_ALREADY_EXISTS": "Cette allergie figure déjà dans la liste.",
+  "errors-codes-ALLERGIES_EXIST": "Cette personne a déjà des allergies dans la liste. Actualisez l’écran et réessayez.",
+  "errors-codes-RESTRICTION_LIMIT_REACHED": "La liste est pleine. Retirez un élément avant d’en ajouter un autre.",
+  "errors-codes-PROFILE_LIMIT_REACHED": "Vous avez atteint la limite de profils. Supprimez un profil pour en ajouter un autre."
 }

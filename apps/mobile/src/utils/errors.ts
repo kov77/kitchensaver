@@ -1,13 +1,17 @@
 import i18next from 'i18next'
 
 import {
+  ERROR_CODE_MESSAGE_KEYS,
   MAX_REQUEST_RETRIES,
   NETWORK_ERROR_PATTERN,
   RESPONSE_STATUS_CODE,
 } from '@/core/constants'
 
 export class ApiRequestError extends Error {
-  constructor(readonly status: number) {
+  constructor(
+    readonly status: number,
+    readonly code?: string,
+  ) {
     super(`API request failed with status ${status}`)
   }
 }
@@ -21,12 +25,19 @@ export function isUnauthorizedError(error: unknown) {
 
 export function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
-    return getStatusMessage(error.status)
+    return getApiErrorMessage(error)
   }
   if (error instanceof TypeError && NETWORK_ERROR_PATTERN.test(error.message)) {
     return i18next.t('errors-network')
   }
   return i18next.t('errors-unknown')
+}
+
+function getApiErrorMessage({ status, code }: ApiRequestError) {
+  const codeMessageKey =
+    code === undefined ? undefined : ERROR_CODE_MESSAGE_KEYS.get(code)
+  if (codeMessageKey) return i18next.t(codeMessageKey)
+  return getStatusMessage(status)
 }
 
 function getStatusMessage(status: number) {

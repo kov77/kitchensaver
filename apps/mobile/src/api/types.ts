@@ -23,13 +23,6 @@ export type PlanReadinessReason =
 export type OnboardingBody =
   paths['/api/v1/people/onboarding']['post']['requestBody']['content']['application/json']
 
-export type OnboardingAllergies = OnboardingBody['allergies']
-
-export type AllergenCode = Extract<
-  OnboardingAllergies,
-  { status: 'HAS_ALLERGIES' }
->['items'][number]['allergenCode']
-
 export type PersonDetail = Schemas['PersonDetailDto']
 
 export type Allergy = Schemas['AllergyDto']

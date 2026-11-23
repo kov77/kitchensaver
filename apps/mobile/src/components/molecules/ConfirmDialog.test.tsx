@@ -2,7 +2,7 @@ import { render, screen, userEvent } from '@testing-library/react-native'
 
 import { ConfirmDialog } from './ConfirmDialog'
 
-function renderDialog(isVisible = true) {
+function renderDialog() {
   const onConfirm = jest.fn()
   const onCancel = jest.fn()
   return {
@@ -10,7 +10,6 @@ function renderDialog(isVisible = true) {
     onCancel,
     ready: render(
       <ConfirmDialog
-        isVisible={isVisible}
         title="Are you sure?"
         message="Details"
         confirmLabel="Continue"
@@ -23,10 +22,11 @@ function renderDialog(isVisible = true) {
 }
 
 describe('ConfirmDialog', () => {
-  it('shows nothing while hidden', async () => {
-    await renderDialog(false).ready
+  it('shows the title and the message', async () => {
+    await renderDialog().ready
 
-    expect(screen.queryByText('Are you sure?')).toBeNull()
+    expect(screen.getByText('Are you sure?')).toBeTruthy()
+    expect(screen.getByText('Details')).toBeTruthy()
   })
 
   it('confirms only when the confirm button is pressed', async () => {

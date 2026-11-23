@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
@@ -10,6 +9,7 @@ import { SectionCard } from '@/components/molecules/SectionCard'
 import { ProfileForm } from '@/components/organisms/ProfileForm'
 import { formatDisplayDate, parseIsoDate } from '@/utils/dates'
 import { getErrorMessage } from '@/utils/errors'
+import { useOpen } from '@/utils/useOpen'
 
 import { styles } from './PersonScreen.styles'
 
@@ -21,13 +21,13 @@ export function ProfileCard({
   person: { id, name, dateOfBirth },
 }: ProfileCardProps) {
   const { t } = useTranslation(['person', 'profile'])
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, { open: startEditing, close: closeEditor }] = useOpen()
   const { mutate: updatePerson, error, isPending, reset } = useUpdatePerson(id)
   const birthDate = parseIsoDate(dateOfBirth)
 
   const stopEditing = () => {
     reset()
-    setIsEditing(false)
+    closeEditor()
   }
 
   return (
@@ -66,7 +66,7 @@ export function ProfileCard({
           <Button
             title={t('edit')}
             variant="secondary"
-            onPress={() => setIsEditing(true)}
+            onPress={startEditing}
           />
         </>
       )}

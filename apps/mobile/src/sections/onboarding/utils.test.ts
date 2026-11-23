@@ -1,14 +1,13 @@
-import { ALLERGY_ANSWER } from './constants'
-import type { AllergyValues } from './schemas'
-import {
-  buildOnboardingBody,
-  getWarningDialog,
-  onboardingFlowReducer,
-} from './utils'
+import { ALLERGY_ANSWER } from '@/components/organisms/allergy/constants'
+import type { AllergyAnswerValues } from '@/components/organisms/allergy/schemas'
+
+import { buildOnboardingBody, onboardingFlowReducer } from './utils'
 
 const PROFILE = { name: 'Alex', dateOfBirth: new Date(1990, 4, 15) }
 
-function allergies(overrides: Partial<AllergyValues>): AllergyValues {
+function allergies(
+  overrides: Partial<AllergyAnswerValues>,
+): AllergyAnswerValues {
   return { answer: null, allergens: [], otherLabel: '', ...overrides }
 }
 
@@ -87,34 +86,6 @@ describe('buildOnboardingBody', () => {
     expect(() =>
       buildOnboardingBody(PROFILE, null, allergies({ answer: null })),
     ).toThrow()
-  })
-})
-
-describe('getWarningDialog', () => {
-  const NO = { answer: ALLERGY_ANSWER.NO, allergens: [], otherLabel: '' }
-
-  it('warns before saving the answer no', () => {
-    expect(getWarningDialog(NO)).toEqual({
-      titleKey: 'warning-dialogs-no-title',
-      messageKey: 'warning-dialogs-no-message',
-    })
-  })
-
-  it('warns before saving the answer unknown', () => {
-    expect(getWarningDialog({ ...NO, answer: ALLERGY_ANSWER.UNKNOWN })).toEqual(
-      {
-        titleKey: 'warning-dialogs-unknown-title',
-        messageKey: 'warning-dialogs-unknown-message',
-      },
-    )
-  })
-
-  it.each([
-    ['listed allergies', { ...NO, answer: ALLERGY_ANSWER.YES }],
-    ['an unanswered question', { ...NO, answer: null }],
-    ['nothing pending', null],
-  ])('does not warn for %s', (_name, values) => {
-    expect(getWarningDialog(values)).toBeNull()
   })
 })
 

@@ -22,6 +22,9 @@ export const styles = StyleSheet.create({
   secondary: {
     backgroundColor: colors.surfaceMuted,
   },
+  danger: {
+    backgroundColor: colors.warning,
+  },
   inactive: {
     opacity: INACTIVE_OPACITY,
   },
@@ -33,5 +36,8 @@ export const styles = StyleSheet.create({
   },
   secondaryTitle: {
     color: colors.brandPrimary,
+  },
+  dangerTitle: {
+    color: colors.textOnBrand,
   },
 })

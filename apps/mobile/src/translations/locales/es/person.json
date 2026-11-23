@@ -10,5 +10,18 @@
   "change-goal": "Cambiar objetivo",
   "set-goal": "Fijar objetivo",
   "allergy-title": "Alergias alimentarias",
-  "allergy-load-failed": "No pudimos cargar las alergias."
+  "allergy-load-failed": "No pudimos cargar las alergias.",
+  "delete-button": "Eliminar perfil",
+  "delete-title": "¿Eliminar a {{name}}?",
+  "delete-message": "Se eliminarán de forma permanente el perfil con la fecha de nacimiento, el objetivo y las alergias. Esta acción no se puede deshacer.",
+  "delete-confirm": "Eliminar definitivamente",
+  "allergy-change-answer": "Cambiar respuesta",
+  "allergy-add": "Añadir alergias",
+  "allergy-remove": "Quitar",
+  "allergy-remove-label": "Quitar {{allergen}}",
+  "allergy-remove-title": "¿Quitar {{allergen}}?",
+  "allergy-remove-message": "Esta alergia dejará de tenerse en cuenta para {{name}} y los planes de comidas podrán incluir este alimento.",
+  "allergy-remove-last-message": "Esta es la última alergia de {{name}}. Dejará de tenerse en cuenta, los planes de comidas podrán incluir este alimento y habrá que volver a responder la pregunta sobre alergias.",
+  "allergy-remove-confirm": "Quitar alergia",
+  "allergy-add-failed": "Es posible que algunas alergias no se hayan guardado. Revisa la lista y añade las que falten. {{reason}}"
 }

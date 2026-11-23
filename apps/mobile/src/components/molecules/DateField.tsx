@@ -1,12 +1,12 @@
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker'
-import { useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 
 import { styles as inputStyles } from '@/components/atoms/Input.styles'
 import { Text } from '@/components/atoms/Text'
 import { formatDisplayDate } from '@/utils/dates'
+import { useOpen } from '@/utils/useOpen'
 
 import { styles } from './DateField.styles'
 
@@ -29,11 +29,11 @@ export function DateField({
   maximumDate,
   errorMessage,
 }: DateFieldProps) {
-  const [isPickerOpen, setIsPickerOpen] = useState(false)
+  const [isPickerOpen, { close: closePicker, toggle: togglePicker }] = useOpen()
   const displayValue = value ? formatDisplayDate(value) : placeholder
 
   const handleChange = ({ type }: DateTimePickerEvent, date?: Date) => {
-    if (Platform.OS === 'android') setIsPickerOpen(false)
+    if (Platform.OS === 'android') closePicker()
     if (type === 'set' && date) onChange(date)
   }
 
@@ -45,7 +45,7 @@ export function DateField({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${displayValue}`}
-        onPress={() => setIsPickerOpen((isOpen) => !isOpen)}
+        onPress={togglePicker}
         style={inputStyles.row}
       >
         <Text variant="input" color={value ? 'text' : 'textMuted'}>

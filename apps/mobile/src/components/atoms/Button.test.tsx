@@ -39,4 +39,27 @@ describe('Button', () => {
 
     expect(screen.getByText('Log out')).toBeTruthy()
   })
+
+  it('can be named differently from its visible title', async () => {
+    await render(
+      <Button
+        title="Remove"
+        accessibilityLabel="Remove Peanuts"
+        onPress={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Remove Peanuts' })).toBeTruthy()
+  })
+
+  it('calls onPress for the danger variant', async () => {
+    const onPress = jest.fn()
+    await render(<Button title="Delete" variant="danger" onPress={onPress} />)
+
+    await userEvent
+      .setup()
+      .press(screen.getByRole('button', { name: 'Delete' }))
+
+    expect(onPress).toHaveBeenCalledTimes(1)
+  })
 })

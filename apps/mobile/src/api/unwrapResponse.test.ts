@@ -1,6 +1,15 @@
 import { ApiRequestError } from '@/utils/errors'
 
-import { unwrapResponse } from './unwrapResponse'
+import { assertResponseOk, unwrapResponse } from './unwrapResponse'
+
+function getThrown(action: () => unknown) {
+  try {
+    action()
+  } catch (error) {
+    return error
+  }
+  return undefined
+}
 
 describe('unwrapResponse', () => {
   it('returns the data of a successful response', () => {
@@ -43,5 +52,52 @@ describe('unwrapResponse', () => {
     expect(() =>
       unwrapResponse({ response: new Response(null, { status: 500 }) }),
     ).toThrow(ApiRequestError)
+  })
+})
+
+describe('assertResponseOk', () => {
+  it('accepts an empty successful response', () => {
+    expect(() =>
+      assertResponseOk({ response: new Response(null, { status: 204 }) }),
+    ).not.toThrow()
+  })
+
+  it.each([401, 404, 409, 500])('throws for status %s', (status) => {
+    expect(() =>
+      assertResponseOk({ response: new Response(null, { status }) }),
+    ).toThrow(new ApiRequestError(status))
+  })
+})
+
+describe('error code of a failed response', () => {
+  const response = () => new Response(null, { status: 409 })
+
+  it('is taken from the error body', () => {
+    const body = {
+      code: 'ALLERGY_ALREADY_EXISTS',
+      message: 'x',
+      requestId: 'r',
+    }
+
+    expect(
+      getThrown(() => unwrapResponse({ error: body, response: response() })),
+    ).toMatchObject({ status: 409, code: 'ALLERGY_ALREADY_EXISTS' })
+    expect(
+      getThrown(() => assertResponseOk({ error: body, response: response() })),
+    ).toMatchObject({ status: 409, code: 'ALLERGY_ALREADY_EXISTS' })
+  })
+
+  it.each([
+    ['there is no body', undefined],
+    ['the body is text', 'Bad gateway'],
+    ['the code is not text', { code: 409 }],
+    ['the body has no code', { message: 'x' }],
+  ])('is left out when %s', (_name, error) => {
+    const thrown = getThrown(() =>
+      unwrapResponse({ error, response: response() }),
+    )
+
+    expect(thrown).toBeInstanceOf(ApiRequestError)
+    expect(thrown).toMatchObject({ status: 409, code: undefined })
   })
 })

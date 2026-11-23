@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
+import { useDeletePerson } from '@/api/queries/useDeletePerson'
 import { usePerson } from '@/api/queries/usePerson'
 import { Button } from '@/components/atoms/Button'
 import { Spinner } from '@/components/atoms/Spinner'
@@ -8,10 +9,11 @@ import { Text } from '@/components/atoms/Text'
 import { FormMessage } from '@/components/molecules/FormMessage'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
 import { AppScreen } from '@/components/templates/AppScreen'
-import { getErrorMessage } from '@/utils/errors'
 import { usePersonSummary } from '@/core/usePersonSummary'
+import { getErrorMessage } from '@/utils/errors'
 
 import { AllergyCard } from './AllergyCard'
+import { DeletePerson } from './DeletePerson'
 import { GoalCard } from './GoalCard'
 import { ProfileCard } from './ProfileCard'
 
@@ -20,14 +22,24 @@ export function PersonScreen() {
   const { personId } = useLocalSearchParams<{ personId: string }>()
   const router = useRouter()
   const {
+    mutate: deletePerson,
+    error: deleteError,
+    isPending: isDeleting,
+    isSuccess: isDeleted,
+  } = useDeletePerson(personId)
+  const {
     data: person,
     error,
     isFetching,
     isPending,
     refetch,
-  } = usePerson(personId)
+  } = usePerson({ personId, enabled: !isDeleted })
   const { describeReadiness } = usePersonSummary()
   const readinessHint = person ? describeReadiness(person.planReadiness) : null
+
+  const leave = () => (router.canGoBack() ? router.back() : router.replace('/'))
+
+  if (isDeleted) return null
 
   return (
     <AppScreen>
@@ -66,15 +78,18 @@ export function PersonScreen() {
           />
           <AllergyCard
             personId={person.id}
+            personName={person.name}
             allergyStatus={person.allergyStatus}
+          />
+          <DeletePerson
+            name={person.name}
+            isDeleting={isDeleting}
+            error={deleteError}
+            onDelete={() => deletePerson(undefined, { onSuccess: leave })}
           />
         </>
       ) : null}
-      <Button
-        title={t('back')}
-        variant="secondary"
-        onPress={() => router.back()}
-      />
+      <Button title={t('back')} variant="secondary" onPress={leave} />
     </AppScreen>
   )
 }

@@ -10,5 +10,18 @@
   "change-goal": "Change goal",
   "set-goal": "Set goal",
   "allergy-title": "Food allergies",
-  "allergy-load-failed": "We could not load the allergies."
+  "allergy-load-failed": "We could not load the allergies.",
+  "delete-button": "Delete profile",
+  "delete-title": "Delete {{name}}?",
+  "delete-message": "This permanently deletes the profile with the date of birth, the goal and the allergies. This cannot be undone.",
+  "delete-confirm": "Delete permanently",
+  "allergy-change-answer": "Change answer",
+  "allergy-add": "Add allergies",
+  "allergy-remove": "Remove",
+  "allergy-remove-label": "Remove {{allergen}}",
+  "allergy-remove-title": "Remove {{allergen}}?",
+  "allergy-remove-message": "This allergy will no longer be taken into account for {{name}}, and meal plans may include this food.",
+  "allergy-remove-last-message": "This is the last allergy of {{name}}. It will no longer be taken into account, meal plans may include this food, and the allergy question will need to be answered again.",
+  "allergy-remove-confirm": "Remove allergy",
+  "allergy-add-failed": "Some allergies may not have been saved. Check the list and add the missing ones. {{reason}}"
 }
