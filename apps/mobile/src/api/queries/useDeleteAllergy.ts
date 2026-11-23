@@ -16,7 +16,7 @@ export function useDeleteAllergy(personId: string) {
           params: { path: { id: personId, allergyId } },
         }),
       ),
-    onSuccess: async () => {
+    onSettled: async () => {
       await queryClient.invalidateQueries({
         queryKey: getPersonKey(personId),
         exact: true,

@@ -417,6 +417,20 @@ describe('AllergyCard with listed allergies', () => {
     expect(apiClient.DELETE).toHaveBeenCalledTimes(1)
   })
 
+  it('refreshes the person even when the allergy is already gone on the server', async () => {
+    jest.mocked(apiClient.DELETE).mockResolvedValue(apiResult(404))
+    const queryClient = await renderListed([PEANUT, KIWI])
+
+    await press('button', 'Remove Kiwi')
+    await press('button', 'Remove allergy')
+
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryState(getPersonKey('person-1'))?.isInvalidated,
+      ).toBe(true),
+    )
+  })
+
   it('keeps the allergy when the removal is cancelled', async () => {
     await renderListed([PEANUT, KIWI])
 
