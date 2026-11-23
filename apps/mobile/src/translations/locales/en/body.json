@@ -1,0 +1,8 @@
+{
+  "height-label": "Height (cm)",
+  "weight-label": "Weight (kg)",
+  "activity-label": "Activity level",
+  "sex-label": "Sex used in the formula",
+  "errors-height": "Enter a height between 90 and 250 cm.",
+  "errors-weight": "Enter a weight between 20 and 400 kg."
+}

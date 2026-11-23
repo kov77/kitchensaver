@@ -1,9 +1,4 @@
-import type {
-  ActivityLevel,
-  EstimatedGoalType,
-  FormulaSex,
-  GoalType,
-} from '@/core/types'
+import type { EstimatedGoalType, GoalType } from '@/core/types'
 
 export const GOAL_MODE = {
   MANUAL: 'MANUAL',
@@ -22,15 +17,6 @@ export const ESTIMATED_GOAL_TYPES: readonly EstimatedGoalType[] = [
   'MAINTAIN',
   'GAIN',
 ]
-
-export const ACTIVITY_LEVELS: readonly ActivityLevel[] = [
-  'INACTIVE',
-  'LOW_ACTIVE',
-  'ACTIVE',
-  'VERY_ACTIVE',
-]
-
-export const FORMULA_SEXES: readonly FormulaSex[] = ['MALE', 'FEMALE']
 
 export const ASSUMPTION_KEYS = [
   {

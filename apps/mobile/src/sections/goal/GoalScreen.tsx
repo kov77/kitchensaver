@@ -23,6 +23,7 @@ export function GoalScreen() {
     <AppScreen>
       <ScreenHeader title={t('screen-title')} subtitle={t('screen-subtitle')} />
       <GoalEditor
+        savedParameters={null}
         submitLabel={t('screen-save')}
         isSaving={isPending}
         saveErrorMessage={error ? getErrorMessage(error) : null}

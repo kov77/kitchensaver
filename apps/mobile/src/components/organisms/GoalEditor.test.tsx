@@ -18,6 +18,7 @@ const onSave = jest.fn()
 async function renderEditor(saveErrorMessage: string | null = null) {
   await renderWithQuery(
     <GoalEditor
+      savedParameters={null}
       submitLabel="Save goal"
       isSaving={false}
       saveErrorMessage={saveErrorMessage}

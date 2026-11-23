@@ -3,6 +3,7 @@ import type {
   PersonDetail,
   PersonGoal,
   PersonListItem,
+  StoredBodyParameters,
 } from '@/api/types'
 
 export type AppAccess =
@@ -21,12 +22,10 @@ export type ActivityLevel = 'INACTIVE' | 'LOW_ACTIVE' | 'ACTIVE' | 'VERY_ACTIVE'
 
 export type FormulaSex = 'MALE' | 'FEMALE'
 
-export type EstimateInput = {
+export type BodyParameters = Omit<StoredBodyParameters, 'updatedAt'>
+
+export type EstimateInput = BodyParameters & {
   goalType: EstimatedGoalType
-  heightCm: number
-  weightKg: number
-  activityLevel: ActivityLevel
-  formulaSex: FormulaSex
 }
 
 export type GoalEstimate = {
