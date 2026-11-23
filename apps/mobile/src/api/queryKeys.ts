@@ -20,3 +20,7 @@ export function getExclusionsKey(personId: string) {
 export function getPreferencesKey(personId: string) {
   return [...getPersonKey(personId), 'preferences'] as const
 }
+
+export function getBodyParametersKey(personId: string) {
+  return [...getPersonKey(personId), 'body-parameters'] as const
+}

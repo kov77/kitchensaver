@@ -1,6 +1,10 @@
 import { ApiRequestError } from '@/utils/errors'
 
-import { assertResponseOk, unwrapResponse } from './unwrapResponse'
+import {
+  assertResponseOk,
+  hasErrorCode,
+  unwrapResponse,
+} from './unwrapResponse'
 
 function getThrown(action: () => unknown) {
   try {
@@ -100,4 +104,33 @@ describe('error code of a failed response', () => {
     expect(thrown).toBeInstanceOf(ApiRequestError)
     expect(thrown).toMatchObject({ status: 409, code: undefined })
   })
+})
+
+describe('hasErrorCode', () => {
+  const response = new Response(null, { status: 404 })
+
+  it('recognizes the code of the error body', () => {
+    expect(
+      hasErrorCode(
+        { error: { code: 'PERSON_NOT_FOUND' }, response },
+        'PERSON_NOT_FOUND',
+      ),
+    ).toBe(true)
+  })
+
+  it('tells one code from another with the same status', () => {
+    expect(
+      hasErrorCode(
+        { error: { code: 'PERSON_NOT_FOUND' }, response },
+        'BODY_PARAMETERS_NOT_FOUND',
+      ),
+    ).toBe(false)
+  })
+
+  it.each([undefined, 'Not found', { message: 'x' }])(
+    'is false when the body is %j',
+    (error) => {
+      expect(hasErrorCode({ error, response }, 'PERSON_NOT_FOUND')).toBe(false)
+    },
+  )
 })
