@@ -1,0 +1,8 @@
+{
+  "name-label": "Alimento",
+  "name-placeholder": "Por ejemplo, champiñones",
+  "rating-label": "Valoración (de 1 a 5)",
+  "errors-name-required": "Introduce un alimento.",
+  "errors-name-too-long": "Usa como máximo {{max}} caracteres.",
+  "errors-rating-required": "Elige una valoración."
+}

@@ -2,6 +2,7 @@ import allergy from './locales/en/allergy.json'
 import auth from './locales/en/auth.json'
 import common from './locales/en/common.json'
 import consent from './locales/en/consent.json'
+import food from './locales/en/food.json'
 import goal from './locales/en/goal.json'
 import onboarding from './locales/en/onboarding.json'
 import people from './locales/en/people.json'
@@ -14,6 +15,7 @@ export const en = {
   auth,
   consent,
   onboarding,
+  food,
   goal,
   profile,
   people,
