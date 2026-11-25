@@ -155,6 +155,27 @@ describe('PeopleScreen', () => {
     ).toBeNull()
   })
 
+  it('starts adding another person', async () => {
+    respondWith(200, [READY_PERSON])
+    await renderPeople()
+    await screen.findByText('Max · 34')
+
+    await userEvent
+      .setup()
+      .press(screen.getByRole('button', { name: 'Add person' }))
+
+    expect(mockPush).toHaveBeenCalledWith('/add-person')
+  })
+
+  it('offers no way to add a person until the list is loaded', async () => {
+    respondWith(403)
+
+    await renderPeople()
+    await screen.findByText('You do not have access to this.')
+
+    expect(screen.queryByRole('button', { name: 'Add person' })).toBeNull()
+  })
+
   it('lets the user log out', async () => {
     respondWith(200, [READY_PERSON])
     await renderPeople()

@@ -17,7 +17,16 @@ jest.mock('expo-router', () => {
   return { Stack }
 })
 
-const ALL_SCREENS = ['index', 'consent', 'onboarding', 'sign-in', 'sign-up']
+const ALL_SCREENS = [
+  'index',
+  'add-person',
+  'person/[personId]',
+  'goal/[personId]',
+  'consent',
+  'onboarding',
+  'sign-in',
+  'sign-up',
+]
 
 function renderedScreens() {
   return ALL_SCREENS.filter((name) => screen.queryByText(name) !== null)
@@ -45,7 +54,12 @@ describe('RootNavigator', () => {
   it('opens the app once the confirmations are recorded', async () => {
     await render(<RootNavigator access="ready" />)
 
-    expect(renderedScreens()).toEqual(['index'])
+    expect(renderedScreens()).toEqual([
+      'index',
+      'add-person',
+      'person/[personId]',
+      'goal/[personId]',
+    ])
   })
 
   it('shows no screen while the status is loading', async () => {
