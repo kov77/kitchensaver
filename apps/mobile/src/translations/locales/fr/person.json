@@ -54,9 +54,8 @@
   "preference-remove-title": "Retirer la note de <highlight>{{food}}</highlight> ?",
   "preference-remove-message": "Les plans de repas de {{name}} ne tiendront plus compte de cette note.",
   "preference-remove-confirm": "Retirer la note",
+  "profile-summary": "{{age}} ans · date de naissance : {{date}}",
+  "profile-edit": "Modifier le profil",
   "add": "Ajouter",
-  "close": "Fermer",
-  "profile-title": "Profil",
-  "edit": "Modifier",
-  "years-old": "ans"
+  "close": "Fermer"
 }

@@ -54,9 +54,8 @@
   "preference-remove-title": "Remove the rating of <highlight>{{food}}</highlight>?",
   "preference-remove-message": "Meal plans for {{name}} will no longer take this rating into account.",
   "preference-remove-confirm": "Remove rating",
+  "profile-summary": "{{age}} years old · born {{date}}",
+  "profile-edit": "Edit profile",
   "add": "Add",
-  "close": "Close",
-  "profile-title": "Profile",
-  "edit": "Edit",
-  "years-old": "years old"
+  "close": "Close"
 }

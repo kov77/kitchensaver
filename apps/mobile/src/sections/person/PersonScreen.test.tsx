@@ -118,8 +118,7 @@ describe('PersonScreen', () => {
     await renderPerson()
 
     expect(await screen.findByRole('header', { name: 'Max' })).toBeTruthy()
-    expect(screen.getByText(`34 years old`)).toBeTruthy()
-    expect(screen.getByText('4 March 1992')).toBeTruthy()
+    expect(screen.getByText('34 years old · born 4 March 1992')).toBeTruthy()
     expect(screen.getByText('Lose weight · 2,100 kcal/day')).toBeTruthy()
   })
 
@@ -293,7 +292,9 @@ describe('PersonScreen allergies', () => {
 describe('PersonScreen profile editing', () => {
   async function startEditing() {
     const user = userEvent.setup()
-    await user.press(await screen.findByRole('button', { name: 'Edit' }))
+    await user.press(
+      await screen.findByRole('button', { name: 'Edit profile' }),
+    )
     return user
   }
 
@@ -350,7 +351,7 @@ describe('PersonScreen profile editing', () => {
 
     expect(apiClient.PATCH).not.toHaveBeenCalled()
     expect(screen.queryByLabelText('Name')).toBeNull()
-    expect(screen.getAllByText('Max')).toHaveLength(2)
+    expect(screen.getByRole('header', { name: 'Max' })).toBeTruthy()
     expect(screen.queryByText('Someone else')).toBeNull()
   })
 })

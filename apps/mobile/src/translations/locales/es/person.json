@@ -54,9 +54,8 @@
   "preference-remove-title": "¿Quitar la valoración de <highlight>{{food}}</highlight>?",
   "preference-remove-message": "Los planes de comidas de {{name}} dejarán de tener en cuenta esta valoración.",
   "preference-remove-confirm": "Quitar valoración",
+  "profile-summary": "{{age}} años · nacimiento: {{date}}",
+  "profile-edit": "Editar perfil",
   "add": "Añadir",
-  "close": "Cerrar",
-  "profile-title": "Perfil",
-  "edit": "Editar",
-  "years-old": "años"
+  "close": "Cerrar"
 }
