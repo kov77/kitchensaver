@@ -46,7 +46,7 @@ export function DateField({
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${displayValue}`}
         onPress={togglePicker}
-        style={inputStyles.row}
+        style={[inputStyles.row, errorMessage && inputStyles.invalid]}
       >
         <Text variant="input" color={value ? 'text' : 'textMuted'}>
           {displayValue}
@@ -63,7 +63,7 @@ export function DateField({
         />
       ) : null}
       {errorMessage ? (
-        <Text variant="link" color="warning" accessibilityLiveRegion="polite">
+        <Text variant="link" color="danger" accessibilityLiveRegion="polite">
           {errorMessage}
         </Text>
       ) : null}

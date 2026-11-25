@@ -29,7 +29,7 @@ export function FormCheckbox<Values extends FieldValues>({
     <View>
       <Checkbox label={label} isChecked={value} onChange={onChange} />
       {error ? (
-        <Text variant="link" color="warning" accessibilityLiveRegion="polite">
+        <Text variant="link" color="danger" accessibilityLiveRegion="polite">
           {error.message}
         </Text>
       ) : null}

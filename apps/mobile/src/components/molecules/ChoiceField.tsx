@@ -39,7 +39,7 @@ export function ChoiceField<Value extends string>({
         ))}
       </View>
       {errorMessage ? (
-        <Text variant="link" color="warning" accessibilityLiveRegion="polite">
+        <Text variant="link" color="danger" accessibilityLiveRegion="polite">
           {errorMessage}
         </Text>
       ) : null}

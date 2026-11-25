@@ -4,6 +4,9 @@ import {
   screen,
   userEvent,
 } from '@testing-library/react-native'
+import { StyleSheet } from 'react-native'
+
+import { colors } from '@/theme/colors'
 
 import { DateField } from './DateField'
 
@@ -18,7 +21,7 @@ jest.mock('@react-native-community/datetimepicker', () => {
 const MINIMUM = new Date(1900, 0, 1)
 const MAXIMUM = new Date(2013, 10, 18)
 
-async function renderField(value: Date | null = null) {
+async function renderField(value: Date | null = null, errorMessage?: string) {
   const onChange = jest.fn()
   await render(
     <DateField
@@ -28,6 +31,7 @@ async function renderField(value: Date | null = null) {
       onChange={onChange}
       minimumDate={MINIMUM}
       maximumDate={MAXIMUM}
+      errorMessage={errorMessage}
     />,
   )
   return onChange
@@ -40,6 +44,31 @@ async function openPicker() {
 }
 
 describe('DateField', () => {
+  it('marks the field and the message in red when there is an error', async () => {
+    await renderField(null, 'This field is required.')
+
+    expect(
+      StyleSheet.flatten(
+        screen.getByRole('button', { name: /Date of birth/ }).props.style,
+      ),
+    ).toMatchObject({ borderColor: colors.danger })
+    expect(
+      StyleSheet.flatten(
+        screen.getByText('This field is required.').props.style,
+      ),
+    ).toMatchObject({ color: colors.danger })
+  })
+
+  it('keeps the normal border without an error', async () => {
+    await renderField()
+
+    expect(
+      StyleSheet.flatten(
+        screen.getByRole('button', { name: /Date of birth/ }).props.style,
+      ),
+    ).toMatchObject({ borderColor: colors.border })
+  })
+
   it('shows the placeholder until a date is chosen', async () => {
     await renderField()
 

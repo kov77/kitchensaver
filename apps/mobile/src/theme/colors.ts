@@ -5,10 +5,13 @@ export const colors = {
   background: '#F8FAF5',
   surface: '#FFFFFF',
   surfaceMuted: '#F2F6EE',
+  border: '#7F927C',
   text: '#203129',
   textMuted: '#7D9080',
   textOnBrand: '#FFFFFF',
   warning: '#A56535',
   warningSoft: '#FFF0E1',
+  danger: '#B3261E',
+  dangerSoft: '#FDECEA',
   overlay: 'rgba(32, 49, 41, 0.5)',
 } as const

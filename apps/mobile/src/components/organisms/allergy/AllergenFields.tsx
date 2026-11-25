@@ -50,7 +50,7 @@ export function AllergenFields({
           )}
         />
         {errors.allergens ? (
-          <Text variant="link" color="warning" accessibilityLiveRegion="polite">
+          <Text variant="link" color="danger" accessibilityLiveRegion="polite">
             {errors.allergens.message}
           </Text>
         ) : null}
