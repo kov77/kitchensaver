@@ -7,20 +7,17 @@ import {
   NAME_MAX_LENGTH,
 } from '@/core/constants'
 import { toIsoDate } from '@/utils/dates'
-import { lazyMessage } from '@/utils/messages'
+import { getRequiredMessage, lazyMessage } from '@/utils/messages'
+import { requiredText } from '@/utils/schemas'
 
 type DateBounds = { minimumDate: Date; maximumDate: Date }
 
 export function createProfileSchema({ minimumDate, maximumDate }: DateBounds) {
   return zod.object({
-    name: zod
-      .string()
-      .trim()
-      .min(1, lazyMessage('profile:errors-name-required'))
-      .max(
-        NAME_MAX_LENGTH,
-        lazyMessage('profile:errors-name-too-long', { max: NAME_MAX_LENGTH }),
-      ),
+    name: requiredText.max(
+      NAME_MAX_LENGTH,
+      lazyMessage('profile:errors-name-too-long', { max: NAME_MAX_LENGTH }),
+    ),
     dateOfBirth: zod
       .date()
       .nullable()
@@ -28,7 +25,7 @@ export function createProfileSchema({ minimumDate, maximumDate }: DateBounds) {
         if (date === null) {
           context.addIssue({
             code: 'custom',
-            message: i18next.t('profile:errors-date-required'),
+            message: getRequiredMessage(),
           })
           return
         }

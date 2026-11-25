@@ -1,5 +1,6 @@
 import allergy from './locales/es/allergy.json'
 import auth from './locales/es/auth.json'
+import body from './locales/es/body.json'
 import common from './locales/es/common.json'
 import consent from './locales/es/consent.json'
 import food from './locales/es/food.json'
@@ -12,6 +13,7 @@ import profile from './locales/es/profile.json'
 export const es = {
   common,
   allergy,
+  body,
   auth,
   consent,
   onboarding,

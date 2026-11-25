@@ -18,6 +18,7 @@ const onSave = jest.fn()
 async function renderEditor(saveErrorMessage: string | null = null) {
   await renderWithQuery(
     <GoalEditor
+      savedParameters={null}
       submitLabel="Save goal"
       isSaving={false}
       saveErrorMessage={saveErrorMessage}
@@ -60,10 +61,12 @@ describe('GoalEditor manual mode', () => {
   it('needs a goal type and calories before saving', async () => {
     await press('button', 'Save goal')
 
-    expect(await screen.findByText('Choose an option.')).toBeTruthy()
+    expect(await screen.findAllByText('This field is required.')).toHaveLength(
+      2,
+    )
     expect(
-      screen.getByText('Enter whole calories between 500 and 10,000.'),
-    ).toBeTruthy()
+      screen.queryByText('Enter whole calories between 500 and 10,000.'),
+    ).toBeNull()
     expect(onSave).not.toHaveBeenCalled()
   })
 
@@ -206,9 +209,7 @@ describe('GoalEditor estimate mode', () => {
 
     await press('button', 'Save goal')
 
-    expect(
-      await screen.findByText('Enter whole calories between 500 and 10,000.'),
-    ).toBeTruthy()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
     expect(onSave).not.toHaveBeenCalled()
   })
 

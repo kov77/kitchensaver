@@ -3,6 +3,7 @@ import * as zod from 'zod'
 
 import { NAME_MAX_LENGTH } from '@/core/constants'
 import type { AllergenCode } from '@/core/types'
+import { getRequiredMessage } from '@/utils/messages'
 
 import {
   ALLERGEN_CODES,
@@ -31,7 +32,7 @@ function validateAllergenSelection(
     context.addIssue({
       code: 'custom',
       path: ['allergens'],
-      message: i18next.t('allergy:errors-allergen-required'),
+      message: getRequiredMessage(),
     })
     return
   }
@@ -40,7 +41,7 @@ function validateAllergenSelection(
     context.addIssue({
       code: 'custom',
       path: ['otherLabel'],
-      message: i18next.t('allergy:errors-other-required'),
+      message: getRequiredMessage(),
     })
     return
   }
@@ -69,7 +70,7 @@ export const allergyAnswerSchema = zod
       context.addIssue({
         code: 'custom',
         path: ['answer'],
-        message: i18next.t('allergy:errors-answer-required'),
+        message: getRequiredMessage(),
       })
       return
     }

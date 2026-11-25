@@ -4,7 +4,12 @@ import { useTranslation } from 'react-i18next'
 
 import { ChoiceField } from '@/components/molecules/ChoiceField'
 import { FormMessage } from '@/components/molecules/FormMessage'
-import type { EstimateInput, GoalDraft, GoalEstimate } from '@/core/types'
+import type {
+  BodyParameters,
+  EstimateInput,
+  GoalDraft,
+  GoalEstimate,
+} from '@/core/types'
 import { getErrorMessage } from '@/utils/errors'
 
 import { EstimateInputsForm } from './goal/EstimateInputsForm'
@@ -15,6 +20,7 @@ import { GOAL_MODE } from './goal/constants'
 type GoalMode = (typeof GOAL_MODE)[keyof typeof GOAL_MODE]
 
 type GoalEditorProps = {
+  savedParameters: BodyParameters | null
   submitLabel: string
   isSaving: boolean
   saveErrorMessage: string | null
@@ -23,6 +29,7 @@ type GoalEditorProps = {
 }
 
 export function GoalEditor({
+  savedParameters,
   submitLabel,
   isSaving,
   saveErrorMessage,
@@ -67,6 +74,7 @@ export function GoalEditor({
       {mode === GOAL_MODE.ESTIMATED && !isReviewing ? (
         <EstimateInputsForm
           initialInput={estimateInput ?? null}
+          savedParameters={savedParameters}
           errorMessage={estimateError ? getErrorMessage(estimateError) : null}
           isEstimating={isEstimating}
           onSubmit={(input) => {

@@ -2,18 +2,39 @@ import { en } from './en'
 import { es } from './es'
 import { fr } from './fr'
 
+type Texts = Record<string, string>
+type Locale = Record<string, Texts>
+
 const PLACEHOLDER_PATTERN = /{{\w+}}/g
 
-const TRANSLATIONS = [
+const TRANSLATIONS: readonly (readonly [string, Locale])[] = [
   ['es', es],
   ['fr', fr],
-] as const
+]
+
+function textsOf(locale: Locale, namespace: string): Texts {
+  return locale[namespace] ?? {}
+}
+
+function listMarkers(text: string | undefined, pattern: RegExp) {
+  return (text?.match(pattern) ?? []).sort().join()
+}
+
+function findMismatches(translation: Locale, pattern: RegExp) {
+  return Object.entries(en).flatMap(([namespace, texts]) =>
+    Object.entries(texts).filter(
+      ([key, text]) =>
+        listMarkers(textsOf(translation, namespace)[key], pattern) !==
+        listMarkers(text, pattern),
+    ),
+  )
+}
 
 describe.each(TRANSLATIONS)('%s translation', (_locale, translation) => {
   it.each(Object.keys(en))('has the keys of %s in English', (namespace) => {
-    const reference = en[namespace as keyof typeof en]
-    const actual = translation[namespace as keyof typeof en]
-    expect(Object.keys(actual).sort()).toEqual(Object.keys(reference).sort())
+    expect(Object.keys(textsOf(translation, namespace)).sort()).toEqual(
+      Object.keys(textsOf(en, namespace)).sort(),
+    )
   })
 
   it('has no empty text', () => {
@@ -24,17 +45,29 @@ describe.each(TRANSLATIONS)('%s translation', (_locale, translation) => {
   })
 
   it('keeps the placeholders of the English text', () => {
-    const mismatches = Object.entries(en).flatMap(([namespace, texts]) =>
-      Object.entries(texts).filter(([key, text]) => {
-        const translated = (
-          translation[namespace as keyof typeof en] as Record<string, string>
-        )[key]
-        return (
-          (translated?.match(PLACEHOLDER_PATTERN) ?? []).sort().join() !==
-          (text.match(PLACEHOLDER_PATTERN) ?? []).sort().join()
-        )
-      }),
-    )
-    expect(mismatches).toEqual([])
+    expect(findMismatches(translation, PLACEHOLDER_PATTERN)).toEqual([])
   })
+})
+
+const ALL_TRANSLATIONS: readonly (readonly [string, Locale])[] = [
+  ['en', en],
+  ...TRANSLATIONS,
+]
+
+const QUOTED_NAMES: readonly (readonly [string, string])[] = [
+  ['delete-title', 'name'],
+  ['allergy-remove-title', 'allergen'],
+  ['exclusion-remove-title', 'food'],
+  ['preference-remove-title', 'food'],
+]
+
+describe.each(ALL_TRANSLATIONS)('%s confirmation titles', (_locale, locale) => {
+  it.each(QUOTED_NAMES)(
+    'puts the name in the title %s in quotes',
+    (key, placeholder) => {
+      const title = textsOf(locale, 'person')[key] ?? ''
+
+      expect(title).toMatch(new RegExp(`[“«]\\s*{{${placeholder}}}\\s*[”»]`))
+    },
+  )
 })

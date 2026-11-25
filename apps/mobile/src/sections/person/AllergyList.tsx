@@ -3,7 +3,7 @@ import { View } from 'react-native'
 
 import { useDeleteAllergy } from '@/api/queries/useDeleteAllergy'
 import type { Allergy } from '@/api/types'
-import { Button } from '@/components/atoms/Button'
+import { IconButton } from '@/components/atoms/IconButton'
 import { Text } from '@/components/atoms/Text'
 import { ConfirmDialog } from '@/components/molecules/ConfirmDialog'
 import { FormMessage } from '@/components/molecules/FormMessage'
@@ -43,14 +43,16 @@ export function AllergyList({
       <View style={styles.list}>
         {allergies.map((allergy) => (
           <View key={allergy.id} style={styles.row}>
-            <Text variant="body">{getLabel(allergy)}</Text>
-            <Button
-              title={t('allergy-remove')}
+            <Text variant="body" style={styles.name}>
+              {getLabel(allergy)}
+            </Text>
+            <IconButton
+              icon="remove"
+              variant="danger"
               accessibilityLabel={t('allergy-remove-label', {
                 allergen: getLabel(allergy),
               })}
-              variant="secondary"
-              isLoading={isPending}
+              isDisabled={isPending}
               onPress={() => askToRemove(allergy)}
             />
           </View>

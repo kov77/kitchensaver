@@ -9,9 +9,13 @@ import { PreferenceList } from './PreferenceList'
 
 type PreferencesCardProps = {
   personId: string
+  personName: string
 }
 
-export function PreferencesCard({ personId }: PreferencesCardProps) {
+export function PreferencesCard({
+  personId,
+  personName,
+}: PreferencesCardProps) {
   const { t } = useTranslation('person')
   const preferencesQuery = usePreferences(personId)
 
@@ -24,7 +28,11 @@ export function PreferencesCard({ personId }: PreferencesCardProps) {
       >
         {(preferences) => (
           <>
-            <PreferenceList personId={personId} preferences={preferences} />
+            <PreferenceList
+              personId={personId}
+              personName={personName}
+              preferences={preferences}
+            />
             <AddPreferencePanel personId={personId} />
           </>
         )}

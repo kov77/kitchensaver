@@ -5,4 +5,5 @@ export const sizes = {
   checkbox: 24,
   avatar: 40,
   checkboxBorderWidth: 2,
+  inputBorderWidth: 1,
 } as const

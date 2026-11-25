@@ -3,7 +3,7 @@ import { View } from 'react-native'
 
 import { useDeleteExclusion } from '@/api/queries/useDeleteExclusion'
 import type { Exclusion } from '@/api/types'
-import { Button } from '@/components/atoms/Button'
+import { TagChip } from '@/components/atoms/TagChip'
 import { Text } from '@/components/atoms/Text'
 import { ConfirmDialog } from '@/components/molecules/ConfirmDialog'
 import { FormMessage } from '@/components/molecules/FormMessage'
@@ -44,20 +44,17 @@ export function ExclusionList({
 
   return (
     <>
-      <View style={styles.list}>
+      <View style={styles.tags}>
         {exclusions.map((exclusion) => (
-          <View key={exclusion.id} style={styles.row}>
-            <Text variant="body">{exclusion.ingredientName}</Text>
-            <Button
-              title={t('exclusion-remove')}
-              accessibilityLabel={t('exclusion-remove-label', {
-                food: exclusion.ingredientName,
-              })}
-              variant="secondary"
-              isLoading={isPending}
-              onPress={() => askToRemove(exclusion)}
-            />
-          </View>
+          <TagChip
+            key={exclusion.id}
+            label={exclusion.ingredientName}
+            removeLabel={t('exclusion-remove-label', {
+              food: exclusion.ingredientName,
+            })}
+            isDisabled={isPending}
+            onRemove={() => askToRemove(exclusion)}
+          />
         ))}
       </View>
       {error ? <FormMessage message={getErrorMessage(error)} /> : null}

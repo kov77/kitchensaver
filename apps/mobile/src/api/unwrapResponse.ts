@@ -6,12 +6,17 @@ type ApiResult<Data> = { data?: Data; error?: unknown; response: Response }
 
 const errorBodySchema = zod.object({ code: zod.string() })
 
-function toRequestError({ error, response }: ApiResult<unknown>) {
+function getErrorCode(error: unknown) {
   const body = errorBodySchema.safeParse(error)
-  return new ApiRequestError(
-    response.status,
-    body.success ? body.data.code : undefined,
-  )
+  return body.success ? body.data.code : undefined
+}
+
+function toRequestError({ error, response }: ApiResult<unknown>) {
+  return new ApiRequestError(response.status, getErrorCode(error))
+}
+
+export function hasErrorCode({ error }: ApiResult<unknown>, code: string) {
+  return getErrorCode(error) === code
 }
 
 export function unwrapResponse<Data>(result: ApiResult<Data>): Data {

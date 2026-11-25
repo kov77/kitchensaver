@@ -37,6 +37,13 @@ export const NAME_MAX_LENGTH = 80
 
 export const RATINGS: readonly Rating[] = [1, 2, 3, 4, 5]
 
+export const RATING_LIMITS = {
+  min: Math.min(...RATINGS),
+  max: Math.max(...RATINGS),
+} as const
+
+export const DEFAULT_RATING: Rating = 3
+
 export const GOAL_LIMITS = {
   dailyKcal: { min: 500, max: 10_000 },
   heightCm: { min: 90, max: 250 },

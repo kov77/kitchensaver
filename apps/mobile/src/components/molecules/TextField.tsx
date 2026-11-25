@@ -9,7 +9,7 @@ import { spacing } from '@/theme/spacing'
 import { styles } from './TextField.styles'
 
 type TextFieldProps = TextInputProps & {
-  label: string
+  label?: string
   errorMessage?: string
   isPassword?: boolean
 }
@@ -31,11 +31,14 @@ export function TextField({
 
   return (
     <View style={styles.container}>
-      <Text variant="label" color="textMuted">
-        {label}
-      </Text>
+      {label ? (
+        <Text variant="label" color="textMuted">
+          {label}
+        </Text>
+      ) : null}
       <Input
         accessibilityLabel={label}
+        isInvalid={Boolean(errorMessage)}
         secureTextEntry={isPassword && isHidden}
         accessory={
           isPassword ? (
@@ -55,7 +58,7 @@ export function TextField({
         {...inputProps}
       />
       {errorMessage ? (
-        <Text variant="link" color="warning" accessibilityLiveRegion="polite">
+        <Text variant="link" color="danger" accessibilityLiveRegion="polite">
           {errorMessage}
         </Text>
       ) : null}

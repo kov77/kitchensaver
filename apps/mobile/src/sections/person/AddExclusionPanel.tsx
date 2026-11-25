@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 
 import { useAddExclusion } from '@/api/queries/useAddExclusion'
-import { FormPanel } from '@/components/molecules/FormPanel'
+import { Button } from '@/components/atoms/Button'
+import { BottomSheet } from '@/components/molecules/BottomSheet'
 import { ExclusionForm } from '@/components/organisms/ExclusionForm'
 import { getErrorMessage } from '@/utils/errors'
 import { useOpen } from '@/utils/useOpen'
@@ -26,21 +27,28 @@ export function AddExclusionPanel({ personId }: AddExclusionPanelProps) {
   }
 
   return (
-    <FormPanel
-      isOpen={isAdding}
-      openLabel={t('exclusion-add')}
-      cancelLabel={t('cancel')}
-      onOpen={startAdding}
-      onCancel={stopAdding}
-    >
-      <ExclusionForm
-        submitLabel={t('save')}
-        isSubmitting={isPending}
-        errorMessage={error ? getErrorMessage(error) : null}
-        onSubmit={({ ingredientName }) =>
-          addExclusion(ingredientName, { onSuccess: stopAdding })
-        }
+    <>
+      <Button
+        title={t('exclusion-add')}
+        variant="secondary"
+        onPress={startAdding}
       />
-    </FormPanel>
+      {isAdding ? (
+        <BottomSheet
+          title={t('exclusion-add')}
+          closeLabel={t('close')}
+          onClose={stopAdding}
+        >
+          <ExclusionForm
+            submitLabel={t('add')}
+            isSubmitting={isPending}
+            errorMessage={error ? getErrorMessage(error) : null}
+            onSubmit={({ ingredientName }) =>
+              addExclusion(ingredientName, { onSuccess: stopAdding })
+            }
+          />
+        </BottomSheet>
+      ) : null}
+    </>
   )
 }

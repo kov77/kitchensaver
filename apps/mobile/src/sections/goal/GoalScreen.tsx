@@ -2,19 +2,35 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
 import { requestGoalEstimate } from '@/api/goalRequests'
+import { useBodyParameters } from '@/api/queries/useBodyParameters'
 import { useSaveGoal } from '@/api/queries/useSaveGoal'
 import { Button } from '@/components/atoms/Button'
+import { Spinner } from '@/components/atoms/Spinner'
+import { Text } from '@/components/atoms/Text'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
 import { GoalEditor } from '@/components/organisms/GoalEditor'
 import { AppScreen } from '@/components/templates/AppScreen'
 import type { GoalDraft } from '@/core/types'
 import { getErrorMessage } from '@/utils/errors'
+import { useOpen } from '@/utils/useOpen'
 
 export function GoalScreen() {
   const { t } = useTranslation('goal')
   const { personId } = useLocalSearchParams<{ personId: string }>()
   const router = useRouter()
   const { mutate: saveGoal, error, isPending } = useSaveGoal(personId)
+  const {
+    data: savedParameters,
+    isPending: isParametersPending,
+    fetchStatus,
+  } = useBodyParameters(personId)
+  const [isEditorShown, { open: markEditorShown }] = useOpen()
+  const isLoadingParameters = isParametersPending && fetchStatus === 'fetching'
+  const isEditorVisible = isEditorShown || !isLoadingParameters
+  const arePrefillUnavailable =
+    savedParameters === undefined && !isLoadingParameters
+
+  if (isEditorVisible && !isEditorShown) markEditorShown()
 
   const save = (draft: GoalDraft) =>
     saveGoal(draft, { onSuccess: () => router.back() })
@@ -22,13 +38,23 @@ export function GoalScreen() {
   return (
     <AppScreen>
       <ScreenHeader title={t('screen-title')} subtitle={t('screen-subtitle')} />
-      <GoalEditor
-        submitLabel={t('screen-save')}
-        isSaving={isPending}
-        saveErrorMessage={error ? getErrorMessage(error) : null}
-        onEstimate={(input) => requestGoalEstimate(personId, input)}
-        onSave={save}
-      />
+      {arePrefillUnavailable ? (
+        <Text variant="body" color="textMuted">
+          {t('screen-parameters-unavailable')}
+        </Text>
+      ) : null}
+      {isEditorVisible ? (
+        <GoalEditor
+          savedParameters={savedParameters ?? null}
+          submitLabel={t('screen-save')}
+          isSaving={isPending}
+          saveErrorMessage={error ? getErrorMessage(error) : null}
+          onEstimate={(input) => requestGoalEstimate(personId, input)}
+          onSave={save}
+        />
+      ) : (
+        <Spinner />
+      )}
       <Button
         title={t('screen-cancel')}
         variant="secondary"

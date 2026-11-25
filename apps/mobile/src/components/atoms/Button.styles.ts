@@ -6,7 +6,7 @@ import { sizes } from '@/theme/sizes'
 import { spacing } from '@/theme/spacing'
 import { typography } from '@/theme/typography'
 
-const INACTIVE_OPACITY = 0.7
+import { INACTIVE_OPACITY } from './constants'
 
 export const styles = StyleSheet.create({
   button: {
@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surfaceMuted,
   },
   danger: {
-    backgroundColor: colors.warning,
+    backgroundColor: colors.danger,
   },
   inactive: {
     opacity: INACTIVE_OPACITY,

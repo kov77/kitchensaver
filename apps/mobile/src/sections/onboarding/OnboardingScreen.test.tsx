@@ -111,8 +111,9 @@ describe('OnboardingScreen profile step', () => {
       .setup()
       .press(screen.getByRole('button', { name: 'Continue' }))
 
-    expect(await screen.findByText('Enter a name.')).toBeTruthy()
-    expect(screen.getByText('Select the date of birth.')).toBeTruthy()
+    expect(await screen.findAllByText('This field is required.')).toHaveLength(
+      2,
+    )
     expect(screen.queryByText('Do you have any food allergies?')).toBeNull()
   })
 
@@ -229,9 +230,7 @@ describe('OnboardingScreen allergy step', () => {
   it('does not save until the allergy question is answered', async () => {
     await finish()
 
-    expect(
-      await screen.findByText('Choose an answer to continue.'),
-    ).toBeTruthy()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
     expect(mockPost).not.toHaveBeenCalled()
   })
 
@@ -240,7 +239,7 @@ describe('OnboardingScreen allergy step', () => {
 
     await finish()
 
-    expect(await screen.findByText('Select at least one allergy.')).toBeTruthy()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
     expect(mockPost).not.toHaveBeenCalled()
   })
 
@@ -251,7 +250,7 @@ describe('OnboardingScreen allergy step', () => {
 
     await finish()
 
-    expect(await screen.findByText('Describe the allergy.')).toBeTruthy()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
     expect(mockPost).not.toHaveBeenCalled()
   })
 

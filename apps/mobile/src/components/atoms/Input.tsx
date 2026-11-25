@@ -7,11 +7,16 @@ import { styles } from './Input.styles'
 
 type InputProps = TextInputProps & {
   accessory?: ReactNode
+  isInvalid?: boolean
 }
 
-export function Input({ accessory, ...inputProps }: InputProps) {
+export function Input({
+  accessory,
+  isInvalid = false,
+  ...inputProps
+}: InputProps) {
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, isInvalid && styles.invalid]}>
       <TextInput
         placeholderTextColor={colors.textMuted}
         style={styles.input}

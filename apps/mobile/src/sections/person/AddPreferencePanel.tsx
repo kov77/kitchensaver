@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 
 import { useAddPreference } from '@/api/queries/useAddPreference'
-import { FormPanel } from '@/components/molecules/FormPanel'
+import { Button } from '@/components/atoms/Button'
+import { BottomSheet } from '@/components/molecules/BottomSheet'
 import { PreferenceForm } from '@/components/organisms/PreferenceForm'
 import { getErrorMessage } from '@/utils/errors'
 import { useOpen } from '@/utils/useOpen'
@@ -26,21 +27,28 @@ export function AddPreferencePanel({ personId }: AddPreferencePanelProps) {
   }
 
   return (
-    <FormPanel
-      isOpen={isAdding}
-      openLabel={t('preference-add')}
-      cancelLabel={t('cancel')}
-      onOpen={startAdding}
-      onCancel={stopAdding}
-    >
-      <PreferenceForm
-        submitLabel={t('save')}
-        isSubmitting={isPending}
-        errorMessage={error ? getErrorMessage(error) : null}
-        onSubmit={(preference) =>
-          addPreference(preference, { onSuccess: stopAdding })
-        }
+    <>
+      <Button
+        title={t('preference-add')}
+        variant="secondary"
+        onPress={startAdding}
       />
-    </FormPanel>
+      {isAdding ? (
+        <BottomSheet
+          title={t('preference-add')}
+          closeLabel={t('close')}
+          onClose={stopAdding}
+        >
+          <PreferenceForm
+            submitLabel={t('add')}
+            isSubmitting={isPending}
+            errorMessage={error ? getErrorMessage(error) : null}
+            onSubmit={(preference) =>
+              addPreference(preference, { onSuccess: stopAdding })
+            }
+          />
+        </BottomSheet>
+      ) : null}
+    </>
   )
 }

@@ -30,3 +30,5 @@ export type Allergy = Schemas['AllergyDto']
 export type Exclusion = Schemas['ExclusionDto']
 
 export type Preference = Schemas['PreferenceDto']
+
+export type StoredBodyParameters = Schemas['BodyParametersDto']

@@ -1,0 +1,8 @@
+{
+  "height-label": "Taille (cm)",
+  "weight-label": "Poids (kg)",
+  "activity-label": "Niveau d’activité",
+  "sex-label": "Sexe utilisé dans la formule",
+  "errors-height": "Saisissez une taille entre 90 et 250 cm.",
+  "errors-weight": "Saisissez un poids entre 20 et 400 kg."
+}

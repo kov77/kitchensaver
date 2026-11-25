@@ -40,6 +40,6 @@ describe('profile schema date of birth', () => {
   })
 
   it('asks for a date when none is chosen', () => {
-    expect(dateErrors(null)).toEqual(['Select the date of birth.'])
+    expect(dateErrors(null)).toEqual(['This field is required.'])
   })
 })

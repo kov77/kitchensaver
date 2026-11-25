@@ -2,12 +2,14 @@ import { screen, userEvent, waitFor } from '@testing-library/react-native'
 
 import { apiClient } from '@/api/apiClient'
 import {
+  getBodyParametersKey,
   getExclusionsKey,
   getPeopleListKey,
   getPersonKey,
   getPreferencesKey,
 } from '@/api/queryKeys'
 import type { Allergy, PersonDetail } from '@/api/types'
+import { apiError } from '@/test-utils/apiError'
 import { apiResult } from '@/test-utils/apiResult'
 import {
   createTestQueryClient,
@@ -69,10 +71,14 @@ const KIWI_ALLERGY: Allergy = {
 
 const requestedPaths: string[] = []
 
-const LIST_PATHS: Record<string, 'allergies' | 'exclusions' | 'preferences'> = {
+const LIST_PATHS: Record<
+  string,
+  'allergies' | 'exclusions' | 'preferences' | 'bodyParameters'
+> = {
   '/api/v1/people/{id}/allergies': 'allergies',
   '/api/v1/people/{id}/exclusions': 'exclusions',
   '/api/v1/people/{id}/preferences': 'preferences',
+  '/api/v1/people/{id}/body-parameters': 'bodyParameters',
 }
 
 function respondWith({
@@ -80,13 +86,15 @@ function respondWith({
   allergies = apiResult(200, []),
   exclusions = apiResult(200, []),
   preferences = apiResult(200, []),
+  bodyParameters = apiError(404, 'BODY_PARAMETERS_NOT_FOUND'),
 }: {
   person?: ApiResult
   allergies?: ApiResult
   exclusions?: ApiResult
   preferences?: ApiResult
+  bodyParameters?: ApiResult
 } = {}) {
-  const lists = { allergies, exclusions, preferences }
+  const lists = { allergies, exclusions, preferences, bodyParameters }
   jest.mocked(apiClient.GET).mockImplementation(async (path: string) => {
     requestedPaths.push(path)
     const list = LIST_PATHS[path]
@@ -110,8 +118,7 @@ describe('PersonScreen', () => {
     await renderPerson()
 
     expect(await screen.findByRole('header', { name: 'Max' })).toBeTruthy()
-    expect(screen.getByText(`34 years old`)).toBeTruthy()
-    expect(screen.getByText('4 March 1992')).toBeTruthy()
+    expect(screen.getByText('34 years old · born 4 March 1992')).toBeTruthy()
     expect(screen.getByText('Lose weight · 2,100 kcal/day')).toBeTruthy()
   })
 
@@ -285,7 +292,9 @@ describe('PersonScreen allergies', () => {
 describe('PersonScreen profile editing', () => {
   async function startEditing() {
     const user = userEvent.setup()
-    await user.press(await screen.findByRole('button', { name: 'Edit' }))
+    await user.press(
+      await screen.findByRole('button', { name: 'Edit profile' }),
+    )
     return user
   }
 
@@ -315,7 +324,7 @@ describe('PersonScreen profile editing', () => {
     await user.clear(screen.getByLabelText('Name'))
     await user.press(screen.getByRole('button', { name: 'Save' }))
 
-    expect(await screen.findByText('Enter a name.')).toBeTruthy()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
     expect(apiClient.PATCH).not.toHaveBeenCalled()
   })
 
@@ -342,7 +351,7 @@ describe('PersonScreen profile editing', () => {
 
     expect(apiClient.PATCH).not.toHaveBeenCalled()
     expect(screen.queryByLabelText('Name')).toBeNull()
-    expect(screen.getAllByText('Max')).toHaveLength(2)
+    expect(screen.getByRole('header', { name: 'Max' })).toBeTruthy()
     expect(screen.queryByText('Someone else')).toBeNull()
   })
 })
@@ -360,7 +369,7 @@ describe('PersonScreen deleting the person', () => {
     await renderPerson()
     await askToDelete()
 
-    expect(screen.getByText('Delete Max?')).toBeTruthy()
+    expect(screen.getByText('Delete “Max”?')).toBeTruthy()
     expect(
       screen.getByText(/permanently deletes the profile.*cannot be undone/),
     ).toBeTruthy()
@@ -391,6 +400,9 @@ describe('PersonScreen deleting the person', () => {
       params: { path: { id: 'person-1' } },
     })
     expect(queryClient.getQueryData(getPersonKey('person-1'))).toBeUndefined()
+    expect(
+      queryClient.getQueryData(getBodyParametersKey('person-1')),
+    ).toBeUndefined()
     expect(
       queryClient.getQueryData(getExclusionsKey('person-1')),
     ).toBeUndefined()

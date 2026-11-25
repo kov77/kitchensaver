@@ -12,8 +12,13 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: sizes.inputMinHeight,
     paddingHorizontal: spacing.lg,
+    borderWidth: sizes.inputBorderWidth,
+    borderColor: colors.border,
     borderRadius: radius.control,
     backgroundColor: colors.surface,
+  },
+  invalid: {
+    borderColor: colors.danger,
   },
   input: {
     ...typography.input,

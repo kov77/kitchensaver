@@ -21,9 +21,7 @@ function selectionErrors(values: object) {
 
 describe('allergy answer schema', () => {
   it('asks for an answer', () => {
-    expect(answerErrors({ answer: null })).toEqual([
-      'Choose an answer to continue.',
-    ])
+    expect(answerErrors({ answer: null })).toEqual(['This field is required.'])
   })
 
   it.each(['no', 'unknown'])(
@@ -34,9 +32,7 @@ describe('allergy answer schema', () => {
   )
 
   it('asks for at least one allergen when the answer is yes', () => {
-    expect(answerErrors({ answer: 'yes' })).toEqual([
-      'Select at least one allergy.',
-    ])
+    expect(answerErrors({ answer: 'yes' })).toEqual(['This field is required.'])
   })
 
   it('does not ask for a label of the other allergen unless it is chosen', () => {
@@ -45,13 +41,13 @@ describe('allergy answer schema', () => {
 
   it('asks for the label when the other allergen is chosen', () => {
     expect(answerErrors({ allergens: ['OTHER'] })).toEqual([
-      'Describe the allergy.',
+      'This field is required.',
     ])
   })
 
   it('treats a label of spaces as empty', () => {
     expect(answerErrors({ allergens: ['OTHER'], otherLabel: '   ' })).toEqual([
-      'Describe the allergy.',
+      'This field is required.',
     ])
   })
 
@@ -89,12 +85,12 @@ describe('allergy answer schema', () => {
 
 describe('allergen selection schema', () => {
   it('asks for at least one allergen', () => {
-    expect(selectionErrors({})).toEqual(['Select at least one allergy.'])
+    expect(selectionErrors({})).toEqual(['This field is required.'])
   })
 
   it('asks for the label when the other allergen is chosen', () => {
     expect(selectionErrors({ allergens: ['OTHER'] })).toEqual([
-      'Describe the allergy.',
+      'This field is required.',
     ])
   })
 

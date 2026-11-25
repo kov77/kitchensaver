@@ -138,9 +138,7 @@ describe('AllergyCard answering the question', () => {
     await press('button', 'Change answer')
     await press('button', 'Save')
 
-    expect(
-      await screen.findByText('Choose an answer to continue.'),
-    ).toBeTruthy()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
     expect(apiClient.PUT).not.toHaveBeenCalled()
   })
 
@@ -397,7 +395,7 @@ describe('AllergyCard with listed allergies', () => {
 
     await press('button', 'Remove Kiwi')
 
-    expect(await screen.findByText('Remove Kiwi?')).toBeTruthy()
+    expect(await screen.findByText('Remove “Kiwi”?')).toBeTruthy()
     expect(
       screen.getByText(
         'This allergy will no longer be taken into account for Max, and meal plans may include this food.',
@@ -446,7 +444,7 @@ describe('AllergyCard with listed allergies', () => {
       .setup()
       .press(screen.getByRole('button', { name: 'Remove Peanuts' }))
 
-    expect(screen.queryByText('Remove Peanuts?')).toBeNull()
+    expect(screen.queryByText('Remove “Peanuts”?')).toBeNull()
     expect(apiClient.DELETE).toHaveBeenCalledTimes(1)
   })
 
@@ -489,7 +487,8 @@ describe('AllergyCard with listed allergies', () => {
 
     expect(await screen.findByText('Peanuts')).toBeTruthy()
     expect(screen.getByText('Kiwi')).toBeTruthy()
-    expect(screen.getAllByText('Remove')).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Remove Peanuts' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Remove Kiwi' })).toBeTruthy()
   })
 })
 

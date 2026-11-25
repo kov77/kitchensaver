@@ -21,6 +21,7 @@ export function GoalStep({ dateOfBirth, onNext, onBack }: GoalStepProps) {
     <>
       <ScreenHeader title={t('goal-title')} subtitle={t('goal-subtitle')} />
       <GoalEditor
+        savedParameters={null}
         submitLabel={t('next')}
         isSaving={false}
         saveErrorMessage={null}

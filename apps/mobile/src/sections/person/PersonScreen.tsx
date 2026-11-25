@@ -5,19 +5,11 @@ import { useDeletePerson } from '@/api/queries/useDeletePerson'
 import { usePerson } from '@/api/queries/usePerson'
 import { Button } from '@/components/atoms/Button'
 import { Spinner } from '@/components/atoms/Spinner'
-import { Text } from '@/components/atoms/Text'
 import { FormMessage } from '@/components/molecules/FormMessage'
-import { ScreenHeader } from '@/components/molecules/ScreenHeader'
 import { AppScreen } from '@/components/templates/AppScreen'
-import { usePersonSummary } from '@/core/usePersonSummary'
 import { getErrorMessage } from '@/utils/errors'
 
-import { AllergyCard } from './AllergyCard'
-import { DeletePerson } from './DeletePerson'
-import { ExclusionsCard } from './ExclusionsCard'
-import { GoalCard } from './GoalCard'
-import { PreferencesCard } from './PreferencesCard'
-import { ProfileCard } from './ProfileCard'
+import { PersonDetails } from './PersonDetails'
 
 export function PersonScreen() {
   const { t } = useTranslation('person')
@@ -36,8 +28,6 @@ export function PersonScreen() {
     isPending,
     refetch,
   } = usePerson({ personId, enabled: !isDeleted })
-  const { describeReadiness } = usePersonSummary()
-  const readinessHint = person ? describeReadiness(person.planReadiness) : null
 
   const leave = () => (router.canGoBack() ? router.back() : router.replace('/'))
 
@@ -58,40 +48,12 @@ export function PersonScreen() {
         </>
       ) : null}
       {person ? (
-        <>
-          <ScreenHeader
-            title={person.name}
-            subtitle={`${person.age} ${t('years-old')}`}
-          />
-          {readinessHint ? (
-            <Text variant="link" color="warning">
-              {readinessHint}
-            </Text>
-          ) : null}
-          <ProfileCard person={person} />
-          <GoalCard
-            goal={person.goal}
-            onChangeGoal={() =>
-              router.push({
-                pathname: '/goal/[personId]',
-                params: { personId: person.id },
-              })
-            }
-          />
-          <AllergyCard
-            personId={person.id}
-            personName={person.name}
-            allergyStatus={person.allergyStatus}
-          />
-          <ExclusionsCard personId={person.id} personName={person.name} />
-          <PreferencesCard personId={person.id} />
-          <DeletePerson
-            name={person.name}
-            isDeleting={isDeleting}
-            error={deleteError}
-            onDelete={() => deletePerson(undefined, { onSuccess: leave })}
-          />
-        </>
+        <PersonDetails
+          person={person}
+          isDeleting={isDeleting}
+          deleteError={deleteError}
+          onDelete={() => deletePerson(undefined, { onSuccess: leave })}
+        />
       ) : null}
       <Button title={t('back')} variant="secondary" onPress={leave} />
     </AppScreen>
