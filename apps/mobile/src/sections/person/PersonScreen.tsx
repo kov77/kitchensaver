@@ -86,7 +86,7 @@ export function PersonScreen() {
             allergyStatus={person.allergyStatus}
           />
           <ExclusionsCard personId={person.id} personName={person.name} />
-          <PreferencesCard personId={person.id} />
+          <PreferencesCard personId={person.id} personName={person.name} />
           <DeletePerson
             name={person.name}
             isDeleting={isDeleting}

@@ -1,4 +1,5 @@
 import { screen, userEvent, waitFor } from '@testing-library/react-native'
+import { StyleSheet } from 'react-native'
 
 import { apiClient } from '@/api/apiClient'
 import type { Exclusion } from '@/api/types'
@@ -8,6 +9,7 @@ import {
   createTestQueryClient,
   renderWithQuery,
 } from '@/test-utils/renderWithQuery'
+import { colors } from '@/theme/colors'
 
 import { ExclusionsCard } from './ExclusionsCard'
 
@@ -103,13 +105,34 @@ describe('ExclusionsCard adding', () => {
     return userEvent.setup()
   }
 
+  it('opens a sheet with a title and a focused name field', async () => {
+    await renderCard()
+    await openForm()
+
+    expect(screen.getByRole('header', { name: 'Add food' })).toBeTruthy()
+    expect(screen.getByLabelText('Food').props.autoFocus).toBe(true)
+    expect(screen.queryByText('Food')).toBeNull()
+    expect(screen.getByPlaceholderText('For example, mushrooms')).toBeTruthy()
+  })
+
+  it('closes the sheet without adding anything', async () => {
+    await renderCard()
+    const user = await openForm()
+    await user.type(screen.getByLabelText('Food'), 'Mushrooms')
+
+    await press('button', 'Close')
+
+    expect(screen.queryByLabelText('Food')).toBeNull()
+    expect(apiClient.POST).not.toHaveBeenCalled()
+  })
+
   it('sends the trimmed name and closes the form', async () => {
     jest.mocked(apiClient.POST).mockResolvedValue(apiResult(201, MUSHROOMS))
     await renderCard()
     const user = await openForm()
 
     await user.type(screen.getByLabelText('Food'), '  Mushrooms ')
-    await press('button', 'Save')
+    await press('button', 'Add')
 
     await waitFor(() =>
       expect(apiClient.POST).toHaveBeenCalledWith(
@@ -127,9 +150,12 @@ describe('ExclusionsCard adding', () => {
     await renderCard()
     await openForm()
 
-    await press('button', 'Save')
+    await press('button', 'Add')
 
     expect(await screen.findByText('This field is required.')).toBeTruthy()
+    expect(
+      StyleSheet.flatten(screen.getByLabelText('Food').parent?.props.style),
+    ).toMatchObject({ borderColor: colors.danger })
     expect(apiClient.POST).not.toHaveBeenCalled()
   })
 
@@ -139,7 +165,7 @@ describe('ExclusionsCard adding', () => {
     const user = await openForm()
 
     await user.type(screen.getByLabelText('Food'), 'Mushrooms')
-    await press('button', 'Save')
+    await press('button', 'Add')
 
     await waitFor(() => expect(apiClient.GET).toHaveBeenCalledTimes(2))
   })
@@ -152,7 +178,7 @@ describe('ExclusionsCard adding', () => {
     const user = await openForm()
 
     await user.type(screen.getByLabelText('Food'), 'mushrooms')
-    await press('button', 'Save')
+    await press('button', 'Add')
 
     expect(
       await screen.findByText('This food is already on the list.'),
@@ -168,7 +194,7 @@ describe('ExclusionsCard adding', () => {
     const user = await openForm()
 
     await user.type(screen.getByLabelText('Food'), 'Mushrooms')
-    await press('button', 'Save')
+    await press('button', 'Add')
 
     expect(
       await screen.findByText(
@@ -184,7 +210,7 @@ describe('ExclusionsCard adding', () => {
     jest.mocked(apiClient.GET).mockResolvedValue(apiResult(500))
 
     await user.type(screen.getByLabelText('Food'), 'Mushrooms')
-    await press('button', 'Save')
+    await press('button', 'Add')
 
     expect(
       await screen.findByText('We could not load the excluded foods.'),
@@ -198,8 +224,8 @@ describe('ExclusionsCard adding', () => {
     const user = await openForm()
     await user.type(screen.getByLabelText('Food'), 'Mushrooms')
 
-    await press('button', 'Save')
-    await press('button', 'Save')
+    await press('button', 'Add')
+    await press('button', 'Add')
 
     expect(apiClient.POST).toHaveBeenCalledTimes(1)
   })
@@ -209,10 +235,10 @@ describe('ExclusionsCard adding', () => {
     await renderCard()
     const user = await openForm()
     await user.type(screen.getByLabelText('Food'), 'Mushrooms')
-    await press('button', 'Save')
+    await press('button', 'Add')
     await screen.findByText(SERVER_ERROR_TEXT)
 
-    await press('button', 'Cancel')
+    await press('button', 'Close')
     await press('button', 'Add food')
 
     expect(screen.queryByText(SERVER_ERROR_TEXT)).toBeNull()

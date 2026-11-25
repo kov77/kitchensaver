@@ -138,9 +138,7 @@ describe('AllergyCard answering the question', () => {
     await press('button', 'Change answer')
     await press('button', 'Save')
 
-    expect(
-      await screen.findByText('This field is required.'),
-    ).toBeTruthy()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
     expect(apiClient.PUT).not.toHaveBeenCalled()
   })
 
@@ -489,7 +487,8 @@ describe('AllergyCard with listed allergies', () => {
 
     expect(await screen.findByText('Peanuts')).toBeTruthy()
     expect(screen.getByText('Kiwi')).toBeTruthy()
-    expect(screen.getAllByText('Remove')).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Remove Peanuts' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Remove Kiwi' })).toBeTruthy()
   })
 })
 

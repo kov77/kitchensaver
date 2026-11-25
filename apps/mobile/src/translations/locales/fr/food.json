@@ -3,5 +3,6 @@
   "name-placeholder": "Par exemple, champignons",
   "rating-label": "Note (de 1 à 5)",
   "errors-name-too-long": "Utilisez au plus {{max}} caractères.",
-  "errors-rating-required": "Choisissez une note."
+  "rating-lower": "Baisser la note",
+  "rating-higher": "Augmenter la note"
 }

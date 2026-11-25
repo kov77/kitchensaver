@@ -34,9 +34,10 @@ export function ExclusionForm({
       <FormTextField
         control={control}
         name="ingredientName"
-        label={t('name-label')}
+        accessibilityLabel={t('name-label')}
         placeholder={t('name-placeholder')}
         autoCapitalize="none"
+        autoFocus
       />
       {errorMessage ? <FormMessage message={errorMessage} /> : null}
       <Button

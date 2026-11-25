@@ -3,5 +3,6 @@
   "name-placeholder": "For example, mushrooms",
   "rating-label": "Rating (1 to 5)",
   "errors-name-too-long": "Use at most {{max}} characters.",
-  "errors-rating-required": "Choose a rating."
+  "rating-lower": "Lower the rating",
+  "rating-higher": "Raise the rating"
 }

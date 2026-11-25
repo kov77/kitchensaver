@@ -38,27 +38,21 @@ describe('exclusion schema', () => {
 })
 
 describe('preference schema', () => {
-  it('asks for a rating', () => {
-    expect(
-      errorsOf(preferenceSchema, { ingredientName: 'Kiwi', rating: null }),
-    ).toEqual(['Choose a rating.'])
-  })
-
-  it.each(['1', '3', '5'])('accepts the rating %s', (rating) => {
+  it.each([1, 2, 3, 4, 5])('accepts the rating %s', (rating) => {
     expect(
       errorsOf(preferenceSchema, { ingredientName: 'Kiwi', rating }),
     ).toEqual([])
   })
 
-  it.each(['0', '6', '3.5', 'five', ''])('rejects the rating %j', (rating) => {
+  it.each([0, 6, 2.5, -1, '3', null])('rejects the rating %j', (rating) => {
     expect(
       errorsOf(preferenceSchema, { ingredientName: 'Kiwi', rating }),
     ).not.toEqual([])
   })
 
-  it('asks for a food and a rating together', () => {
+  it('asks for a food', () => {
     expect(
-      errorsOf(preferenceSchema, { ingredientName: '', rating: null }),
-    ).toEqual(['This field is required.', 'Choose a rating.'])
+      errorsOf(preferenceSchema, { ingredientName: '', rating: 3 }),
+    ).toEqual(['This field is required.'])
   })
 })
