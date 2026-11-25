@@ -1,10 +1,9 @@
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { View } from 'react-native'
 
 import { useDeletePreference } from '@/api/queries/useDeletePreference'
 import { useUpdatePreference } from '@/api/queries/useUpdatePreference'
 import type { Preference } from '@/api/types'
-import { Highlight } from '@/components/atoms/Highlight'
 import { Text } from '@/components/atoms/Text'
 import { ConfirmDialog } from '@/components/molecules/ConfirmDialog'
 import { FormMessage } from '@/components/molecules/FormMessage'
@@ -76,14 +75,9 @@ export function PreferenceList({
       {error ? <FormMessage message={getErrorMessage(error)} /> : null}
       {preferenceToRemove ? (
         <ConfirmDialog
-          title={
-            <Trans
-              t={t}
-              i18nKey="preference-remove-title"
-              values={{ food: preferenceToRemove.ingredientName }}
-              components={{ highlight: <Highlight /> }}
-            />
-          }
+          title={t('preference-remove-title', {
+            food: preferenceToRemove.ingredientName,
+          })}
           message={t('preference-remove-message', { name: personName })}
           confirmLabel={t('preference-remove-confirm')}
           cancelLabel={t('cancel')}

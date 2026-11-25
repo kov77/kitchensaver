@@ -6,7 +6,6 @@ type Texts = Record<string, string>
 type Locale = Record<string, Texts>
 
 const PLACEHOLDER_PATTERN = /{{\w+}}/g
-const TAG_PATTERN = /<\/?\w+>/g
 
 const TRANSLATIONS: readonly (readonly [string, Locale])[] = [
   ['es', es],
@@ -48,8 +47,27 @@ describe.each(TRANSLATIONS)('%s translation', (_locale, translation) => {
   it('keeps the placeholders of the English text', () => {
     expect(findMismatches(translation, PLACEHOLDER_PATTERN)).toEqual([])
   })
+})
 
-  it('keeps the markup tags of the English text', () => {
-    expect(findMismatches(translation, TAG_PATTERN)).toEqual([])
-  })
+const ALL_TRANSLATIONS: readonly (readonly [string, Locale])[] = [
+  ['en', en],
+  ...TRANSLATIONS,
+]
+
+const QUOTED_NAMES: readonly (readonly [string, string])[] = [
+  ['delete-title', 'name'],
+  ['allergy-remove-title', 'allergen'],
+  ['exclusion-remove-title', 'food'],
+  ['preference-remove-title', 'food'],
+]
+
+describe.each(ALL_TRANSLATIONS)('%s confirmation titles', (_locale, locale) => {
+  it.each(QUOTED_NAMES)(
+    'puts the name in the title %s in quotes',
+    (key, placeholder) => {
+      const title = textsOf(locale, 'person')[key] ?? ''
+
+      expect(title).toMatch(new RegExp(`[“«]\\s*{{${placeholder}}}\\s*[”»]`))
+    },
+  )
 })

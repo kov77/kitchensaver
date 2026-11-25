@@ -395,7 +395,7 @@ describe('AllergyCard with listed allergies', () => {
 
     await press('button', 'Remove Kiwi')
 
-    expect(await screen.findByText('Remove Kiwi?')).toBeTruthy()
+    expect(await screen.findByText('Remove “Kiwi”?')).toBeTruthy()
     expect(
       screen.getByText(
         'This allergy will no longer be taken into account for Max, and meal plans may include this food.',
@@ -444,7 +444,7 @@ describe('AllergyCard with listed allergies', () => {
       .setup()
       .press(screen.getByRole('button', { name: 'Remove Peanuts' }))
 
-    expect(screen.queryByText('Remove Peanuts?')).toBeNull()
+    expect(screen.queryByText('Remove “Peanuts”?')).toBeNull()
     expect(apiClient.DELETE).toHaveBeenCalledTimes(1)
   })
 

@@ -1,9 +1,8 @@
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { View } from 'react-native'
 
 import { useDeleteAllergy } from '@/api/queries/useDeleteAllergy'
 import type { Allergy } from '@/api/types'
-import { Highlight } from '@/components/atoms/Highlight'
 import { IconButton } from '@/components/atoms/IconButton'
 import { Text } from '@/components/atoms/Text'
 import { ConfirmDialog } from '@/components/molecules/ConfirmDialog'
@@ -62,14 +61,9 @@ export function AllergyList({
       {error ? <FormMessage message={getErrorMessage(error)} /> : null}
       {allergyToRemove ? (
         <ConfirmDialog
-          title={
-            <Trans
-              t={t}
-              i18nKey="allergy-remove-title"
-              values={{ allergen: getLabel(allergyToRemove) }}
-              components={{ highlight: <Highlight /> }}
-            />
-          }
+          title={t('allergy-remove-title', {
+            allergen: getLabel(allergyToRemove),
+          })}
           message={
             allergies.length === 1
               ? t('allergy-remove-last-message', { name: personName })

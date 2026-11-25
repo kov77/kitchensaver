@@ -252,7 +252,7 @@ describe('ExclusionsCard removing', () => {
 
     await press('button', 'Remove Mushrooms')
 
-    expect(await screen.findByText('Stop excluding Mushrooms?')).toBeTruthy()
+    expect(await screen.findByText('Stop excluding “Mushrooms”?')).toBeTruthy()
     expect(
       screen.getByText('Meal plans for Max may include Mushrooms again.'),
     ).toBeTruthy()

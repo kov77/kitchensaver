@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { Modal, View } from 'react-native'
 
 import { Button } from '@/components/atoms/Button'
@@ -7,8 +6,8 @@ import { Text } from '@/components/atoms/Text'
 import { styles } from './ConfirmDialog.styles'
 
 type ConfirmDialogProps = {
-  title: ReactNode
-  message: ReactNode
+  title: string
+  message: string
   confirmLabel: string
   cancelLabel: string
   confirmVariant?: 'primary' | 'danger'

@@ -1,9 +1,8 @@
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { View } from 'react-native'
 
 import { useDeleteExclusion } from '@/api/queries/useDeleteExclusion'
 import type { Exclusion } from '@/api/types'
-import { Highlight } from '@/components/atoms/Highlight'
 import { TagChip } from '@/components/atoms/TagChip'
 import { Text } from '@/components/atoms/Text'
 import { ConfirmDialog } from '@/components/molecules/ConfirmDialog'
@@ -61,14 +60,9 @@ export function ExclusionList({
       {error ? <FormMessage message={getErrorMessage(error)} /> : null}
       {exclusionToRemove ? (
         <ConfirmDialog
-          title={
-            <Trans
-              t={t}
-              i18nKey="exclusion-remove-title"
-              values={{ food: exclusionToRemove.ingredientName }}
-              components={{ highlight: <Highlight /> }}
-            />
-          }
+          title={t('exclusion-remove-title', {
+            food: exclusionToRemove.ingredientName,
+          })}
           message={t('exclusion-remove-message', {
             name: personName,
             food: exclusionToRemove.ingredientName,

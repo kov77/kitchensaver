@@ -1,7 +1,6 @@
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/atoms/Button'
-import { Highlight } from '@/components/atoms/Highlight'
 import { ConfirmDialog } from '@/components/molecules/ConfirmDialog'
 import { FormMessage } from '@/components/molecules/FormMessage'
 import { getErrorMessage } from '@/utils/errors'
@@ -40,14 +39,7 @@ export function DeletePerson({
       />
       {isConfirming ? (
         <ConfirmDialog
-          title={
-            <Trans
-              t={t}
-              i18nKey="delete-title"
-              values={{ name }}
-              components={{ highlight: <Highlight /> }}
-            />
-          }
+          title={t('delete-title', { name })}
           message={t('delete-message')}
           confirmLabel={t('delete-confirm')}
           cancelLabel={t('cancel')}

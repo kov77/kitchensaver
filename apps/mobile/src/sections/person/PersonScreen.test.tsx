@@ -369,7 +369,7 @@ describe('PersonScreen deleting the person', () => {
     await renderPerson()
     await askToDelete()
 
-    expect(screen.getByText('Delete Max?')).toBeTruthy()
+    expect(screen.getByText('Delete “Max”?')).toBeTruthy()
     expect(
       screen.getByText(/permanently deletes the profile.*cannot be undone/),
     ).toBeTruthy()

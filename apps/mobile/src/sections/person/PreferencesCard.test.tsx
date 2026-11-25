@@ -8,7 +8,6 @@ import {
   createTestQueryClient,
   renderWithQuery,
 } from '@/test-utils/renderWithQuery'
-import { colors } from '@/theme/colors'
 
 import { PreferencesCard } from './PreferencesCard'
 
@@ -289,7 +288,9 @@ describe('PreferencesCard changing and removing', () => {
 
     await press('button', 'Remove the rating of Carrot')
 
-    expect(await screen.findByText('Remove the rating of Carrot?')).toBeTruthy()
+    expect(
+      await screen.findByText('Remove the rating of “Carrot”?'),
+    ).toBeTruthy()
     expect(
       screen.getByText(
         'Meal plans for Alena will no longer take this rating into account.',
@@ -298,15 +299,12 @@ describe('PreferencesCard changing and removing', () => {
     expect(apiClient.DELETE).not.toHaveBeenCalled()
   })
 
-  it('colours the name of the food in the question', async () => {
+  it('puts the name of the food in quotes, not in the colour of errors', async () => {
     await renderCard([KIWI, CARROT])
 
     await press('button', 'Remove the rating of Carrot')
 
-    const isColoured = screen
-      .getAllByText('Carrot')
-      .some(({ props }) => JSON.stringify(props.style).includes(colors.danger))
-    expect(isColoured).toBe(true)
+    expect(screen.getByText('Remove the rating of “Carrot”?')).toBeTruthy()
   })
 
   it('shows a food name with markup characters exactly as typed', async () => {
@@ -316,7 +314,7 @@ describe('PreferencesCard changing and removing', () => {
     await press('button', 'Remove the rating of Tom & <b>Jerry</b>')
 
     expect(
-      await screen.findByText('Remove the rating of Tom & <b>Jerry</b>?'),
+      await screen.findByText('Remove the rating of “Tom & <b>Jerry</b>”?'),
     ).toBeTruthy()
   })
 
@@ -336,7 +334,7 @@ describe('PreferencesCard changing and removing', () => {
       await press('button', `Remove the rating of ${name}`)
 
       expect(
-        await screen.findByText(`Remove the rating of ${name}?`),
+        await screen.findByText(`Remove the rating of “${name}”?`),
       ).toBeTruthy()
     },
   )
