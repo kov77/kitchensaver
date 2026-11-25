@@ -232,7 +232,9 @@ describe('BodyParametersCard saving', () => {
     await fillForm()
     await press('button', 'Save')
 
-    expect(await screen.findAllByText('This field is required.')).toHaveLength(2)
+    expect(await screen.findAllByText('This field is required.')).toHaveLength(
+      2,
+    )
     expect(apiClient.PUT).not.toHaveBeenCalled()
   })
 
@@ -311,6 +313,35 @@ describe('BodyParametersCard deleting', () => {
       ),
     )
     await waitFor(() => expect(apiClient.GET).toHaveBeenCalledTimes(2))
+  })
+
+  it('does not show an error when the measurements are already gone', async () => {
+    jest
+      .mocked(apiClient.DELETE)
+      .mockResolvedValue(apiError(404, 'BODY_PARAMETERS_NOT_FOUND'))
+    await renderSaved()
+
+    await press('button', 'Delete measurements')
+    await press('button', 'Delete')
+
+    await waitFor(() => expect(apiClient.GET).toHaveBeenCalledTimes(2))
+    expect(
+      screen.queryByText('We could not find what you were looking for.'),
+    ).toBeNull()
+  })
+
+  it('still shows an error when another thing is missing', async () => {
+    jest
+      .mocked(apiClient.DELETE)
+      .mockResolvedValue(apiError(404, 'PERSON_NOT_FOUND'))
+    await renderSaved()
+
+    await press('button', 'Delete measurements')
+    await press('button', 'Delete')
+
+    expect(
+      await screen.findByText('We could not find what you were looking for.'),
+    ).toBeTruthy()
   })
 
   it('refreshes even when the measurements are already gone', async () => {

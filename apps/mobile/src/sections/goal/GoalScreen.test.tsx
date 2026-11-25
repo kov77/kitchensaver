@@ -1,7 +1,7 @@
 import { onlineManager, QueryClient } from '@tanstack/react-query'
-import { screen, userEvent } from '@testing-library/react-native'
+import { screen, userEvent, waitFor } from '@testing-library/react-native'
 
-import { getPeopleListKey } from '@/api/queryKeys'
+import { getBodyParametersKey, getPeopleListKey } from '@/api/queryKeys'
 import { apiError } from '@/test-utils/apiError'
 import { apiResult } from '@/test-utils/apiResult'
 import {
@@ -241,6 +241,30 @@ describe('GoalScreen saved measurements', () => {
     expect(
       screen.getByRole('radio', { name: 'I already know my daily calories' }),
     ).toBeTruthy()
+  })
+
+  it('keeps what was typed when the connection comes back and the measurements load', async () => {
+    let answer: (response: unknown) => void = () => undefined
+    mockGet.mockReturnValue(new Promise((resolve) => (answer = resolve)))
+    onlineManager.setOnline(false)
+    await renderGoal()
+    const user = userEvent.setup()
+    await user.press(screen.getByRole('radio', { name: 'Help me estimate' }))
+    await user.type(screen.getByLabelText('Height (cm)'), '171')
+
+    onlineManager.setOnline(true)
+    await waitFor(() => expect(mockGet).toHaveBeenCalled())
+
+    expect(screen.getByLabelText('Height (cm)').props.value).toBe('171')
+    expect(screen.queryByLabelText('Loading')).toBeNull()
+
+    answer(apiResult(200, SAVED_PARAMETERS))
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryData(getBodyParametersKey('person-7')),
+      ).toEqual(SAVED_PARAMETERS),
+    )
+    expect(screen.getByLabelText('Height (cm)').props.value).toBe('171')
   })
 
   it('does not warn about measurements when nothing is saved', async () => {
