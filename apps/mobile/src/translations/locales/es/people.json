@@ -4,5 +4,6 @@
   "retry": "Reintentar",
   "log-out": "Cerrar sesión",
   "empty": "Aún no hay perfiles activos.",
-  "card-hint": "Abre el perfil"
+  "card-hint": "Abre el perfil",
+  "add-person": "Añadir persona"
 }

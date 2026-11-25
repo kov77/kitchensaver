@@ -63,6 +63,12 @@ export function PeopleScreen() {
           ))}
         </View>
       ) : null}
+      {people ? (
+        <Button
+          title={t('add-person')}
+          onPress={() => router.push('/add-person')}
+        />
+      ) : null}
       <Button
         title={t('log-out')}
         variant="secondary"

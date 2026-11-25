@@ -4,5 +4,6 @@
   "retry": "Try again",
   "log-out": "Log out",
   "empty": "There are no active profiles yet.",
-  "card-hint": "Opens the profile"
+  "card-hint": "Opens the profile",
+  "add-person": "Add person"
 }
