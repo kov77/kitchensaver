@@ -30,7 +30,7 @@ describe('SignInScreen', () => {
     await fillAndSubmit('not-an-email', '')
 
     expect(await screen.findByText('Enter a valid email address.')).toBeTruthy()
-    expect(screen.getByText('Enter your password.')).toBeTruthy()
+    expect(screen.getByText('This field is required.')).toBeTruthy()
     expect(mockSignIn).not.toHaveBeenCalled()
   })
 

@@ -2,7 +2,6 @@
   "name-label": "Food",
   "name-placeholder": "For example, mushrooms",
   "rating-label": "Rating (1 to 5)",
-  "errors-name-required": "Enter a food.",
   "errors-name-too-long": "Use at most {{max}} characters.",
   "errors-rating-required": "Choose a rating."
 }

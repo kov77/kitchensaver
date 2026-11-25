@@ -139,7 +139,7 @@ describe('AllergyCard answering the question', () => {
     await press('button', 'Save')
 
     expect(
-      await screen.findByText('Choose an answer to continue.'),
+      await screen.findByText('This field is required.'),
     ).toBeTruthy()
     expect(apiClient.PUT).not.toHaveBeenCalled()
   })

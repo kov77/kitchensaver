@@ -3,8 +3,6 @@
   "name-placeholder": "Votre prénom",
   "date-of-birth-label": "Date de naissance",
   "date-of-birth-placeholder": "Sélectionner la date",
-  "errors-name-required": "Saisissez un nom.",
   "errors-name-too-long": "Utilisez au plus {{max}} caractères.",
-  "errors-date-required": "Sélectionnez la date de naissance.",
   "errors-date-out-of-range": "L’âge doit être compris entre {{min}} et {{max}}."
 }

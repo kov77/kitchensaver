@@ -3,8 +3,6 @@
   "name-placeholder": "Tu nombre de pila",
   "date-of-birth-label": "Fecha de nacimiento",
   "date-of-birth-placeholder": "Seleccionar fecha",
-  "errors-name-required": "Introduce un nombre.",
   "errors-name-too-long": "Usa como máximo {{max}} caracteres.",
-  "errors-date-required": "Selecciona la fecha de nacimiento.",
   "errors-date-out-of-range": "La edad debe estar entre {{min}} y {{max}}."
 }

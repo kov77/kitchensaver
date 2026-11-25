@@ -2,7 +2,6 @@
   "name-label": "Aliment",
   "name-placeholder": "Par exemple, champignons",
   "rating-label": "Note (de 1 à 5)",
-  "errors-name-required": "Saisissez un aliment.",
   "errors-name-too-long": "Utilisez au plus {{max}} caractères.",
   "errors-rating-required": "Choisissez une note."
 }

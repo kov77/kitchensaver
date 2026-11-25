@@ -1,25 +1,24 @@
 import * as zod from 'zod'
 
-import { lazyMessage } from '@/utils/messages'
+import { REQUIRED_MESSAGE, lazyMessage } from '@/utils/messages'
+import { requiredText } from '@/utils/schemas'
 
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from './constants'
 
-const emailSchema = zod
-  .string()
-  .trim()
-  .pipe(zod.email(lazyMessage('auth:field-errors-invalid-email')))
+const emailSchema = requiredText.pipe(
+  zod.email(lazyMessage('auth:field-errors-invalid-email')),
+)
 
 export const signInSchema = zod.object({
   email: emailSchema,
-  password: zod
-    .string()
-    .min(1, lazyMessage('auth:field-errors-password-required')),
+  password: zod.string().min(1, REQUIRED_MESSAGE),
 })
 
 export const signUpSchema = zod.object({
   email: emailSchema,
   password: zod
     .string()
+    .min(1, REQUIRED_MESSAGE)
     .min(
       PASSWORD_MIN_LENGTH,
       lazyMessage('auth:field-errors-password-too-short', {

@@ -11,13 +11,13 @@ function errorsOf(
 describe('exclusion schema', () => {
   it('asks for a food', () => {
     expect(errorsOf(exclusionSchema, { ingredientName: '' })).toEqual([
-      'Enter a food.',
+      'This field is required.',
     ])
   })
 
   it('treats spaces as empty', () => {
     expect(errorsOf(exclusionSchema, { ingredientName: '   ' })).toEqual([
-      'Enter a food.',
+      'This field is required.',
     ])
   })
 
@@ -59,6 +59,6 @@ describe('preference schema', () => {
   it('asks for a food and a rating together', () => {
     expect(
       errorsOf(preferenceSchema, { ingredientName: '', rating: null }),
-    ).toEqual(['Enter a food.', 'Choose a rating.'])
+    ).toEqual(['This field is required.', 'Choose a rating.'])
   })
 })

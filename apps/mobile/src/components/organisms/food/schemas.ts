@@ -2,17 +2,14 @@ import * as zod from 'zod'
 
 import { NAME_MAX_LENGTH } from '@/core/constants'
 import { lazyMessage } from '@/utils/messages'
+import { requiredText } from '@/utils/schemas'
 
 import { RATING_CHOICES } from './constants'
 
-const foodNameSchema = zod
-  .string()
-  .trim()
-  .min(1, lazyMessage('food:errors-name-required'))
-  .max(
-    NAME_MAX_LENGTH,
-    lazyMessage('food:errors-name-too-long', { max: NAME_MAX_LENGTH }),
-  )
+const foodNameSchema = requiredText.max(
+  NAME_MAX_LENGTH,
+  lazyMessage('food:errors-name-too-long', { max: NAME_MAX_LENGTH }),
+)
 
 export const exclusionSchema = zod.object({ ingredientName: foodNameSchema })
 

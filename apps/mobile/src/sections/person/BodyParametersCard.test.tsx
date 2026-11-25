@@ -232,7 +232,7 @@ describe('BodyParametersCard saving', () => {
     await fillForm()
     await press('button', 'Save')
 
-    expect(await screen.findAllByText('Choose an option.')).toHaveLength(2)
+    expect(await screen.findAllByText('This field is required.')).toHaveLength(2)
     expect(apiClient.PUT).not.toHaveBeenCalled()
   })
 

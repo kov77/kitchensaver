@@ -58,5 +58,5 @@
   "errors-codes-RESTRICTION_LIMIT_REACHED": "La liste est pleine. Retirez un élément avant d’en ajouter un autre.",
   "errors-codes-PROFILE_LIMIT_REACHED": "Vous avez atteint la limite de profils. Supprimez un profil pour en ajouter un autre.",
   "errors-codes-FOOD_ALREADY_EXISTS": "Cet aliment figure déjà dans la liste.",
-  "errors-choose": "Choisissez une option."
+  "errors-required": "Ce champ est obligatoire."
 }

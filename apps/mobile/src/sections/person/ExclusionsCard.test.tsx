@@ -129,7 +129,7 @@ describe('ExclusionsCard adding', () => {
 
     await press('button', 'Save')
 
-    expect(await screen.findByText('Enter a food.')).toBeTruthy()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
     expect(apiClient.POST).not.toHaveBeenCalled()
   })
 

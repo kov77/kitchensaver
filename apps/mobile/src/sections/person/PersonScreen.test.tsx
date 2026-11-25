@@ -323,7 +323,7 @@ describe('PersonScreen profile editing', () => {
     await user.clear(screen.getByLabelText('Name'))
     await user.press(screen.getByRole('button', { name: 'Save' }))
 
-    expect(await screen.findByText('Enter a name.')).toBeTruthy()
+    expect(await screen.findByText('This field is required.')).toBeTruthy()
     expect(apiClient.PATCH).not.toHaveBeenCalled()
   })
 

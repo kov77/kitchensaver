@@ -24,7 +24,7 @@ describe('body parameters schema', () => {
     },
   )
 
-  it.each(['89', '251', '', 'tall', '1e2', '-170'])(
+  it.each(['89', '251', 'tall', '1e2', '-170'])(
     'rejects the height %j',
     (heightCm) => {
       expect(errorsOf({ heightCm })).toEqual([
@@ -37,16 +37,26 @@ describe('body parameters schema', () => {
     expect(errorsOf({ weightKg })).toEqual([])
   })
 
-  it.each(['19.9', '401', '', 'heavy'])('rejects the weight %j', (weightKg) => {
+  it.each(['19.9', '401', 'heavy'])('rejects the weight %j', (weightKg) => {
     expect(errorsOf({ weightKg })).toEqual([
       'Enter a weight between 20 and 400 kg.',
     ])
   })
 
+  it.each(['', '   '])(
+    'asks for the height and the weight when they are %j',
+    (text) => {
+      expect(errorsOf({ heightCm: text, weightKg: text })).toEqual([
+        'This field is required.',
+        'This field is required.',
+      ])
+    },
+  )
+
   it('asks to choose the activity level and the sex', () => {
     expect(errorsOf({ activityLevel: null, formulaSex: null })).toEqual([
-      'Choose an option.',
-      'Choose an option.',
+      'This field is required.',
+      'This field is required.',
     ])
   })
 

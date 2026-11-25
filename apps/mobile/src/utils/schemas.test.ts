@@ -12,7 +12,7 @@ describe('choice', () => {
 
     expect(result.success).toBe(false)
     expect(result.error?.issues.map(({ message }) => message)).toEqual([
-      'Choose an option.',
+      'This field is required.',
     ])
   })
 
