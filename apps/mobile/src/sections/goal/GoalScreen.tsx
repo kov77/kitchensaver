@@ -9,16 +9,23 @@ import { Spinner } from '@/components/atoms/Spinner'
 import { Text } from '@/components/atoms/Text'
 import { ScreenHeader } from '@/components/molecules/ScreenHeader'
 import { GoalEditor } from '@/components/organisms/GoalEditor'
+import { KcalWarningDialog } from '@/components/organisms/goal/KcalWarningDialog'
 import { AppScreen } from '@/components/templates/AppScreen'
 import type { GoalDraft } from '@/core/types'
-import { getErrorMessage } from '@/utils/errors'
+import { getErrorMessage, isKcalWarningError } from '@/utils/errors'
 import { useOpen } from '@/utils/useOpen'
 
 export function GoalScreen() {
   const { t } = useTranslation('goal')
   const { personId } = useLocalSearchParams<{ personId: string }>()
   const router = useRouter()
-  const { mutate: saveGoal, error, isPending } = useSaveGoal(personId)
+  const {
+    mutate: saveGoal,
+    error,
+    isPending,
+    variables: attemptedGoal,
+    reset: resetSave,
+  } = useSaveGoal(personId)
   const {
     data: savedParameters,
     isPending: isParametersPending,
@@ -34,6 +41,7 @@ export function GoalScreen() {
 
   const save = (draft: GoalDraft) =>
     saveGoal(draft, { onSuccess: () => router.back() })
+  const isKcalConfirmationNeeded = isKcalWarningError(error)
 
   return (
     <AppScreen>
@@ -48,13 +56,21 @@ export function GoalScreen() {
           savedParameters={savedParameters ?? null}
           submitLabel={t('screen-save')}
           isSaving={isPending}
-          saveErrorMessage={error ? getErrorMessage(error) : null}
+          saveErrorMessage={
+            error && !isKcalConfirmationNeeded ? getErrorMessage(error) : null
+          }
           onEstimate={(input) => requestGoalEstimate(personId, input)}
           onSave={save}
         />
       ) : (
         <Spinner />
       )}
+      {isKcalConfirmationNeeded && attemptedGoal ? (
+        <KcalWarningDialog
+          onConfirm={() => save({ ...attemptedGoal, confirmKcalWarning: true })}
+          onCancel={resetSave}
+        />
+      ) : null}
       <Button
         title={t('screen-cancel')}
         variant="secondary"

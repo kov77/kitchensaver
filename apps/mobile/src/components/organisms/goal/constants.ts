@@ -1,4 +1,6 @@
-import type { EstimatedGoalType, GoalType } from '@/core/types'
+import type { ParseKeys } from 'i18next'
+
+import type { EstimatedGoalType, GoalPace, GoalType } from '@/core/types'
 
 export const GOAL_MODE = {
   MANUAL: 'MANUAL',
@@ -38,3 +40,8 @@ export const ASSUMPTION_KEYS = [
 ] as const
 
 export const UNKNOWN_ASSUMPTION_KEY = 'assumptions-unknown'
+
+export const PACE_LABEL_KEYS: Record<GoalPace, ParseKeys<'goal'>> = {
+  MILD: 'editor-pace-MILD',
+  MODERATE: 'editor-pace-MODERATE',
+}

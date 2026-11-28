@@ -10,6 +10,20 @@ const ESTIMATE: GoalEstimate = {
   estimatedMaintenanceKcal: 2275,
   methodology: 'National Academies DRI 2023',
   assumptions: ['MAINTENANCE_ENERGY_NOT_A_TARGET', 'SOME_FUTURE_CODE'],
+  kcalSuggestions: [
+    {
+      pace: 'MILD',
+      suggestedKcal: 1975,
+      adjustmentKcal: -300,
+      isLimited: false,
+    },
+    {
+      pace: 'MODERATE',
+      suggestedKcal: 1775,
+      adjustmentKcal: -500,
+      isLimited: false,
+    },
+  ],
 }
 
 const onEstimate = jest.fn<Promise<GoalEstimate>, [unknown]>()
@@ -164,7 +178,7 @@ describe('GoalEditor estimate mode', () => {
     ).toBe('2275')
   })
 
-  it('leaves the target empty for a weight loss goal so the user decides', async () => {
+  it('leaves the target empty until a pace is chosen for a weight loss goal', async () => {
     await renderEditor()
 
     await fillEstimateInputs({ goalType: 'Lose weight' })
@@ -173,10 +187,75 @@ describe('GoalEditor estimate mode', () => {
       (await screen.findByLabelText('Your daily calorie goal (kcal)')).props
         .value,
     ).toBe('')
+    expect(screen.getByRole('radio', { name: 'Gentle' })).toBeTruthy()
+    expect(screen.getByRole('radio', { name: 'Moderate' })).toBeTruthy()
+  })
+
+  it('fills the target and shows the calculation when a pace is chosen', async () => {
+    await renderEditor()
+    await fillEstimateInputs({ goalType: 'Lose weight' })
+    await screen.findByLabelText('Your daily calorie goal (kcal)')
+
+    await press('radio', 'Moderate')
+
+    expect(
+      screen.getByLabelText('Your daily calorie goal (kcal)').props.value,
+    ).toBe('1775')
     expect(
       screen.getByText(
-        'The estimate is for keeping your weight. Enter the target you want.',
+        '2,275 kcal to keep your weight -500 kcal = 1,775 kcal a day.',
       ),
+    ).toBeTruthy()
+  })
+
+  it('lets the user change the suggested target and saves what is shown', async () => {
+    const user = userEvent.setup()
+    await renderEditor()
+    await fillEstimateInputs({ goalType: 'Lose weight' })
+    await screen.findByLabelText('Your daily calorie goal (kcal)')
+    await press('radio', 'Gentle')
+
+    await user.clear(screen.getByLabelText('Your daily calorie goal (kcal)'))
+    await user.type(
+      screen.getByLabelText('Your daily calorie goal (kcal)'),
+      '2000',
+    )
+    await press('button', 'Save goal')
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ goalType: 'LOSE', dailyKcal: 2000 }),
+    )
+  })
+
+  it('offers no pace for a maintain goal', async () => {
+    await renderEditor()
+
+    await fillEstimateInputs({ goalType: 'Maintain weight' })
+    await screen.findByLabelText('Your daily calorie goal (kcal)')
+
+    expect(screen.queryByRole('radio', { name: 'Gentle' })).toBeNull()
+  })
+
+  it('says when the suggestion stops at a limit', async () => {
+    onEstimate.mockResolvedValue({
+      ...ESTIMATE,
+      kcalSuggestions: [
+        {
+          pace: 'MODERATE',
+          suggestedKcal: 1200,
+          adjustmentKcal: -327,
+          isLimited: true,
+        },
+      ],
+    })
+    await renderEditor()
+    await fillEstimateInputs({ goalType: 'Lose weight' })
+    await screen.findByLabelText('Your daily calorie goal (kcal)')
+
+    await press('radio', 'Moderate')
+
+    expect(
+      screen.getByText(/The suggestion stops at the limit the app recommends/),
     ).toBeTruthy()
   })
 

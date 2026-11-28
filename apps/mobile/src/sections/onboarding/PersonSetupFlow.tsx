@@ -1,10 +1,12 @@
 import { useReducer } from 'react'
 
 import { useCreateOnboarding } from '@/api/queries/useCreateOnboarding'
+import type { OnboardingBody } from '@/api/types'
 import type { AllergyAnswerValues } from '@/components/organisms/allergy/schemas'
+import { KcalWarningDialog } from '@/components/organisms/goal/KcalWarningDialog'
 import { EMPTY_PROFILE } from '@/components/organisms/profile/constants'
 import { AppScreen } from '@/components/templates/AppScreen'
-import { getErrorMessage } from '@/utils/errors'
+import { getErrorMessage, isKcalWarningError } from '@/utils/errors'
 
 import { AllergyStep } from './AllergyStep'
 import { INITIAL_FLOW_STATE } from './constants'
@@ -26,18 +28,34 @@ export function PersonSetupFlow({
   onExit,
   onCreated,
 }: PersonSetupFlowProps) {
-  const { mutate: createOnboarding, error, isPending } = useCreateOnboarding()
+  const {
+    mutate: createOnboarding,
+    error,
+    isPending,
+    variables: attempt,
+    reset: resetAttempt,
+  } = useCreateOnboarding()
   const getAttemptKey = useAttemptKey()
   const [flow, dispatch] = useReducer(onboardingFlowReducer, INITIAL_FLOW_STATE)
 
-  const submit = (allergies: AllergyAnswerValues) => {
-    if (flow.step !== 'allergies') return
-    const body = buildOnboardingBody(flow.profile, flow.goal, allergies)
+  const send = (body: OnboardingBody) =>
     createOnboarding(
       { body, idempotencyKey: getAttemptKey(JSON.stringify(body)) },
       { onSuccess: onCreated },
     )
+
+  const submit = (allergies: AllergyAnswerValues) => {
+    if (flow.step !== 'allergies') return
+    send(buildOnboardingBody(flow.profile, flow.goal, allergies))
   }
+
+  const confirmKcalWarning = () => {
+    const goal = attempt?.body.goal
+    if (!attempt || !goal) return
+    send({ ...attempt.body, goal: { ...goal, confirmKcalWarning: true } })
+  }
+
+  const isKcalConfirmationNeeded = isKcalWarningError(error)
 
   return (
     <AppScreen>
@@ -59,10 +77,18 @@ export function PersonSetupFlow({
       ) : null}
       {flow.step === 'allergies' ? (
         <AllergyStep
-          errorMessage={error ? getErrorMessage(error) : null}
+          errorMessage={
+            error && !isKcalConfirmationNeeded ? getErrorMessage(error) : null
+          }
           isSubmitting={isPending}
           onBack={() => dispatch({ type: 'back' })}
           onSubmit={submit}
+        />
+      ) : null}
+      {isKcalConfirmationNeeded ? (
+        <KcalWarningDialog
+          onConfirm={confirmKcalWarning}
+          onCancel={resetAttempt}
         />
       ) : null}
     </AppScreen>

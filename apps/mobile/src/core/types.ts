@@ -28,15 +28,26 @@ export type EstimateInput = BodyParameters & {
   goalType: EstimatedGoalType
 }
 
+export type GoalPace = 'MILD' | 'MODERATE'
+
+export type KcalSuggestion = {
+  pace: GoalPace
+  suggestedKcal: number
+  adjustmentKcal: number
+  isLimited: boolean
+}
+
 export type GoalEstimate = {
   estimatedMaintenanceKcal: number
   methodology: string
   assumptions: string[]
+  kcalSuggestions: KcalSuggestion[]
 }
 
-export type GoalDraft =
+export type GoalDraft = (
   | { mode: 'MANUAL'; goalType: GoalType; dailyKcal: number }
   | ({ mode: 'ESTIMATED'; dailyKcal: number } & EstimateInput)
+) & { confirmKcalWarning?: boolean }
 
 export type GoalSummary = PersonGoal
 

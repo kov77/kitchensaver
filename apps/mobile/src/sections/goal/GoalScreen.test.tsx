@@ -85,6 +85,66 @@ describe('GoalScreen', () => {
     expect(mockBack).toHaveBeenCalledTimes(1)
   })
 
+  it('asks for confirmation when the calories are outside the usual range and saves after it', async () => {
+    mockPut
+      .mockResolvedValueOnce(apiError(422, 'GOAL_KCAL_OUT_OF_RANGE'))
+      .mockResolvedValueOnce(apiResult(200, { dailyKcal: 2200 }))
+    await renderGoal()
+    await fillManualGoal()
+
+    await pressSave()
+    await screen.findByText('Outside the usual range')
+    expect(mockBack).not.toHaveBeenCalled()
+    await userEvent
+      .setup()
+      .press(screen.getByRole('button', { name: 'Save anyway' }))
+
+    await waitFor(() => expect(mockBack).toHaveBeenCalledTimes(1))
+    expect(mockPut).toHaveBeenLastCalledWith('/api/v1/people/{id}/goal', {
+      params: { path: { id: 'person-7' } },
+      body: {
+        mode: 'MANUAL',
+        goalType: 'MAINTAIN',
+        dailyKcal: 2200,
+        confirmKcalWarning: true,
+      },
+    })
+  })
+
+  it('keeps the form and sends nothing more when the warning is dismissed', async () => {
+    mockPut.mockResolvedValue(apiError(422, 'GOAL_KCAL_OUT_OF_RANGE'))
+    await renderGoal()
+    await fillManualGoal()
+
+    await pressSave()
+    await screen.findByText('Outside the usual range')
+    await userEvent
+      .setup()
+      .press(screen.getByRole('button', { name: 'Change it' }))
+
+    expect(screen.queryByText('Outside the usual range')).toBeNull()
+    expect(mockPut).toHaveBeenCalledTimes(1)
+    expect(screen.getByLabelText('Daily calories (kcal)').props.value).toBe(
+      '2200',
+    )
+    expect(mockBack).not.toHaveBeenCalled()
+  })
+
+  it('says plainly that calories below the lowest amount cannot be saved', async () => {
+    mockPut.mockResolvedValue(apiError(422, 'GOAL_KCAL_BELOW_MINIMUM'))
+    await renderGoal()
+    await fillManualGoal()
+
+    await pressSave()
+
+    expect(
+      await screen.findByText(
+        'This is below the lowest daily calories the app accepts. Enter a higher amount.',
+      ),
+    ).toBeTruthy()
+    expect(screen.queryByText('Outside the usual range')).toBeNull()
+  })
+
   it('refreshes the people list so the readiness hint can go away', async () => {
     const peopleKey = getPeopleListKey('active')
     queryClient.setQueryData(peopleKey, [])
@@ -117,6 +177,14 @@ describe('GoalScreen', () => {
         estimatedMaintenanceKcal: 2275,
         methodology: 'DRI',
         assumptions: ['AGE_IN_COMPLETED_YEARS'],
+        kcalSuggestions: [
+          {
+            pace: 'MILD',
+            suggestedKcal: 1975,
+            adjustmentKcal: -300,
+            isLimited: false,
+          },
+        ],
       }),
     )
     const user = userEvent.setup()
@@ -284,6 +352,7 @@ describe('GoalScreen saved measurements', () => {
         estimatedMaintenanceKcal: 2200,
         methodology: 'DRI',
         assumptions: [],
+        kcalSuggestions: [],
       }),
     )
     await openEstimate()
