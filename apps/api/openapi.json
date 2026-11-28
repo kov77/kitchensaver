@@ -575,6 +575,9 @@
                       },
                       "confirmMacroMismatch": {
                         "type": "boolean"
+                      },
+                      "confirmKcalWarning": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -648,6 +651,9 @@
                       },
                       "confirmMacroMismatch": {
                         "type": "boolean"
+                      },
+                      "confirmKcalWarning": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -683,7 +689,7 @@
             "description": "PERSON_NOT_FOUND"
           },
           "422": {
-            "description": "GOAL_MACROS_MISMATCH, GOAL_TYPE_NOT_SUPPORTED_FOR_AGE, BODY_PARAMETERS_REQUIRED, GOAL_ESTIMATION_UNAVAILABLE or VALIDATION_FAILED"
+            "description": "GOAL_MACROS_MISMATCH, GOAL_KCAL_OUT_OF_RANGE, GOAL_KCAL_BELOW_MINIMUM, GOAL_TYPE_NOT_SUPPORTED_FOR_AGE, BODY_PARAMETERS_REQUIRED, GOAL_ESTIMATION_UNAVAILABLE or VALIDATION_FAILED"
           }
         },
         "security": [
@@ -1911,6 +1917,9 @@
                           },
                           "confirmMacroMismatch": {
                             "type": "boolean"
+                          },
+                          "confirmKcalWarning": {
+                            "type": "boolean"
                           }
                         },
                         "required": [
@@ -1983,6 +1992,9 @@
                             "maximum": 2000
                           },
                           "confirmMacroMismatch": {
+                            "type": "boolean"
+                          },
+                          "confirmKcalWarning": {
                             "type": "boolean"
                           }
                         },
@@ -2475,6 +2487,67 @@
           "dailyKcal"
         ]
       },
+      "KcalLimitsDto": {
+        "type": "object",
+        "properties": {
+          "blockedMinimum": {
+            "type": "number"
+          },
+          "advisedMinimum": {
+            "type": "number"
+          },
+          "advisedMaximum": {
+            "type": "number"
+          },
+          "advisedMaximumDeficit": {
+            "type": "number"
+          },
+          "advisedMaximumSurplus": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "blockedMinimum",
+          "advisedMinimum",
+          "advisedMaximum",
+          "advisedMaximumDeficit",
+          "advisedMaximumSurplus"
+        ]
+      },
+      "KcalWarningDto": {
+        "type": "object",
+        "properties": {
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "BELOW_BLOCKED_MINIMUM",
+                "BELOW_ADVISED_MINIMUM",
+                "ABOVE_ADVISED_MAXIMUM",
+                "DEFICIT_ABOVE_ADVISED_RANGE",
+                "SURPLUS_ABOVE_ADVISED_RANGE"
+              ]
+            }
+          },
+          "dailyKcal": {
+            "type": "number"
+          },
+          "maintenanceKcal": {
+            "type": "number",
+            "nullable": true
+          },
+          "limits": {
+            "$ref": "#/components/schemas/KcalLimitsDto"
+          }
+        },
+        "required": [
+          "issues",
+          "dailyKcal",
+          "maintenanceKcal",
+          "limits"
+        ]
+      },
       "NutritionGoalDto": {
         "type": "object",
         "properties": {
@@ -2551,6 +2624,15 @@
             "items": {
               "$ref": "#/components/schemas/MacroWarningDto"
             }
+          },
+          "kcalWarning": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/KcalWarningDto"
+              }
+            ]
           }
         },
         "required": [
@@ -2567,7 +2649,8 @@
           "confirmedAt",
           "reviewRequiredAt",
           "macroCheck",
-          "warnings"
+          "warnings",
+          "kcalWarning"
         ]
       },
       "ProposedMacrosDto": {
@@ -2587,6 +2670,33 @@
           "proteinG",
           "fatG",
           "carbsG"
+        ]
+      },
+      "KcalSuggestionDto": {
+        "type": "object",
+        "properties": {
+          "pace": {
+            "type": "string",
+            "enum": [
+              "MILD",
+              "MODERATE"
+            ]
+          },
+          "suggestedKcal": {
+            "type": "number"
+          },
+          "adjustmentKcal": {
+            "type": "number"
+          },
+          "isLimited": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pace",
+          "suggestedKcal",
+          "adjustmentKcal",
+          "isLimited"
         ]
       },
       "GoalEstimateDto": {
@@ -2620,6 +2730,12 @@
               "type": "string"
             }
           },
+          "kcalSuggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KcalSuggestionDto"
+            }
+          },
           "isEstimate": {
             "type": "boolean",
             "enum": [
@@ -2633,6 +2749,7 @@
           "calculationMethod",
           "methodology",
           "assumptions",
+          "kcalSuggestions",
           "isEstimate"
         ]
       },

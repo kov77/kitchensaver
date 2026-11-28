@@ -519,6 +519,294 @@ describe('macros', () => {
   })
 })
 
+describe('daily calories', () => {
+  test.each([
+    [
+      'LOSE',
+      [
+        {
+          pace: 'MILD',
+          suggestedKcal: 2602,
+          adjustmentKcal: -300,
+          isLimited: false,
+        },
+        {
+          pace: 'MODERATE',
+          suggestedKcal: 2402,
+          adjustmentKcal: -500,
+          isLimited: false,
+        },
+      ],
+    ],
+    [
+      'GAIN',
+      [
+        {
+          pace: 'MILD',
+          suggestedKcal: 3200,
+          adjustmentKcal: 298,
+          isLimited: true,
+        },
+        {
+          pace: 'MODERATE',
+          suggestedKcal: 3200,
+          adjustmentKcal: 298,
+          isLimited: true,
+        },
+      ],
+    ],
+    [
+      'MAINTAIN',
+      [
+        {
+          pace: 'MILD',
+          suggestedKcal: 2902,
+          adjustmentKcal: 0,
+          isLimited: false,
+        },
+        {
+          pace: 'MODERATE',
+          suggestedKcal: 2902,
+          adjustmentKcal: 0,
+          isLimited: false,
+        },
+      ],
+    ],
+  ])('suggests calories for %s at both paces', async (goalType, expected) => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+
+    const response = await asUser.estimateGoal(id, {
+      ...bodyParameters,
+      goalType,
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.body.kcalSuggestions).toEqual(expected)
+  })
+
+  test('stops a suggested deficit at the minimum', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+
+    const response = await asUser.estimateGoal(id, {
+      heightCm: 140,
+      weightKg: 30,
+      activityLevel: 'INACTIVE',
+      formulaSex: 'FEMALE',
+      goalType: 'LOSE',
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.body.kcalSuggestions).toEqual([
+      {
+        pace: 'MILD',
+        suggestedKcal: 1227,
+        adjustmentKcal: -300,
+        isLimited: false,
+      },
+      {
+        pace: 'MODERATE',
+        suggestedKcal: 1200,
+        adjustmentKcal: -327,
+        isLimited: true,
+      },
+    ])
+  })
+
+  test('never accepts calories below the lowest value, even when confirmed', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+
+    const response = await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      dailyKcal: 799,
+      confirmKcalWarning: true,
+    })
+
+    expect(response.status).toBe(422)
+    expect(response.body.code).toBe('GOAL_KCAL_BELOW_MINIMUM')
+    expect((await asUser.getGoal(id)).status).toBe(404)
+  })
+
+  test('refuses calories below 1200 until confirmed and then reports the warning', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+    const goal = { mode: 'MANUAL', dailyKcal: 1100 }
+
+    const refused = await asUser.saveGoal(id, goal)
+    const stored = await asUser.getGoal(id)
+    const confirmed = await asUser.saveGoal(id, {
+      ...goal,
+      confirmKcalWarning: true,
+    })
+    const read = await asUser.getGoal(id)
+
+    expect(refused.status).toBe(422)
+    expect(refused.body).toMatchObject({
+      code: 'GOAL_KCAL_OUT_OF_RANGE',
+      details: {
+        issues: ['BELOW_ADVISED_MINIMUM'],
+        dailyKcal: 1100,
+        maintenanceKcal: null,
+        limits: { blockedMinimum: 800, advisedMinimum: 1200 },
+      },
+    })
+    expect(stored.status).toBe(404)
+    expect(confirmed.status).toBe(200)
+    expect(read.body.kcalWarning).toMatchObject({
+      issues: ['BELOW_ADVISED_MINIMUM'],
+      dailyKcal: 1100,
+    })
+  })
+
+  test('refuses calories above 3200 until confirmed', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+
+    const refused = await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      dailyKcal: 3300,
+    })
+
+    expect(refused.status).toBe(422)
+    expect(refused.body.details.issues).toEqual(['ABOVE_ADVISED_MAXIMUM'])
+  })
+
+  test('has no warning for calories inside the range', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+
+    await asUser.saveGoal(id, { mode: 'MANUAL', dailyKcal: 1200 })
+    const read = await asUser.getGoal(id)
+
+    expect(read.body.kcalWarning).toBeNull()
+  })
+
+  test('compares a manual goal with the stored body parameters', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+    await asUser.saveBodyParameters(id, bodyParameters)
+
+    const atLimit = await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      dailyKcal: 1902,
+    })
+    const beyond = await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      dailyKcal: 1901,
+    })
+
+    expect(atLimit.status).toBe(200)
+    expect(atLimit.body.kcalWarning).toBeNull()
+    expect(beyond.status).toBe(422)
+    expect(beyond.body.details).toMatchObject({
+      issues: ['DEFICIT_ABOVE_ADVISED_RANGE'],
+      maintenanceKcal: 2902,
+    })
+  })
+
+  test('compares an estimated goal with its own estimate, not with a client value', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+
+    const response = await asUser.saveGoal(id, {
+      mode: 'ESTIMATED',
+      goalType: 'LOSE',
+      dailyKcal: 1500,
+      ...bodyParameters,
+    })
+
+    expect(response.status).toBe(422)
+    expect(response.body.details).toMatchObject({
+      issues: ['DEFICIT_ABOVE_ADVISED_RANGE'],
+      maintenanceKcal: 2902,
+    })
+  })
+
+  test('treats exactly 800 as a confirmable warning, not as blocked', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+
+    const response = await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      dailyKcal: 800,
+    })
+
+    expect(response.status).toBe(422)
+    expect(response.body.code).toBe('GOAL_KCAL_OUT_OF_RANGE')
+  })
+
+  test('accepts exactly 3200 without a warning', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+
+    const response = await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      dailyKcal: 3200,
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.body.kcalWarning).toBeNull()
+  })
+
+  test('warns about a surplus above 500 when the maintenance is known', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+    await asUser.saveBodyParameters(id, {
+      ...bodyParameters,
+      weightKg: 50,
+      activityLevel: 'INACTIVE',
+    })
+    const maintenance = (
+      await asUser.estimateGoal(id, { goalType: 'MAINTAIN' })
+    ).body.estimatedMaintenanceKcal
+
+    const atLimit = await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      dailyKcal: maintenance + 500,
+    })
+    const beyond = await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      dailyKcal: maintenance + 501,
+    })
+
+    expect(atLimit.status).toBe(200)
+    expect(beyond.status).toBe(422)
+    expect(beyond.body.details.issues).toEqual(['SURPLUS_ABOVE_ADVISED_RANGE'])
+  })
+
+  test('recomputes the warning of a manual goal when the body parameters change', async () => {
+    const { asUser } = await setup()
+    const id = await createPerson(asUser)
+    await asUser.saveGoal(id, { mode: 'MANUAL', dailyKcal: 1900 })
+    const before = await asUser.getGoal(id)
+
+    await asUser.saveBodyParameters(id, bodyParameters)
+    const after = await asUser.getGoal(id)
+
+    expect(before.body.kcalWarning).toBeNull()
+    expect(after.body.kcalWarning).toMatchObject({
+      issues: ['DEFICIT_ABOVE_ADVISED_RANGE'],
+      maintenanceKcal: 2902,
+    })
+  })
+
+  test('hides the warning of another account', async () => {
+    const { asUser, asOtherUser } = await setup()
+    const id = await createPerson(asUser)
+    await asUser.saveGoal(id, {
+      mode: 'MANUAL',
+      dailyKcal: 1100,
+      confirmKcalWarning: true,
+    })
+
+    const response = await asOtherUser.getGoal(id)
+
+    expect(response.status).toBe(404)
+  })
+})
+
 describe('plan readiness', () => {
   test('is not ready until a goal exists', async () => {
     const { asUser } = await setup()

@@ -1,10 +1,14 @@
 import {
+  assessDailyKcal,
   canEstimateEnergy,
   compareMacroEnergy,
+  DAILY_KCAL_LIMITS,
   estimateMaintenanceEnergy,
+  GOAL_PACES,
   isGoalTypeAllowedForAge,
   type GoalType,
   type Macros,
+  suggestDailyKcal,
   suggestMacros,
 } from '@kitchensaver/nutrition'
 
@@ -13,6 +17,7 @@ import type {
   BodyParametersRequest,
   EstimateGoalRequest,
   GoalEstimateDto,
+  KcalWarningDto,
   SaveGoalRequest,
 } from './nutrition-goals.dto.js'
 
@@ -36,6 +41,52 @@ function assertMacrosMatchEnergy(dailyKcal: number, macros: Macros) {
     'GOAL_MACROS_MISMATCH',
     'The macros do not match the daily calories; confirm to save anyway',
     { calculatedKcal, dailyKcal },
+  )
+}
+
+export function maintenanceKcalFor(
+  ageYears: number,
+  bodyParameters: BodyParametersRequest | null,
+) {
+  if (!bodyParameters || !canEstimateEnergy(ageYears)) return null
+  const estimate = estimateMaintenanceEnergy({ ageYears, ...bodyParameters })
+  return estimate?.maintenanceKcal ?? null
+}
+
+export function checkDailyKcal(
+  dailyKcal: number,
+  maintenanceKcal: number | null,
+): KcalWarningDto | null {
+  const { issues } = assessDailyKcal(dailyKcal, maintenanceKcal)
+  if (issues.length === 0) return null
+  return {
+    issues,
+    dailyKcal,
+    maintenanceKcal,
+    limits: DAILY_KCAL_LIMITS,
+  }
+}
+
+function assertKcalAllowed(
+  dailyKcal: number,
+  maintenanceKcal: number | null,
+  confirmKcalWarning: boolean | undefined,
+) {
+  const { level, issues } = assessDailyKcal(dailyKcal, maintenanceKcal)
+  if (level === 'BLOCKED') {
+    throw new ApiException(
+      422,
+      'GOAL_KCAL_BELOW_MINIMUM',
+      'The daily calories are below the lowest value the app accepts',
+      { dailyKcal, limits: DAILY_KCAL_LIMITS },
+    )
+  }
+  if (level === 'OK' || confirmKcalWarning) return
+  throw new ApiException(
+    422,
+    'GOAL_KCAL_OUT_OF_RANGE',
+    'The daily calories are outside the recommended range; confirm to save anyway',
+    { issues, dailyKcal, maintenanceKcal, limits: DAILY_KCAL_LIMITS },
   )
 }
 
@@ -98,6 +149,15 @@ export function previewEstimate(
       'LARGE_INDIVIDUAL_VARIATION',
       ...(method === 'DRI_2023_ADULT' ? [] : ['INCLUDES_GROWTH_ALLOWANCE']),
     ],
+    kcalSuggestions: GOAL_PACES.flatMap((pace) => {
+      const suggestion = suggestDailyKcal(
+        maintenanceKcal,
+        request.goalType,
+        pace,
+        ageYears,
+      )
+      return suggestion ? [{ pace, ...suggestion }] : []
+    }),
     isEstimate: true,
   }
 }
@@ -108,8 +168,15 @@ export function buildGoalFields(
   stored: BodyParametersRequest | null,
   now: Date,
 ) {
-  const { goalType, dailyKcal, proteinG, fatG, carbsG, confirmMacroMismatch } =
-    request
+  const {
+    goalType,
+    dailyKcal,
+    proteinG,
+    fatG,
+    carbsG,
+    confirmMacroMismatch,
+    confirmKcalWarning,
+  } = request
   assertGoalTypeAllowed(goalType, ageYears)
 
   if (
@@ -125,6 +192,11 @@ export function buildGoalFields(
     request.mode === 'ESTIMATED'
       ? computeEstimate(ageYears, request, stored)
       : null
+  assertKcalAllowed(
+    dailyKcal,
+    estimate?.maintenanceKcal ?? maintenanceKcalFor(ageYears, stored),
+    confirmKcalWarning,
+  )
   return {
     mode: request.mode,
     goalType,

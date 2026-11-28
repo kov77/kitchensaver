@@ -1,3 +1,9 @@
+import {
+  DAILY_KCAL_ISSUES,
+  type DailyKcalIssue,
+  type GoalPace,
+  GOAL_PACES,
+} from '@kitchensaver/nutrition'
 import { ApiProperty } from '@nestjs/swagger'
 import * as zod from 'zod'
 
@@ -41,6 +47,7 @@ const goalFieldsShape = {
   fatG: macroGramsSchema.optional(),
   carbsG: macroGramsSchema.optional(),
   confirmMacroMismatch: zod.boolean().optional(),
+  confirmKcalWarning: zod.boolean().optional(),
 }
 
 export const saveGoalSchema = zod.discriminatedUnion('mode', [
@@ -75,6 +82,29 @@ export class MacroWarningDto {
   @ApiProperty() dailyKcal: number
 }
 
+export class KcalLimitsDto {
+  @ApiProperty() blockedMinimum: number
+  @ApiProperty() advisedMinimum: number
+  @ApiProperty() advisedMaximum: number
+  @ApiProperty() advisedMaximumDeficit: number
+  @ApiProperty() advisedMaximumSurplus: number
+}
+
+export class KcalWarningDto {
+  @ApiProperty({ enum: DAILY_KCAL_ISSUES, isArray: true })
+  issues: DailyKcalIssue[]
+  @ApiProperty() dailyKcal: number
+  @ApiProperty({ type: Number, nullable: true }) maintenanceKcal: number | null
+  @ApiProperty({ type: KcalLimitsDto }) limits: KcalLimitsDto
+}
+
+export class KcalSuggestionDto {
+  @ApiProperty({ enum: GOAL_PACES }) pace: GoalPace
+  @ApiProperty() suggestedKcal: number
+  @ApiProperty() adjustmentKcal: number
+  @ApiProperty() isLimited: boolean
+}
+
 export class NutritionGoalDto {
   @ApiProperty({ enum: GoalMode }) mode: GoalMode
   @ApiProperty({ enum: GoalType }) goalType: GoalType
@@ -96,6 +126,8 @@ export class NutritionGoalDto {
   macroCheck: string
   @ApiProperty({ type: MacroWarningDto, isArray: true })
   warnings: MacroWarningDto[]
+  @ApiProperty({ type: KcalWarningDto, nullable: true })
+  kcalWarning: KcalWarningDto | null
 }
 
 export class ProposedMacrosDto {
@@ -112,5 +144,7 @@ export class GoalEstimateDto {
   calculationMethod: CalculationMethod
   @ApiProperty() methodology: string
   @ApiProperty({ type: String, isArray: true }) assumptions: string[]
+  @ApiProperty({ type: KcalSuggestionDto, isArray: true })
+  kcalSuggestions: KcalSuggestionDto[]
   @ApiProperty({ enum: [true] }) isEstimate: true
 }
