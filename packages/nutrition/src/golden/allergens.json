@@ -1,0 +1,473 @@
+{
+  "ingredients": {
+    "rice": {
+      "id": "rice",
+      "names": ["rice"],
+      "metadata": {
+        "status": "KNOWN",
+        "allergens": [],
+        "mayContain": [],
+        "otherAllergenLabels": []
+      }
+    },
+    "chicken": {
+      "id": "chicken",
+      "names": ["chicken breast"],
+      "metadata": {
+        "status": "KNOWN",
+        "allergens": [],
+        "mayContain": [],
+        "otherAllergenLabels": []
+      }
+    },
+    "peanutButter": {
+      "id": "peanut-butter",
+      "names": ["peanut butter"],
+      "metadata": {
+        "status": "KNOWN",
+        "allergens": ["PEANUT"],
+        "mayContain": [],
+        "otherAllergenLabels": []
+      }
+    },
+    "granola": {
+      "id": "granola",
+      "names": ["granola"],
+      "metadata": {
+        "status": "KNOWN",
+        "allergens": ["WHEAT"],
+        "mayContain": ["TREE_NUT"],
+        "otherAllergenLabels": []
+      }
+    },
+    "cilantro": {
+      "id": "cilantro",
+      "names": ["cilantro", "coriander leaves"],
+      "metadata": {
+        "status": "KNOWN",
+        "allergens": [],
+        "mayContain": [],
+        "otherAllergenLabels": []
+      }
+    },
+    "kiwiSauce": {
+      "id": "kiwi-sauce",
+      "names": ["fruit sauce"],
+      "metadata": {
+        "status": "KNOWN",
+        "allergens": [],
+        "mayContain": [],
+        "otherAllergenLabels": ["kiwi"]
+      }
+    },
+    "kiwi": {
+      "id": "kiwi",
+      "names": ["kiwi"],
+      "metadata": {
+        "status": "KNOWN",
+        "allergens": [],
+        "mayContain": [],
+        "otherAllergenLabels": []
+      }
+    },
+    "mysterySauce": {
+      "id": "mystery-sauce",
+      "names": ["house sauce"],
+      "metadata": {
+        "status": "UNKNOWN"
+      }
+    },
+    "trailMix": {
+      "id": "trail-mix",
+      "names": ["trail mix"],
+      "metadata": {
+        "status": "KNOWN",
+        "allergens": ["OTHER"],
+        "mayContain": [],
+        "otherAllergenLabels": []
+      }
+    },
+    "kiwiUnknown": {
+      "id": "kiwi-unknown",
+      "names": ["kiwi"],
+      "metadata": {
+        "status": "UNKNOWN"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "peanut allergy and peanut butter",
+      "ingredients": ["rice", "peanutButter"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "PEANUT",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "BLOCKED",
+        "reasonCodes": ["ALLERGEN_PRESENT"],
+        "badgeAllergens": ["PEANUT"]
+      }
+    },
+    {
+      "name": "peanut allergy and no peanut",
+      "ingredients": ["rice", "chicken"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "PEANUT",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NO_KNOWN_CONFLICT",
+        "reasonCodes": [],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "no allergies answered and nothing unusual",
+      "ingredients": ["rice", "chicken"],
+      "restrictions": {
+        "allergyStatus": "NONE",
+        "allergies": [],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NO_KNOWN_CONFLICT",
+        "reasonCodes": [],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "unknown sauce with a peanut allergy",
+      "ingredients": ["rice", "mysterySauce"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "PEANUT",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["UNVERIFIED_INGREDIENT"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "unknown sauce with no restrictions",
+      "ingredients": ["rice", "mysterySauce"],
+      "restrictions": {
+        "allergyStatus": "NONE",
+        "allergies": [],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NO_KNOWN_CONFLICT",
+        "reasonCodes": [],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "unknown sauce with an exclusion",
+      "ingredients": ["rice", "mysterySauce"],
+      "restrictions": {
+        "allergyStatus": "NONE",
+        "allergies": [],
+        "exclusions": ["lemongrass"]
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["UNVERIFIED_INGREDIENT"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "allergy question not answered",
+      "ingredients": ["rice", "chicken"],
+      "restrictions": {
+        "allergyStatus": null,
+        "allergies": [],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["ALLERGY_STATUS_MISSING"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "allergy answer is I don't know",
+      "ingredients": ["rice", "granola"],
+      "restrictions": {
+        "allergyStatus": "UNKNOWN",
+        "allergies": [],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["ALLERGY_STATUS_UNKNOWN"],
+        "badgeAllergens": ["WHEAT"]
+      }
+    },
+    {
+      "name": "may contain counts as a conflict for the allergic person",
+      "ingredients": ["granola"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "TREE_NUT",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "BLOCKED",
+        "reasonCodes": ["ALLERGEN_MAY_CONTAIN"],
+        "badgeAllergens": ["WHEAT"]
+      }
+    },
+    {
+      "name": "exclusion matches an alias",
+      "ingredients": ["rice", "cilantro"],
+      "restrictions": {
+        "allergyStatus": "NONE",
+        "allergies": [],
+        "exclusions": ["Coriander   Leaves "]
+      },
+      "expected": {
+        "verdict": "BLOCKED",
+        "reasonCodes": ["EXCLUDED_INGREDIENT"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "exclusion with no match",
+      "ingredients": ["rice", "chicken"],
+      "restrictions": {
+        "allergyStatus": "NONE",
+        "allergies": [],
+        "exclusions": ["cilantro"]
+      },
+      "expected": {
+        "verdict": "NO_KNOWN_CONFLICT",
+        "reasonCodes": [],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "custom allergy matches an ingredient name",
+      "ingredients": ["rice", "kiwi"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "OTHER",
+            "label": " Kiwi "
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "BLOCKED",
+        "reasonCodes": ["ALLERGEN_PRESENT"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "custom allergy matches a known hidden label",
+      "ingredients": ["rice", "kiwiSauce"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "OTHER",
+            "label": "kiwi"
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "BLOCKED",
+        "reasonCodes": ["ALLERGEN_PRESENT"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "custom allergy with an unknown ingredient",
+      "ingredients": ["rice", "mysterySauce"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "OTHER",
+            "label": "kiwi"
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["UNVERIFIED_INGREDIENT"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "has-allergies answer without any allergy",
+      "ingredients": ["rice"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["ALLERGY_DATA_INCONSISTENT"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "a listed allergy counts even when the answer says none",
+      "ingredients": ["peanutButter"],
+      "restrictions": {
+        "allergyStatus": "NONE",
+        "allergies": [
+          {
+            "allergenCode": "PEANUT",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "BLOCKED",
+        "reasonCodes": ["ALLERGEN_PRESENT"],
+        "badgeAllergens": ["PEANUT"]
+      }
+    },
+    {
+      "name": "a conflict outranks missing data",
+      "ingredients": ["peanutButter", "mysterySauce"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "PEANUT",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "BLOCKED",
+        "reasonCodes": ["ALLERGEN_PRESENT", "UNVERIFIED_INGREDIENT"],
+        "badgeAllergens": ["PEANUT"]
+      }
+    },
+    {
+      "name": "custom allergy with an empty label",
+      "ingredients": ["rice"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "OTHER",
+            "label": "   "
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["RESTRICTION_LABEL_EMPTY"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "an empty exclusion",
+      "ingredients": ["rice"],
+      "restrictions": {
+        "allergyStatus": "NONE",
+        "allergies": [],
+        "exclusions": [" "]
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["RESTRICTION_LABEL_EMPTY"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "custom allergy and an ingredient that hides some other allergen",
+      "ingredients": ["rice", "trailMix"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "OTHER",
+            "label": "kiwi"
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["UNVERIFIED_INGREDIENT"],
+        "badgeAllergens": ["OTHER"]
+      }
+    },
+    {
+      "name": "custom allergy matches the name of an ingredient with unknown data",
+      "ingredients": ["kiwiUnknown"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "OTHER",
+            "label": "Kiwi"
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "BLOCKED",
+        "reasonCodes": ["ALLERGEN_PRESENT", "UNVERIFIED_INGREDIENT"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "custom allergy is not matched by a longer name",
+      "ingredients": ["rice", "kiwi"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "OTHER",
+            "label": "kiwi fruit"
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NO_KNOWN_CONFLICT",
+        "reasonCodes": [],
+        "badgeAllergens": []
+      }
+    }
+  ]
+}

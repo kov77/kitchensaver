@@ -1,3 +1,4 @@
+import { normalizeName } from '@kitchensaver/nutrition'
 import { Injectable } from '@nestjs/common'
 
 import { ApiException } from '../common/api-exception.js'
@@ -7,7 +8,6 @@ import { personNotFound } from '../people/people.errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { markAsHavingAllergies, resetAllergyStatus } from './allergy-status.js'
-import { normalizeName } from './normalize-name.js'
 import { allergyRow } from './restriction-rows.js'
 import type {
   AddAllergyRequest,

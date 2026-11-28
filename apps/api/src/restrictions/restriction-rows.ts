@@ -1,5 +1,6 @@
+import { normalizeName } from '@kitchensaver/nutrition'
+
 import { AllergenCode } from '../generated/prisma/client.js'
-import { normalizeName } from './normalize-name.js'
 import type {
   AddAllergyRequest,
   AddExclusionRequest,
