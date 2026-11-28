@@ -1,0 +1,105 @@
+{
+  "foods": {
+    "riceRaw": {
+      "id": "fixture-rice-raw",
+      "state": "RAW",
+      "per100g": { "kcal": 360, "proteinG": 7, "fatG": 0.6, "carbsG": 80 }
+    },
+    "riceCooked": {
+      "id": "fixture-rice-cooked",
+      "state": "COOKED",
+      "per100g": { "kcal": 130, "proteinG": 2.7, "fatG": 0.3, "carbsG": 28 }
+    },
+    "chickenRaw": {
+      "id": "fixture-chicken-raw",
+      "state": "RAW",
+      "per100g": { "kcal": 120, "proteinG": 22, "fatG": 3, "carbsG": 0 }
+    },
+    "broccoliRaw": {
+      "id": "fixture-broccoli-raw",
+      "state": "RAW",
+      "per100g": { "kcal": 34, "proteinG": 2.8, "fatG": 0.4, "carbsG": 7 }
+    },
+    "oil": {
+      "id": "fixture-oil",
+      "state": "RAW",
+      "per100g": { "kcal": 880, "proteinG": 0, "fatG": 100, "carbsG": 0 }
+    }
+  },
+  "cases": [
+    {
+      "name": "chicken, rice and broccoli with 15 g oil",
+      "portions": [
+        { "food": "riceRaw", "grams": 80, "gramsState": "RAW" },
+        { "food": "chickenRaw", "grams": 150, "gramsState": "RAW" },
+        { "food": "broccoliRaw", "grams": 100, "gramsState": "RAW" },
+        { "food": "oil", "grams": 15, "gramsState": "RAW" }
+      ],
+      "expected": {
+        "kcal": 634,
+        "proteinG": 41.4,
+        "fatG": 20.38,
+        "carbsG": 71,
+        "finishedMassG": 345
+      }
+    },
+    {
+      "name": "the same recipe with 5 g oil",
+      "portions": [
+        { "food": "riceRaw", "grams": 80, "gramsState": "RAW" },
+        { "food": "chickenRaw", "grams": 150, "gramsState": "RAW" },
+        { "food": "broccoliRaw", "grams": 100, "gramsState": "RAW" },
+        { "food": "oil", "grams": 5, "gramsState": "RAW" }
+      ],
+      "expected": {
+        "kcal": 546,
+        "proteinG": 41.4,
+        "fatG": 10.38,
+        "carbsG": 71,
+        "finishedMassG": 335
+      }
+    },
+    {
+      "name": "100 g raw rice",
+      "portions": [{ "food": "riceRaw", "grams": 100, "gramsState": "RAW" }],
+      "expected": {
+        "kcal": 360,
+        "proteinG": 7,
+        "fatG": 0.6,
+        "carbsG": 80,
+        "finishedMassG": 100
+      }
+    },
+    {
+      "name": "100 g cooked rice",
+      "portions": [
+        { "food": "riceCooked", "grams": 100, "gramsState": "COOKED" }
+      ],
+      "expected": {
+        "kcal": 130,
+        "proteinG": 2.7,
+        "fatG": 0.3,
+        "carbsG": 28,
+        "finishedMassG": 100
+      }
+    },
+    {
+      "name": "raw rice that cooks to 2.8 times its mass keeps its energy",
+      "portions": [
+        {
+          "food": "riceRaw",
+          "grams": 100,
+          "gramsState": "RAW",
+          "yieldFactor": 2.8
+        }
+      ],
+      "expected": {
+        "kcal": 360,
+        "proteinG": 7,
+        "fatG": 0.6,
+        "carbsG": 80,
+        "finishedMassG": 280
+      }
+    }
+  ]
+}
