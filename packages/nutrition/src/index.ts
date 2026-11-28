@@ -1,3 +1,7 @@
 export * from './constants.js'
 export * from './energy.js'
+export * from './errors.js'
+export * from './food.js'
 export * from './goals.js'
+export * from './recipe-nutrition.js'
+export * from './types.js'
