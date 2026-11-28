@@ -100,7 +100,7 @@ describe('calculateRecipeNutrition', () => {
       calculateRecipeNutrition(cooked ? [{ ...cooked, yieldFactor: 2.8 }] : []),
     )
 
-    expect(code).toBe('YIELD_ON_COOKED_GRAMS')
+    expect(code).toBe('YIELD_ON_NON_RAW_GRAMS')
   })
 
   test('accepts raw and cooked ingredients together because each quantity matches its own record', () => {

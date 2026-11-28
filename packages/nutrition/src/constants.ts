@@ -16,7 +16,15 @@ export const DAILY_KCAL_LIMITS = {
   advisedMaximumSurplus: 500,
 } as const
 
-export const FOOD_STATES = ['RAW', 'COOKED'] as const
+export const FOOD_STATES = [
+  'RAW',
+  'COOKED',
+  'DRIED',
+  'CANNED_DRAINED',
+  'CANNED_WITH_LIQUID',
+  'FROZEN',
+  'READY',
+] as const
 
 export const AMOUNT_UNITS = ['G', 'ML'] as const
 
@@ -35,7 +43,7 @@ export const NUTRITION_INPUT_ERROR_CODES = [
   'FOOD_VALUES_INVALID',
   'FOOD_STATE_MISMATCH',
   'YIELD_FACTOR_INVALID',
-  'YIELD_ON_COOKED_GRAMS',
+  'YIELD_ON_NON_RAW_GRAMS',
   'DENSITY_REQUIRED',
   'DENSITY_INVALID',
   'RECIPE_EMPTY',
