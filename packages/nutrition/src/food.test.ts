@@ -1,7 +1,7 @@
 import * as fastCheck from 'fast-check'
 import { describe, expect, test } from 'vitest'
 
-import { FOOD_LIMITS } from './constants.js'
+import { FOOD_LIMITS, FOOD_STATES } from './constants.js'
 import {
   calculateIngredientNutrition,
   convertToGrams,
@@ -59,6 +59,28 @@ describe('calculateIngredientNutrition', () => {
     ['negative Infinity', Number.NEGATIVE_INFINITY, 'GRAMS_NOT_FINITE'],
   ])('rejects %s', (_name, grams, code) => {
     expect(codeOf(ingredient(grams))).toBe(code)
+  })
+
+  test.each(FOOD_STATES)('calculates a food recorded as %s', (state) => {
+    expect(ingredient(50, { ...rice, state })().kcal).toBe(180)
+  })
+
+  test.each(
+    FOOD_STATES.flatMap((foodState) =>
+      FOOD_STATES.filter((gramsState) => gramsState !== foodState).map(
+        (gramsState) => [foodState, gramsState] as const,
+      ),
+    ),
+  )('rejects %s food with %s grams', (foodState, gramsState) => {
+    expect(
+      codeOf(() =>
+        calculateIngredientNutrition({
+          food: { ...rice, state: foodState },
+          grams: 100,
+          gramsState,
+        }),
+      ),
+    ).toBe('FOOD_STATE_MISMATCH')
   })
 
   test('rejects grams of the other state than the food record', () => {
@@ -159,13 +181,23 @@ describe('finishedGrams', () => {
     },
   )
 
-  test('rejects a yield factor on grams that are already cooked', () => {
-    expect(
-      codeOf(() =>
-        finishedGrams({ grams: 100, gramsState: 'COOKED', yieldFactor: 2.8 }),
-      ),
-    ).toBe('YIELD_ON_COOKED_GRAMS')
-  })
+  test.each(FOOD_STATES.filter((state) => state !== 'RAW'))(
+    'rejects a yield factor on grams in the state %s',
+    (gramsState) => {
+      expect(
+        codeOf(() =>
+          finishedGrams({ grams: 100, gramsState, yieldFactor: 2.8 }),
+        ),
+      ).toBe('YIELD_ON_NON_RAW_GRAMS')
+    },
+  )
+
+  test.each(FOOD_STATES)(
+    'keeps grams in the state %s without a yield',
+    (gramsState) => {
+      expect(finishedGrams({ grams: 100, gramsState })).toBe(100)
+    },
+  )
 })
 
 describe('properties of calculateIngredientNutrition', () => {

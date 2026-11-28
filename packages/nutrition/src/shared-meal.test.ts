@@ -24,6 +24,7 @@ function known(
     names: [id],
     allergenMetadata: {
       status: 'KNOWN',
+      evidence: 'INHERENT',
       allergens,
       mayContain,
       otherAllergenLabels: [],
@@ -34,7 +35,11 @@ function known(
 const unknownSauce: CheckedIngredient = {
   id: 'house-sauce',
   names: ['house sauce'],
-  allergenMetadata: { status: 'UNKNOWN' },
+  allergenMetadata: {
+    status: 'UNKNOWN',
+    reason: 'BRAND_DEPENDENT',
+    possibleAllergens: [{ code: 'SOY', basis: 'TYPICAL_FORMULATION' }],
+  },
 }
 
 function allergicTo(allergenCode: AllergenCode): PersonRestrictions {
@@ -132,7 +137,29 @@ describe('checkSharedMeal', () => {
     expect(resultOf(results, 'ben')?.verdict).toBe('NEEDS_VERIFICATION')
     expect(resultOf(results, 'ben')?.reasons).toEqual([
       {
-        code: 'UNVERIFIED_INGREDIENT',
+        code: 'INGREDIENT_COMPOSITION_UNVERIFIED',
+        ingredientId: 'house-sauce',
+        otherPersonId: 'anna',
+      },
+    ])
+  })
+
+  test('blocks an add-on whose possible allergen is another persons allergy', () => {
+    const results = checkSharedMeal(base, [
+      participant('anna', allergicTo('SOY')),
+      participant('ben', noAllergies, [unknownSauce]),
+    ])
+
+    expect(resultOf(results, 'ben')?.verdict).toBe('BLOCKED')
+    expect(resultOf(results, 'ben')?.reasons).toEqual([
+      {
+        code: 'ADD_ON_CONFLICTS_WITH_PARTICIPANT',
+        ingredientId: 'house-sauce',
+        allergenCode: 'SOY',
+        otherPersonId: 'anna',
+      },
+      {
+        code: 'INGREDIENT_COMPOSITION_UNVERIFIED',
         ingredientId: 'house-sauce',
         otherPersonId: 'anna',
       },

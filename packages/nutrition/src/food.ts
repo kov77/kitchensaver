@@ -89,8 +89,8 @@ export function finishedGrams({
 }: Pick<IngredientPortion, 'grams' | 'gramsState' | 'yieldFactor'>) {
   assertValidGrams(grams)
   assertValidYieldFactor(yieldFactor)
-  if (gramsState === 'COOKED' && yieldFactor !== 1) {
-    throw new NutritionInputError('YIELD_ON_COOKED_GRAMS')
+  if (gramsState !== 'RAW' && yieldFactor !== 1) {
+    throw new NutritionInputError('YIELD_ON_NON_RAW_GRAMS')
   }
   return grams * yieldFactor
 }

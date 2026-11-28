@@ -1,11 +1,14 @@
 import type {
   ALLERGEN_CODES,
+  ALLERGEN_EVIDENCES,
   ALLERGY_STATUSES,
   AMOUNT_UNITS,
   CHECK_REASON_CODES,
   CHECK_VERDICTS,
   FOOD_STATES,
   NUTRITION_INPUT_ERROR_CODES,
+  POSSIBLE_ALLERGEN_BASES,
+  UNKNOWN_ALLERGEN_REASONS,
 } from './constants.js'
 
 export type FoodState = (typeof FOOD_STATES)[number]
@@ -44,14 +47,30 @@ export type CheckVerdict = (typeof CHECK_VERDICTS)[number]
 
 export type CheckReasonCode = (typeof CHECK_REASON_CODES)[number]
 
+export type AllergenEvidence = (typeof ALLERGEN_EVIDENCES)[number]
+
+export type UnknownAllergenReason = (typeof UNKNOWN_ALLERGEN_REASONS)[number]
+
+export type PossibleAllergenBasis = (typeof POSSIBLE_ALLERGEN_BASES)[number]
+
+export interface PossibleAllergen {
+  code: AllergenCode
+  basis: PossibleAllergenBasis
+}
+
 export type AllergenMetadata =
   | {
       status: 'KNOWN'
+      evidence: AllergenEvidence
       allergens: readonly AllergenCode[]
       mayContain: readonly AllergenCode[]
       otherAllergenLabels: readonly string[]
     }
-  | { status: 'UNKNOWN' }
+  | {
+      status: 'UNKNOWN'
+      reason: UnknownAllergenReason
+      possibleAllergens: readonly PossibleAllergen[]
+    }
 
 export interface CheckedIngredient {
   id: string
@@ -75,6 +94,7 @@ export interface CheckReason {
 export interface AllergenBadge {
   allergens: AllergenCode[]
   mayContainAllergens: AllergenCode[]
+  possibleAllergens: AllergenCode[]
   unverifiedIngredientIds: string[]
 }
 
