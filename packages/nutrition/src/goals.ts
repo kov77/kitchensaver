@@ -1,3 +1,9 @@
+import {
+  DAILY_KCAL_ISSUES,
+  DAILY_KCAL_LIMITS,
+  GOAL_PACES,
+} from './constants.js'
+
 export type GoalType = 'LOSE' | 'MAINTAIN' | 'GAIN' | 'CUSTOM'
 
 export interface Macros {
@@ -6,20 +12,15 @@ export interface Macros {
   carbsG: number
 }
 
-export type GoalPace = 'MILD' | 'MODERATE'
+export type GoalPace = (typeof GOAL_PACES)[number]
 
 export interface DailyKcalSuggestion {
   suggestedKcal: number
   adjustmentKcal: number
-  isLimitedByMinimum: boolean
+  isLimited: boolean
 }
 
-export type DailyKcalIssue =
-  | 'BELOW_BLOCKED_MINIMUM'
-  | 'BELOW_ADVISED_MINIMUM'
-  | 'ABOVE_ADVISED_MAXIMUM'
-  | 'DEFICIT_ABOVE_ADVISED_RANGE'
-  | 'SURPLUS_ABOVE_ADVISED_RANGE'
+export type DailyKcalIssue = (typeof DAILY_KCAL_ISSUES)[number]
 
 export interface DailyKcalAssessment {
   level: 'OK' | 'WARNING' | 'BLOCKED'
@@ -30,20 +31,10 @@ const MIN_AGE_FOR_LOSE_GOAL = 18
 const MIN_AGE_FOR_MACRO_SUGGESTION = 18
 const MIN_AGE_FOR_KCAL_ADJUSTMENT = 18
 
-const DEFICIT_KCAL_BY_PACE: Record<GoalPace, number> = {
+const KCAL_ADJUSTMENT_BY_PACE: Record<GoalPace, number> = {
   MILD: 300,
   MODERATE: 500,
 }
-const SURPLUS_KCAL_BY_PACE: Record<GoalPace, number> = {
-  MILD: 300,
-  MODERATE: 500,
-}
-
-const BLOCKED_MINIMUM_DAILY_KCAL = 800
-const ADVISED_MINIMUM_DAILY_KCAL = 1200
-const ADVISED_MAXIMUM_DAILY_KCAL = 3200
-const ADVISED_MAXIMUM_DEFICIT_KCAL = 1000
-const ADVISED_MAXIMUM_SURPLUS_KCAL = 500
 
 const MACRO_MISMATCH_TOLERANCE = 0.1
 
@@ -97,29 +88,33 @@ export function suggestDailyKcal(
     return {
       suggestedKcal: maintenanceKcal,
       adjustmentKcal: 0,
-      isLimitedByMinimum: false,
+      isLimited: false,
     }
   }
   if (ageYears < MIN_AGE_FOR_KCAL_ADJUSTMENT) return null
 
+  const adjustmentKcal = KCAL_ADJUSTMENT_BY_PACE[pace]
+
   if (goalType === 'GAIN') {
-    const adjustmentKcal = SURPLUS_KCAL_BY_PACE[pace]
+    const targetKcal = maintenanceKcal + adjustmentKcal
+    const suggestedKcal = Math.max(
+      maintenanceKcal,
+      Math.min(targetKcal, DAILY_KCAL_LIMITS.advisedMaximum),
+    )
     return {
-      suggestedKcal: maintenanceKcal + adjustmentKcal,
-      adjustmentKcal,
-      isLimitedByMinimum: false,
+      suggestedKcal,
+      adjustmentKcal: suggestedKcal - maintenanceKcal,
+      isLimited: suggestedKcal < targetKcal,
     }
   }
 
-  const targetKcal = maintenanceKcal - DEFICIT_KCAL_BY_PACE[pace]
-  const suggestedKcal = Math.min(
-    maintenanceKcal,
-    Math.max(targetKcal, ADVISED_MINIMUM_DAILY_KCAL),
-  )
+  if (maintenanceKcal <= DAILY_KCAL_LIMITS.advisedMinimum) return null
+  const targetKcal = maintenanceKcal - adjustmentKcal
+  const suggestedKcal = Math.max(targetKcal, DAILY_KCAL_LIMITS.advisedMinimum)
   return {
     suggestedKcal,
     adjustmentKcal: suggestedKcal - maintenanceKcal,
-    isLimitedByMinimum: suggestedKcal > targetKcal,
+    isLimited: suggestedKcal > targetKcal,
   }
 }
 
@@ -127,22 +122,22 @@ export function assessDailyKcal(
   dailyKcal: number,
   maintenanceKcal: number | null,
 ): DailyKcalAssessment {
-  if (dailyKcal < BLOCKED_MINIMUM_DAILY_KCAL) {
+  if (dailyKcal < DAILY_KCAL_LIMITS.blockedMinimum) {
     return { level: 'BLOCKED', issues: ['BELOW_BLOCKED_MINIMUM'] }
   }
 
   const issues: DailyKcalIssue[] = []
-  if (dailyKcal < ADVISED_MINIMUM_DAILY_KCAL) {
+  if (dailyKcal < DAILY_KCAL_LIMITS.advisedMinimum) {
     issues.push('BELOW_ADVISED_MINIMUM')
   }
-  if (dailyKcal > ADVISED_MAXIMUM_DAILY_KCAL) {
+  if (dailyKcal > DAILY_KCAL_LIMITS.advisedMaximum) {
     issues.push('ABOVE_ADVISED_MAXIMUM')
   }
   if (maintenanceKcal !== null) {
-    if (maintenanceKcal - dailyKcal > ADVISED_MAXIMUM_DEFICIT_KCAL) {
+    if (maintenanceKcal - dailyKcal > DAILY_KCAL_LIMITS.advisedMaximumDeficit) {
       issues.push('DEFICIT_ABOVE_ADVISED_RANGE')
     }
-    if (dailyKcal - maintenanceKcal > ADVISED_MAXIMUM_SURPLUS_KCAL) {
+    if (dailyKcal - maintenanceKcal > DAILY_KCAL_LIMITS.advisedMaximumSurplus) {
       issues.push('SURPLUS_ABOVE_ADVISED_RANGE')
     }
   }

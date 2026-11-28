@@ -98,7 +98,7 @@ describe('suggestDailyKcal', () => {
       expect(suggestDailyKcal(maintenanceKcal, goalType, pace, 30)).toEqual({
         suggestedKcal,
         adjustmentKcal,
-        isLimitedByMinimum: false,
+        isLimited: false,
       })
     },
   )
@@ -107,7 +107,7 @@ describe('suggestDailyKcal', () => {
     expect(suggestDailyKcal(1700, 'LOSE', 'MODERATE', 30)).toEqual({
       suggestedKcal: 1200,
       adjustmentKcal: -500,
-      isLimitedByMinimum: false,
+      isLimited: false,
     })
   })
 
@@ -115,25 +115,47 @@ describe('suggestDailyKcal', () => {
     expect(suggestDailyKcal(1600, 'LOSE', 'MODERATE', 30)).toEqual({
       suggestedKcal: 1200,
       adjustmentKcal: -400,
-      isLimitedByMinimum: true,
+      isLimited: true,
+    })
+  })
+
+  test('maintenance just above 1200 kcal gets the smallest possible deficit', () => {
+    expect(suggestDailyKcal(1201, 'LOSE', 'MILD', 30)).toEqual({
+      suggestedKcal: 1200,
+      adjustmentKcal: -1,
+      isLimited: true,
     })
   })
 
   test.each([1200, 1100, 900])(
-    'maintenance of %i kcal gets no deficit',
+    'maintenance of %i kcal gets no deficit suggestion',
     (maintenanceKcal) => {
-      expect(suggestDailyKcal(maintenanceKcal, 'LOSE', 'MILD', 30)).toEqual({
-        suggestedKcal: maintenanceKcal,
-        adjustmentKcal: 0,
-        isLimitedByMinimum: true,
-      })
+      expect(suggestDailyKcal(maintenanceKcal, 'LOSE', 'MILD', 30)).toBeNull()
     },
   )
 
-  test('a surplus has no minimum or maximum limit', () => {
-    expect(suggestDailyKcal(3400, 'GAIN', 'MODERATE', 30)?.suggestedKcal).toBe(
-      3900,
-    )
+  test('a surplus is stopped at 3200 kcal', () => {
+    expect(suggestDailyKcal(2902, 'GAIN', 'MODERATE', 30)).toEqual({
+      suggestedKcal: 3200,
+      adjustmentKcal: 298,
+      isLimited: true,
+    })
+  })
+
+  test('a surplus that ends exactly at 3200 kcal is not limited', () => {
+    expect(suggestDailyKcal(2900, 'GAIN', 'MILD', 30)).toEqual({
+      suggestedKcal: 3200,
+      adjustmentKcal: 300,
+      isLimited: false,
+    })
+  })
+
+  test('maintenance above 3200 kcal gets no surplus', () => {
+    expect(suggestDailyKcal(3400, 'GAIN', 'MILD', 30)).toEqual({
+      suggestedKcal: 3400,
+      adjustmentKcal: 0,
+      isLimited: true,
+    })
   })
 
   test('CUSTOM has no suggestion', () => {
