@@ -92,6 +92,8 @@ export const READINESS_HINT_KEYS: Record<PlanReadinessReason, CommonKey> = {
   ALLERGY_STATUS_MISSING: 'common:readiness-hints-ALLERGY_STATUS_MISSING',
 }
 
+export const KCAL_WARNING_ERROR_CODE = 'GOAL_KCAL_OUT_OF_RANGE'
+
 export const ERROR_CODE_MESSAGE_KEYS = new Map<string, CommonKey>([
   ['ALLERGY_ALREADY_EXISTS', 'common:errors-codes-ALLERGY_ALREADY_EXISTS'],
   ['ALLERGIES_EXIST', 'common:errors-codes-ALLERGIES_EXIST'],
@@ -103,4 +105,5 @@ export const ERROR_CODE_MESSAGE_KEYS = new Map<string, CommonKey>([
   ],
   ['PROFILE_LIMIT_REACHED', 'common:errors-codes-PROFILE_LIMIT_REACHED'],
   ['PROFILE_TOTAL_LIMIT_REACHED', 'common:errors-codes-PROFILE_LIMIT_REACHED'],
+  ['GOAL_KCAL_BELOW_MINIMUM', 'common:errors-codes-GOAL_KCAL_BELOW_MINIMUM'],
 ])

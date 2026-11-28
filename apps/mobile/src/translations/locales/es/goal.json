@@ -24,5 +24,15 @@
   "screen-subtitle": "Elige cómo quieres fijarlo. Podrás cambiarlo después.",
   "screen-save": "Guardar objetivo",
   "screen-cancel": "Cancelar",
-  "screen-parameters-unavailable": "No pudimos cargar las medidas guardadas, así que el formulario empieza vacío."
+  "screen-parameters-unavailable": "No pudimos cargar las medidas guardadas, así que el formulario empieza vacío.",
+  "editor-pace-hint": "Elige un ritmo para rellenar un objetivo sugerido, o escribe el tuyo. Ambos son solo orientativos.",
+  "editor-pace-label": "Ritmo",
+  "editor-pace-MILD": "Suave",
+  "editor-pace-MODERATE": "Moderado",
+  "editor-pace-calculation": "{{maintenance}} kcal para mantener tu peso {{adjustment}} kcal = {{result}} kcal al día.",
+  "editor-pace-limited": "La sugerencia se detiene en el límite que recomienda la app.",
+  "kcal-warning-title": "Fuera del rango habitual",
+  "kcal-warning-message": "Esta cantidad está fuera del rango que se suele recomendar. Te sugerimos hablar con tu dietista antes de usarla. Aun así puedes guardarla.",
+  "kcal-warning-confirm": "Guardar de todos modos",
+  "kcal-warning-cancel": "Cambiarla"
 }

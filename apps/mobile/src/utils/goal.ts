@@ -1,9 +1,12 @@
 import type { GoalDraft } from '@/core/types'
 
 export function toSaveGoalBody(draft: GoalDraft) {
+  const confirmation = draft.confirmKcalWarning
+    ? { confirmKcalWarning: true }
+    : {}
   if (draft.mode === 'MANUAL') {
     const { goalType, dailyKcal } = draft
-    return { mode: 'MANUAL' as const, goalType, dailyKcal }
+    return { mode: 'MANUAL' as const, goalType, dailyKcal, ...confirmation }
   }
   const { goalType, dailyKcal, heightCm, weightKg, activityLevel, formulaSex } =
     draft
@@ -15,5 +18,6 @@ export function toSaveGoalBody(draft: GoalDraft) {
     weightKg,
     activityLevel,
     formulaSex,
+    ...confirmation,
   }
 }

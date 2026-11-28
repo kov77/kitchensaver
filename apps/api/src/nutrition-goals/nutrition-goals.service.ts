@@ -9,7 +9,12 @@ import { parseSupportedDateOfBirth } from '../people/date-of-birth.js'
 import { personNotFound } from '../people/people.errors.js'
 import { PeopleService } from '../people/people.service.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import { buildGoalFields, previewEstimate } from './goal-calculation.js'
+import {
+  buildGoalFields,
+  checkDailyKcal,
+  maintenanceKcalFor,
+  previewEstimate,
+} from './goal-calculation.js'
 import type {
   EstimateGoalRequest,
   GoalEstimateDto,
@@ -17,6 +22,13 @@ import type {
   PreviewGoalRequest,
   SaveGoalRequest,
 } from './nutrition-goals.dto.js'
+
+const bodyParametersSelect = {
+  heightCm: true,
+  weightKg: true,
+  activityLevel: true,
+  formulaSex: true,
+} as const
 
 const goalSelect = {
   mode: true,
@@ -31,11 +43,19 @@ const goalSelect = {
   revision: true,
   confirmedAt: true,
   reviewRequiredAt: true,
+  personProfile: {
+    select: {
+      dateOfBirth: true,
+      bodyParameters: { select: bodyParametersSelect },
+    },
+  },
 } as const
 
 type StoredGoal = Prisma.NutritionGoalGetPayload<{ select: typeof goalSelect }>
 
-function checkMacros({ dailyKcal, proteinG, fatG, carbsG }: StoredGoal) {
+type GoalFields = Omit<StoredGoal, 'personProfile'>
+
+function checkMacros({ dailyKcal, proteinG, fatG, carbsG }: GoalFields) {
   if (proteinG === null || fatG === null || carbsG === null) {
     return { macroCheck: 'SKIPPED_INCOMPLETE', warnings: [] }
   }
@@ -48,6 +68,18 @@ function checkMacros({ dailyKcal, proteinG, fatG, carbsG }: StoredGoal) {
   return {
     macroCheck: 'MISMATCH_CONFIRMED',
     warnings: [{ code: 'MACROS_ENERGY_MISMATCH', calculatedKcal, dailyKcal }],
+  }
+}
+
+function toGoalDto({ personProfile, ...goal }: StoredGoal): NutritionGoalDto {
+  const { dateOfBirth, bodyParameters } = personProfile
+  const maintenanceKcal =
+    goal.estimatedMaintenanceKcal ??
+    maintenanceKcalFor(calculateAge(dateOfBirth, new Date()), bodyParameters)
+  return {
+    ...goal,
+    ...checkMacros(goal),
+    kcalWarning: checkDailyKcal(goal.dailyKcal, maintenanceKcal),
   }
 }
 
@@ -72,7 +104,7 @@ export class NutritionGoalsService {
       where: { personProfileId: personId },
       select: goalSelect,
     })
-    return goal && { ...goal, ...checkMacros(goal) }
+    return goal && toGoalDto(goal)
   }
 
   async estimate(
@@ -99,10 +131,7 @@ export class NutritionGoalsService {
     request: SaveGoalRequest,
   ): Promise<NutritionGoalDto> {
     const ageYears = await this.getAge(accountId, personId)
-    const stored =
-      request.mode === 'ESTIMATED'
-        ? await this.getBodyParameters(personId)
-        : null
+    const stored = await this.getBodyParameters(personId)
     const fields = buildGoalFields(request, ageYears, stored, new Date())
     try {
       const goal = await this.prisma.nutritionGoal.upsert({
@@ -111,7 +140,7 @@ export class NutritionGoalsService {
         update: { ...fields, revision: { increment: 1 } },
         select: goalSelect,
       })
-      return { ...goal, ...checkMacros(goal) }
+      return toGoalDto(goal)
     } catch (error) {
       if (hasPrismaCode(error, 'P2003')) throw personNotFound()
       throw error
@@ -126,12 +155,7 @@ export class NutritionGoalsService {
   private getBodyParameters(personId: string) {
     return this.prisma.personBodyParameters.findUnique({
       where: { personProfileId: personId },
-      select: {
-        heightCm: true,
-        weightKg: true,
-        activityLevel: true,
-        formulaSex: true,
-      },
+      select: bodyParametersSelect,
     })
   }
 }

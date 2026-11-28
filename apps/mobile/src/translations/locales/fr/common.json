@@ -58,5 +58,6 @@
   "errors-codes-RESTRICTION_LIMIT_REACHED": "La liste est pleine. Retirez un élément avant d’en ajouter un autre.",
   "errors-codes-PROFILE_LIMIT_REACHED": "Vous avez atteint la limite de profils. Supprimez un profil pour en ajouter un autre.",
   "errors-codes-FOOD_ALREADY_EXISTS": "Cet aliment figure déjà dans la liste.",
-  "errors-required": "Ce champ est obligatoire."
+  "errors-required": "Ce champ est obligatoire.",
+  "errors-codes-GOAL_KCAL_BELOW_MINIMUM": "C’est en dessous des calories quotidiennes minimales acceptées par l’appli. Saisissez une quantité plus élevée."
 }

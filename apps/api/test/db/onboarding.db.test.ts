@@ -129,6 +129,28 @@ describe('POST /people/onboarding', () => {
     )
   })
 
+  test('saves a confirmed out-of-range goal and reports the warning', async () => {
+    const { asUser } = await setup()
+
+    const response = await asUser.onboard(
+      {
+        name: 'Anna',
+        dateOfBirth: birthDateForAge(30),
+        allergies: noAllergies,
+        bodyParameters,
+        goal: { mode: 'MANUAL', dailyKcal: 1500, confirmKcalWarning: true },
+      },
+      randomUUID(),
+    )
+
+    expect(response.status).toBe(201)
+    expect(response.body.goal.kcalWarning).toMatchObject({
+      issues: ['DEFICIT_ABOVE_ADVISED_RANGE'],
+      dailyKcal: 1500,
+      maintenanceKcal: 2902,
+    })
+  })
+
   test('saves a manual goal that needs no body parameters', async () => {
     const { asUser } = await setup()
 
@@ -381,6 +403,18 @@ describe('onboarding is all or nothing', () => {
         },
       },
       'GOAL_MACROS_MISMATCH',
+      422,
+    ],
+    [
+      'calories below the lowest accepted value',
+      { goal: { mode: 'MANUAL', dailyKcal: 700, confirmKcalWarning: true } },
+      'GOAL_KCAL_BELOW_MINIMUM',
+      422,
+    ],
+    [
+      'calories outside the recommended range without confirmation',
+      { goal: { mode: 'MANUAL', dailyKcal: 1000 } },
+      'GOAL_KCAL_OUT_OF_RANGE',
       422,
     ],
     [

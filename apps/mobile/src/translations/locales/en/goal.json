@@ -24,5 +24,15 @@
   "screen-subtitle": "Choose how you want to set it. You can change it later.",
   "screen-save": "Save goal",
   "screen-cancel": "Cancel",
-  "screen-parameters-unavailable": "Saved measurements could not be loaded, so the form starts empty."
+  "screen-parameters-unavailable": "Saved measurements could not be loaded, so the form starts empty.",
+  "editor-pace-hint": "Pick a pace to fill in a suggested target, or type your own. Both are only guides.",
+  "editor-pace-label": "Pace",
+  "editor-pace-MILD": "Gentle",
+  "editor-pace-MODERATE": "Moderate",
+  "editor-pace-calculation": "{{maintenance}} kcal to keep your weight {{adjustment}} kcal = {{result}} kcal a day.",
+  "editor-pace-limited": "The suggestion stops at the limit the app recommends.",
+  "kcal-warning-title": "Outside the usual range",
+  "kcal-warning-message": "This amount is outside the range usually recommended. We suggest talking to your dietitian before using it. You can still save it.",
+  "kcal-warning-confirm": "Save anyway",
+  "kcal-warning-cancel": "Change it"
 }

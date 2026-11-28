@@ -2,6 +2,7 @@ import i18next from 'i18next'
 
 import {
   ERROR_CODE_MESSAGE_KEYS,
+  KCAL_WARNING_ERROR_CODE,
   MAX_REQUEST_RETRIES,
   NETWORK_ERROR_PATTERN,
   RESPONSE_STATUS_CODE,
@@ -20,6 +21,12 @@ export function isUnauthorizedError(error: unknown) {
   return (
     error instanceof ApiRequestError &&
     error.status === RESPONSE_STATUS_CODE.UNAUTHORIZED
+  )
+}
+
+export function isKcalWarningError(error: unknown) {
+  return (
+    error instanceof ApiRequestError && error.code === KCAL_WARNING_ERROR_CODE
   )
 }
 

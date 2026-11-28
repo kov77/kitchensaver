@@ -24,5 +24,15 @@
   "screen-subtitle": "Choisissez comment le définir. Vous pourrez le modifier plus tard.",
   "screen-save": "Enregistrer l’objectif",
   "screen-cancel": "Annuler",
-  "screen-parameters-unavailable": "Les mesures enregistrées n’ont pas pu être chargées, le formulaire est donc vide."
+  "screen-parameters-unavailable": "Les mesures enregistrées n’ont pas pu être chargées, le formulaire est donc vide.",
+  "editor-pace-hint": "Choisissez un rythme pour remplir un objectif suggéré, ou saisissez le vôtre. Les deux ne sont que des repères.",
+  "editor-pace-label": "Rythme",
+  "editor-pace-MILD": "Doux",
+  "editor-pace-MODERATE": "Modéré",
+  "editor-pace-calculation": "{{maintenance}} kcal pour garder votre poids {{adjustment}} kcal = {{result}} kcal par jour.",
+  "editor-pace-limited": "La suggestion s’arrête à la limite que l’appli recommande.",
+  "kcal-warning-title": "En dehors de la plage habituelle",
+  "kcal-warning-message": "Cette quantité est en dehors de la plage généralement recommandée. Nous vous conseillons d’en parler avec votre diététicien avant de l’utiliser. Vous pouvez quand même l’enregistrer.",
+  "kcal-warning-confirm": "Enregistrer quand même",
+  "kcal-warning-cancel": "La modifier"
 }

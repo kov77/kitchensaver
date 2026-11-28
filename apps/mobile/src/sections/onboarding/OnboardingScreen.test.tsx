@@ -1,9 +1,15 @@
 import { QueryClient } from '@tanstack/react-query'
-import { fireEvent, screen, userEvent } from '@testing-library/react-native'
+import {
+  fireEvent,
+  screen,
+  userEvent,
+  waitFor,
+} from '@testing-library/react-native'
 import { randomUUID } from 'expo-crypto'
 
 import { getPeopleListKey } from '@/api/queryKeys'
 import type { PersonListItem } from '@/api/types'
+import { apiError } from '@/test-utils/apiError'
 import { apiResult } from '@/test-utils/apiResult'
 import {
   createTestQueryClient,
@@ -180,12 +186,43 @@ describe('OnboardingScreen goal step', () => {
     })
   })
 
+  it('asks for confirmation of calories outside the usual range and sends the goal again with it', async () => {
+    mockPost
+      .mockResolvedValueOnce(apiError(422, 'GOAL_KCAL_OUT_OF_RANGE'))
+      .mockResolvedValueOnce(apiResult(201, { person: PERSON }))
+    const user = userEvent.setup()
+    await user.press(
+      screen.getByRole('radio', { name: 'I already know my daily calories' }),
+    )
+    await user.press(screen.getByRole('radio', { name: 'Maintain weight' }))
+    await user.type(screen.getByLabelText('Daily calories (kcal)'), '1100')
+    await user.press(screen.getByRole('button', { name: 'Continue' }))
+    await answer("I don't know")
+    await finish()
+    await user.press(
+      await screen.findByRole('button', { name: 'I understand, continue' }),
+    )
+
+    await screen.findByText('Outside the usual range')
+    await user.press(screen.getByRole('button', { name: 'Save anyway' }))
+
+    await waitFor(() => expect(idempotencyKeys()).toHaveLength(2))
+    expect(
+      mockPost.mock.calls.filter(([path]) => path === ONBOARDING_PATH)[1]?.[1]
+        .body,
+    ).toMatchObject({
+      goal: { dailyKcal: 1100, confirmKcalWarning: true },
+    })
+    expect(new Set(idempotencyKeys()).size).toBe(2)
+  })
+
   it('previews the estimate without a profile, using the date of birth', async () => {
     mockPost.mockResolvedValue(
       apiResult(200, {
         estimatedMaintenanceKcal: 2275,
         methodology: 'DRI',
         assumptions: ['AGE_IN_COMPLETED_YEARS'],
+        kcalSuggestions: [],
       }),
     )
     const user = userEvent.setup()
