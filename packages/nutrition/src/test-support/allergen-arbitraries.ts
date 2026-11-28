@@ -40,6 +40,7 @@ export function knownIngredientArbitrary(
       names,
       allergenMetadata: {
         status: 'KNOWN',
+        evidence: 'INHERENT',
         allergens: known,
         mayContain,
         otherAllergenLabels: [],
@@ -55,7 +56,11 @@ export const unknownIngredientArbitrary = fastCheck
   .map(({ id, names }): CheckedIngredient => ({
     id,
     names,
-    allergenMetadata: { status: 'UNKNOWN' },
+    allergenMetadata: {
+      status: 'UNKNOWN',
+      reason: 'DATA_GAP',
+      possibleAllergens: [],
+    },
   }))
 
 export const anyIngredientArbitrary = fastCheck.oneof(

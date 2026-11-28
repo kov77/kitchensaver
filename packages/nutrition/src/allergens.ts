@@ -23,10 +23,14 @@ function unique<Value>(values: readonly Value[]) {
 function buildBadge(ingredients: readonly CheckedIngredient[]): AllergenBadge {
   const allergens: AllergenCode[] = []
   const mayContainAllergens: AllergenCode[] = []
+  const possibleAllergens: AllergenCode[] = []
   const unverifiedIngredientIds: string[] = []
   for (const { id, allergenMetadata } of ingredients) {
     if (allergenMetadata.status === 'UNKNOWN') {
       unverifiedIngredientIds.push(id)
+      possibleAllergens.push(
+        ...allergenMetadata.possibleAllergens.map(({ code }) => code),
+      )
       continue
     }
     allergens.push(...allergenMetadata.allergens)
@@ -35,6 +39,7 @@ function buildBadge(ingredients: readonly CheckedIngredient[]): AllergenBadge {
   return {
     allergens: unique(allergens),
     mayContainAllergens: unique(mayContainAllergens),
+    possibleAllergens: unique(possibleAllergens),
     unverifiedIngredientIds: unique(unverifiedIngredientIds),
   }
 }
@@ -71,8 +76,16 @@ function checkIngredient(
   }
 
   if (allergenMetadata.status === 'UNKNOWN') {
+    const possibleCodes = new Set(
+      allergenMetadata.possibleAllergens.map(({ code }) => code),
+    )
+    for (const { allergenCode } of allergies) {
+      if (possibleCodes.has(allergenCode)) {
+        reasons.push({ code: 'ALLERGEN_POSSIBLE', ingredientId, allergenCode })
+      }
+    }
     if (allergies.length > 0 || exclusions.length > 0) {
-      reasons.push({ code: 'UNVERIFIED_INGREDIENT', ingredientId })
+      reasons.push({ code: 'INGREDIENT_COMPOSITION_UNVERIFIED', ingredientId })
     }
     return reasons
   }
@@ -81,7 +94,7 @@ function checkIngredient(
     allergenMetadata.allergens.includes(OTHER_ALLERGEN) ||
     allergenMetadata.mayContain.includes(OTHER_ALLERGEN)
   if (otherAllergies.length > 0 && hidesOtherAllergen) {
-    reasons.push({ code: 'UNVERIFIED_INGREDIENT', ingredientId })
+    reasons.push({ code: 'INGREDIENT_COMPOSITION_UNVERIFIED', ingredientId })
   }
 
   for (const { allergenCode } of allergies) {
@@ -132,6 +145,10 @@ export function toVerdict(reasons: readonly CheckReason[]): CheckVerdict {
     return 'BLOCKED'
   }
   return reasons.length > 0 ? 'NEEDS_VERIFICATION' : 'NO_KNOWN_CONFLICT'
+}
+
+export function isEligibleForAutoPlan({ verdict }: { verdict: CheckVerdict }) {
+  return verdict === 'NO_KNOWN_CONFLICT'
 }
 
 export function checkIngredientsForPerson(

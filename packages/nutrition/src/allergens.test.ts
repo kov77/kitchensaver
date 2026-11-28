@@ -1,12 +1,18 @@
 import * as fastCheck from 'fast-check'
 import { describe, expect, test } from 'vitest'
 
-import { checkIngredientsForPerson } from './allergens.js'
+import {
+  checkIngredientsForPerson,
+  isEligibleForAutoPlan,
+} from './allergens.js'
 import {
   ALLERGEN_CODES,
+  ALLERGEN_EVIDENCES,
   ALLERGY_STATUSES,
   CHECK_REASON_CODES,
   CHECK_VERDICTS,
+  POSSIBLE_ALLERGEN_BASES,
+  UNKNOWN_ALLERGEN_REASONS,
 } from './constants.js'
 import golden from './golden/allergens.json' with { type: 'json' }
 import {
@@ -20,6 +26,7 @@ import {
 import { codeOf } from './test-support/arbitraries.js'
 import { narrow } from './test-support/narrow.js'
 import type {
+  AllergenCode,
   AllergenMetadata,
   CheckedIngredient,
   PersonRestrictions,
@@ -27,6 +34,9 @@ import type {
 
 interface GoldenMetadata {
   status: string
+  evidence?: string
+  reason?: string
+  possibleAllergens?: { code: string; basis: string }[]
   allergens?: string[]
   mayContain?: string[]
   otherAllergenLabels?: string[]
@@ -34,13 +44,26 @@ interface GoldenMetadata {
 
 function toMetadata({
   status,
+  evidence = '',
+  reason = '',
+  possibleAllergens = [],
   allergens = [],
   mayContain = [],
   otherAllergenLabels = [],
 }: GoldenMetadata): AllergenMetadata {
-  if (status === 'UNKNOWN') return { status: 'UNKNOWN' }
+  if (status === 'UNKNOWN') {
+    return {
+      status: 'UNKNOWN',
+      reason: narrow(UNKNOWN_ALLERGEN_REASONS, reason),
+      possibleAllergens: possibleAllergens.map(({ code, basis }) => ({
+        code: narrow(ALLERGEN_CODES, code),
+        basis: narrow(POSSIBLE_ALLERGEN_BASES, basis),
+      })),
+    }
+  }
   return {
     status: 'KNOWN',
+    evidence: narrow(ALLERGEN_EVIDENCES, evidence),
     allergens: allergens.map((code) => narrow(ALLERGEN_CODES, code)),
     mayContain: mayContain.map((code) => narrow(ALLERGEN_CODES, code)),
     otherAllergenLabels,
@@ -90,6 +113,91 @@ describe('checkIngredientsForPerson golden cases', () => {
   )
 })
 
+function possiblyContaining(
+  id: string,
+  allergenCode: AllergenCode,
+): CheckedIngredient {
+  return {
+    id,
+    names: [id],
+    allergenMetadata: {
+      status: 'UNKNOWN',
+      reason: 'BRAND_DEPENDENT',
+      possibleAllergens: [{ code: allergenCode, basis: 'TYPICAL_FORMULATION' }],
+    },
+  }
+}
+
+describe('isEligibleForAutoPlan', () => {
+  test.each([
+    ['BLOCKED', false],
+    ['NEEDS_VERIFICATION', false],
+    ['NO_KNOWN_CONFLICT', true],
+  ] as const)('%s gives %s', (verdict, expected) => {
+    expect(isEligibleForAutoPlan({ verdict })).toBe(expected)
+  })
+
+  test('a possible allergen that matches an allergy never reaches an automatic plan', () => {
+    fastCheck.assert(
+      fastCheck.property(
+        allergenCodeArbitrary,
+        fastCheck.array(knownIngredientArbitrary(fastCheck.constant([])), {
+          maxLength: 3,
+        }),
+        (allergenCode, others) => {
+          const result = checkIngredientsForPerson(
+            [...others, possiblyContaining('brand-sauce', allergenCode)],
+            {
+              allergyStatus: 'HAS_ALLERGIES',
+              allergies: [{ allergenCode, label: '' }],
+              exclusions: [],
+            },
+          )
+          return (
+            !isEligibleForAutoPlan(result) &&
+            result.reasons.some(({ code }) => code === 'ALLERGEN_POSSIBLE')
+          )
+        },
+      ),
+    )
+  })
+
+  test('a missing allergen in the possible list never gives a clean verdict to an allergic person', () => {
+    fastCheck.assert(
+      fastCheck.property(
+        allergenCodeArbitrary,
+        fastCheck.array(allergenCodeArbitrary, { maxLength: 4 }),
+        (allergenCode, possible) => {
+          const result = checkIngredientsForPerson(
+            [
+              {
+                id: 'brand-sauce',
+                names: ['brand sauce'],
+                allergenMetadata: {
+                  status: 'UNKNOWN',
+                  reason: 'BRAND_DEPENDENT',
+                  possibleAllergens: possible
+                    .filter((code) => code !== allergenCode)
+                    .map((code) => ({
+                      code,
+                      basis: 'TYPICAL_FORMULATION' as const,
+                    })),
+                },
+              },
+            ],
+            {
+              allergyStatus: 'HAS_ALLERGIES',
+              allergies: [{ allergenCode, label: '' }],
+              exclusions: [],
+            },
+          )
+          return result.verdict === 'NEEDS_VERIFICATION'
+        },
+      ),
+    )
+  })
+})
+
 describe('checkIngredientsForPerson', () => {
   const rice = toIngredient('rice')
 
@@ -114,8 +222,20 @@ describe('checkIngredientsForPerson', () => {
     expect(result.badge).toEqual({
       allergens: ['PEANUT', 'WHEAT'],
       mayContainAllergens: ['TREE_NUT'],
+      possibleAllergens: [],
       unverifiedIngredientIds: ['mystery-sauce'],
     })
+  })
+
+  test('reports the possible allergens of unknown ingredients in the badge', () => {
+    const result = checkIngredientsForPerson(
+      ['rice', 'brandSoySauce'].map(toIngredient),
+      { allergyStatus: 'NONE', allergies: [], exclusions: [] },
+    )
+
+    expect(result.badge.possibleAllergens).toEqual(['SOY', 'WHEAT'])
+    expect(result.badge.allergens).toEqual([])
+    expect(result.badge.unverifiedIngredientIds).toEqual(['brand-soy-sauce'])
   })
 
   test('points at the ingredient and the allergen that caused the block', () => {
@@ -293,6 +413,7 @@ describe('allergen invariants', () => {
             names: ['soy sauce'],
             allergenMetadata: {
               status: 'KNOWN',
+              evidence: 'INHERENT',
               allergens: [],
               mayContain: [],
               otherAllergenLabels: [],

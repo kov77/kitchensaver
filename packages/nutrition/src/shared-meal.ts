@@ -27,7 +27,7 @@ function addOnConflicts(
     return reasons
       .filter(({ ingredientId }) => ingredientId === addOn.id)
       .map((reason) =>
-        reason.code === 'UNVERIFIED_INGREDIENT'
+        reason.code === 'INGREDIENT_COMPOSITION_UNVERIFIED'
           ? { ...reason, otherPersonId: personId }
           : {
               code: 'ADD_ON_CONFLICTS_WITH_PARTICIPANT' as const,

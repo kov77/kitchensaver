@@ -5,6 +5,7 @@
       "names": ["rice"],
       "metadata": {
         "status": "KNOWN",
+        "evidence": "INHERENT",
         "allergens": [],
         "mayContain": [],
         "otherAllergenLabels": []
@@ -15,6 +16,7 @@
       "names": ["chicken breast"],
       "metadata": {
         "status": "KNOWN",
+        "evidence": "INHERENT",
         "allergens": [],
         "mayContain": [],
         "otherAllergenLabels": []
@@ -25,6 +27,7 @@
       "names": ["peanut butter"],
       "metadata": {
         "status": "KNOWN",
+        "evidence": "INHERENT",
         "allergens": ["PEANUT"],
         "mayContain": [],
         "otherAllergenLabels": []
@@ -35,6 +38,7 @@
       "names": ["granola"],
       "metadata": {
         "status": "KNOWN",
+        "evidence": "INHERENT",
         "allergens": ["WHEAT"],
         "mayContain": ["TREE_NUT"],
         "otherAllergenLabels": []
@@ -45,6 +49,7 @@
       "names": ["cilantro", "coriander leaves"],
       "metadata": {
         "status": "KNOWN",
+        "evidence": "INHERENT",
         "allergens": [],
         "mayContain": [],
         "otherAllergenLabels": []
@@ -55,6 +60,7 @@
       "names": ["fruit sauce"],
       "metadata": {
         "status": "KNOWN",
+        "evidence": "INHERENT",
         "allergens": [],
         "mayContain": [],
         "otherAllergenLabels": ["kiwi"]
@@ -65,6 +71,7 @@
       "names": ["kiwi"],
       "metadata": {
         "status": "KNOWN",
+        "evidence": "INHERENT",
         "allergens": [],
         "mayContain": [],
         "otherAllergenLabels": []
@@ -74,7 +81,9 @@
       "id": "mystery-sauce",
       "names": ["house sauce"],
       "metadata": {
-        "status": "UNKNOWN"
+        "status": "UNKNOWN",
+        "reason": "DATA_GAP",
+        "possibleAllergens": []
       }
     },
     "trailMix": {
@@ -82,6 +91,7 @@
       "names": ["trail mix"],
       "metadata": {
         "status": "KNOWN",
+        "evidence": "INHERENT",
         "allergens": ["OTHER"],
         "mayContain": [],
         "otherAllergenLabels": []
@@ -91,7 +101,41 @@
       "id": "kiwi-unknown",
       "names": ["kiwi"],
       "metadata": {
-        "status": "UNKNOWN"
+        "status": "UNKNOWN",
+        "reason": "DATA_GAP",
+        "possibleAllergens": []
+      }
+    },
+    "brandSoySauce": {
+      "id": "brand-soy-sauce",
+      "names": ["soy sauce"],
+      "metadata": {
+        "status": "UNKNOWN",
+        "reason": "BRAND_DEPENDENT",
+        "possibleAllergens": [
+          {
+            "code": "SOY",
+            "basis": "TYPICAL_FORMULATION"
+          },
+          {
+            "code": "WHEAT",
+            "basis": "TYPICAL_FORMULATION"
+          }
+        ]
+      }
+    },
+    "brandSpiceMix": {
+      "id": "brand-spice-mix",
+      "names": ["spice mix"],
+      "metadata": {
+        "status": "UNKNOWN",
+        "reason": "BRAND_DEPENDENT",
+        "possibleAllergens": [
+          {
+            "code": "OTHER",
+            "basis": "INGREDIENT_NAME"
+          }
+        ]
       }
     }
   },
@@ -163,7 +207,7 @@
       },
       "expected": {
         "verdict": "NEEDS_VERIFICATION",
-        "reasonCodes": ["UNVERIFIED_INGREDIENT"],
+        "reasonCodes": ["INGREDIENT_COMPOSITION_UNVERIFIED"],
         "badgeAllergens": []
       }
     },
@@ -191,7 +235,7 @@
       },
       "expected": {
         "verdict": "NEEDS_VERIFICATION",
-        "reasonCodes": ["UNVERIFIED_INGREDIENT"],
+        "reasonCodes": ["INGREDIENT_COMPOSITION_UNVERIFIED"],
         "badgeAllergens": []
       }
     },
@@ -323,7 +367,7 @@
       },
       "expected": {
         "verdict": "NEEDS_VERIFICATION",
-        "reasonCodes": ["UNVERIFIED_INGREDIENT"],
+        "reasonCodes": ["INGREDIENT_COMPOSITION_UNVERIFIED"],
         "badgeAllergens": []
       }
     },
@@ -375,7 +419,10 @@
       },
       "expected": {
         "verdict": "BLOCKED",
-        "reasonCodes": ["ALLERGEN_PRESENT", "UNVERIFIED_INGREDIENT"],
+        "reasonCodes": [
+          "ALLERGEN_PRESENT",
+          "INGREDIENT_COMPOSITION_UNVERIFIED"
+        ],
         "badgeAllergens": ["PEANUT"]
       }
     },
@@ -427,7 +474,7 @@
       },
       "expected": {
         "verdict": "NEEDS_VERIFICATION",
-        "reasonCodes": ["UNVERIFIED_INGREDIENT"],
+        "reasonCodes": ["INGREDIENT_COMPOSITION_UNVERIFIED"],
         "badgeAllergens": ["OTHER"]
       }
     },
@@ -446,7 +493,10 @@
       },
       "expected": {
         "verdict": "BLOCKED",
-        "reasonCodes": ["ALLERGEN_PRESENT", "UNVERIFIED_INGREDIENT"],
+        "reasonCodes": [
+          "ALLERGEN_PRESENT",
+          "INGREDIENT_COMPOSITION_UNVERIFIED"
+        ],
         "badgeAllergens": []
       }
     },
@@ -466,6 +516,137 @@
       "expected": {
         "verdict": "NO_KNOWN_CONFLICT",
         "reasonCodes": [],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "possible soy in a brand sauce with a soy allergy",
+      "ingredients": ["rice", "brandSoySauce"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "SOY",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": [
+          "ALLERGEN_POSSIBLE",
+          "INGREDIENT_COMPOSITION_UNVERIFIED"
+        ],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "absence from the possible allergens is not proof for a peanut allergy",
+      "ingredients": ["rice", "brandSoySauce"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "PEANUT",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": ["INGREDIENT_COMPOSITION_UNVERIFIED"],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "two possible allergens match two allergies",
+      "ingredients": ["rice", "brandSoySauce"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "SOY",
+            "label": ""
+          },
+          {
+            "allergenCode": "WHEAT",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": [
+          "ALLERGEN_POSSIBLE",
+          "ALLERGEN_POSSIBLE",
+          "INGREDIENT_COMPOSITION_UNVERIFIED"
+        ],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "brand sauce with no allergies",
+      "ingredients": ["rice", "brandSoySauce"],
+      "restrictions": {
+        "allergyStatus": "NONE",
+        "allergies": [],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NO_KNOWN_CONFLICT",
+        "reasonCodes": [],
+        "badgeAllergens": []
+      }
+    },
+    {
+      "name": "confirmed peanut next to a possible soy blocks",
+      "ingredients": ["peanutButter", "brandSoySauce"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "PEANUT",
+            "label": ""
+          },
+          {
+            "allergenCode": "SOY",
+            "label": ""
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "BLOCKED",
+        "reasonCodes": [
+          "ALLERGEN_PRESENT",
+          "ALLERGEN_POSSIBLE",
+          "INGREDIENT_COMPOSITION_UNVERIFIED"
+        ],
+        "badgeAllergens": ["PEANUT"]
+      }
+    },
+    {
+      "name": "possible other allergen meets a custom allergy",
+      "ingredients": ["rice", "brandSpiceMix"],
+      "restrictions": {
+        "allergyStatus": "HAS_ALLERGIES",
+        "allergies": [
+          {
+            "allergenCode": "OTHER",
+            "label": "kiwi"
+          }
+        ],
+        "exclusions": []
+      },
+      "expected": {
+        "verdict": "NEEDS_VERIFICATION",
+        "reasonCodes": [
+          "ALLERGEN_POSSIBLE",
+          "INGREDIENT_COMPOSITION_UNVERIFIED"
+        ],
         "badgeAllergens": []
       }
     }
